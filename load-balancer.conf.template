@@ -1,0 +1,12 @@
+upstream backend {
+    least_conn;
+    server ${HOST}_1:${PORT} max_fails=3 fail_timeout=30s;
+    server ${HOST}_2:${PORT} max_fails=3 fail_timeout=30s;
+}
+server {
+    listen ${PORT};
+
+    location / {
+        proxy_pass http://backend/;
+    }
+}

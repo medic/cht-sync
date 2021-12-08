@@ -1,0 +1,43 @@
+version: '3.7'
+
+services:
+  logstash:
+    depends_on:
+      - couchdb
+      - elasticsearch
+
+  couchdb:
+    image: couchdb
+    restart: always
+    environment:
+      - COUCHDB_USER=${COUCHDB_USER}
+      - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
+
+  bootstrap:
+    image: curlimages/curl
+    depends_on:
+      - couchdb
+    command: -X PUT http://${COUCHDB_USER}:${COUCHDB_PASSWORD}@couchdb:5984/${COUCHDB_DB}
+    restart: on-failure:5
+
+  bootstrap_users:
+    image: curlimages/curl
+    depends_on:
+      - couchdb
+    command: -X PUT http://${COUCHDB_USER}:${COUCHDB_PASSWORD}@couchdb:5984/_users
+    restart: on-failure:5
+
+  generator:
+    image: python:3
+    depends_on:
+      - couchdb
+    command: python3 /code/data-generator.py
+    environment:
+      - URL=http://couchdb:5984/${COUCHDB_DB}/
+      - DOCS_PATH=/data/
+      - COUCHDB_USER=${COUCHDB_USER}
+      - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
+    volumes:
+      - ./data-generator.py:/code/data-generator.py:z
+      - ./data/json_docs/:/data/:z
+    restart: always

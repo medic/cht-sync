@@ -1,0 +1,70 @@
+version: '3.7'
+
+services:
+  elasticsearch:
+    image: elasticsearch:7.14.1
+    logging:
+      driver: none
+    environment:
+      - discovery.type=single-node
+
+  logstash:
+    image: logstash:7.14.1
+    restart: always
+    depends_on:
+      - elasticsearch
+    volumes:
+      - ./logstash/pipeline:/usr/share/logstash/pipeline:z
+    environment:
+      - COUCHDB_USER=${COUCHDB_USER}
+      - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
+      - COUCHDB_DB=${COUCHDB_DB}
+      - COUCHDB_HOST=${COUCHDB_HOST}
+      - POSTGRES_TABLE=${POSTGRES_TABLE}
+      - HTTP_ENDPOINT=postgrest:3000
+
+  postgres:
+    image: postgres:12
+    restart: always
+    volumes:
+      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:z
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DBT_POSTGRES_USER=${DBT_POSTGRES_USER}
+      - DBT_POSTGRES_PASSWORD=${DBT_POSTGRES_PASSWORD}
+      - DBT_POSTGRES_SCHEMA=${DBT_POSTGRES_SCHEMA}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_TABLES=${POSTGRES_TABLE} ${POSTGRES_TABLE}_sentinel
+      - POSTGRES_SCHEMA=${POSTGRES_SCHEMA}
+
+  postgrest:
+    image: nginx
+    restart: always
+    environment:
+      - HOST=${COMPOSE_PROJECT_NAME}_postgrest-cluster
+      - PORT=3000
+    volumes:
+      - ./load-balancer.conf.template:/etc/nginx/templates/default.conf.template:z
+
+  postgrest-cluster:
+    image: postgrest/postgrest
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 2
+    environment:
+      - PGRST_DB_URI=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - PGRST_DB_SCHEMA=${POSTGRES_SCHEMA}
+      # CHANGE FOR PROD!!!!
+      - PGRST_DB_ANON_ROLE=${POSTGRES_USER}
+
+  dbt:
+    image: medic/dataemon:latest
+    environment:
+      - POSTGRES_USER=${DBT_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${DBT_POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_TABLE=${POSTGRES_TABLE}
+      - POSTGRES_SCHEMA=${DBT_POSTGRES_SCHEMA}
+      - ROOT_POSTGRES_SCHEMA=${POSTGRES_SCHEMA}
