@@ -19,4 +19,4 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
       if: steps.get-docker-hub-username.outputs.dockerhub_username
     - name: Docker Build
-      run: docker-compose build
+      run: pwd
