@@ -9,12 +9,11 @@ services:
       - discovery.type=single-node
 
   logstash:
-    image: logstash:7.14.1
+    image: medic/logstash-couchdb:latest
+    build: ./logstash/
     restart: always
     depends_on:
       - elasticsearch
-    volumes:
-      - ./logstash/pipeline:/usr/share/logstash/pipeline:z
     environment:
       - COUCHDB_USER=${COUCHDB_USER}
       - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
@@ -22,21 +21,6 @@ services:
       - COUCHDB_HOST=${COUCHDB_HOST}
       - POSTGRES_TABLE=${POSTGRES_TABLE}
       - HTTP_ENDPOINT=postgrest:3000
-
-  postgres:
-    image: postgres:12
-    restart: always
-    volumes:
-      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:z
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - DBT_POSTGRES_USER=${DBT_POSTGRES_USER}
-      - DBT_POSTGRES_PASSWORD=${DBT_POSTGRES_PASSWORD}
-      - DBT_POSTGRES_SCHEMA=${DBT_POSTGRES_SCHEMA}
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_TABLES=${POSTGRES_TABLE} ${POSTGRES_TABLE}_sentinel
-      - POSTGRES_SCHEMA=${POSTGRES_SCHEMA}
 
   postgrest:
     image: nginx
@@ -54,7 +38,7 @@ services:
       mode: replicated
       replicas: 2
     environment:
-      - PGRST_DB_URI=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - PGRST_DB_URI=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST:-postgres}:5432/${POSTGRES_DB}
       - PGRST_DB_SCHEMA=${POSTGRES_SCHEMA}
       # CHANGE FOR PROD!!!!
       - PGRST_DB_ANON_ROLE=${POSTGRES_USER}

@@ -1,0 +1,17 @@
+version: '3.7'
+
+services:
+  postgres:
+    image: postgres:12
+    restart: always
+    volumes:
+      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:z
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DBT_POSTGRES_USER=${DBT_POSTGRES_USER}
+      - DBT_POSTGRES_PASSWORD=${DBT_POSTGRES_PASSWORD}
+      - DBT_POSTGRES_SCHEMA=${DBT_POSTGRES_SCHEMA}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_TABLES=${POSTGRES_TABLE} ${POSTGRES_TABLE}_sentinel
+      - POSTGRES_SCHEMA=${POSTGRES_SCHEMA}

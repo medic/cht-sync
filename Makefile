@@ -1,12 +1,15 @@
 down:
-	docker-compose -f docker-compose.couchdb.yml -f docker-compose.yml \
+	docker-compose -f docker-compose.couchdb.yml -f docker-compose.postgres.yml -f docker-compose.yml \
 		down --remove-orphans
 
-local: down
-	docker-compose -f docker-compose.couchdb.yml -f docker-compose.yml \
+build:
+	docker-compose build
+
+local: down build
+	docker-compose -f docker-compose.couchdb.yml -f docker-compose.postgres.yml -f docker-compose.yml \
 		up
 
-gamma: down
+gamma: down build
 	COUCHDB_HOST=adp-sandbox.dev.medicmobile.org \
 		COUCHDB_DB=medic \
 		COUCHDB_USER=medic \
