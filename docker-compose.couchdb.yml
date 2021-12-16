@@ -4,7 +4,6 @@ services:
   logstash:
     depends_on:
       - couchdb
-      - elasticsearch
 
   couchdb:
     image: couchdb

@@ -15,7 +15,6 @@ gamma: down build
 		COUCHDB_USER=medic \
 		COUCHDB_PASSWORD=$(shell pass medic/adp-sandbox.dev.medicmobile.org/medic) \
 		docker-compose up \
-			elasticsearch \
 			logstash \
 			postgres \
 			postgrest \

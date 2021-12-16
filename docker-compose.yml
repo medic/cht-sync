@@ -1,19 +1,10 @@
 version: '3.7'
 
 services:
-  elasticsearch:
-    image: elasticsearch:7.14.1
-    logging:
-      driver: none
-    environment:
-      - discovery.type=single-node
-
   logstash:
     image: medic/logstash-couchdb:latest
     build: ./logstash/
     restart: always
-    depends_on:
-      - elasticsearch
     environment:
       - COUCHDB_USER=${COUCHDB_USER}
       - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
