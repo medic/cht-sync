@@ -52,3 +52,4 @@ services:
       - POSTGRES_TABLE=${POSTGRES_TABLE}
       - POSTGRES_SCHEMA=${DBT_POSTGRES_SCHEMA}
       - ROOT_POSTGRES_SCHEMA=${POSTGRES_SCHEMA}
+      - DATAEMON_INITAL_PACKAGE=https://github.com/medic/cht-pipeline.git#first_release
