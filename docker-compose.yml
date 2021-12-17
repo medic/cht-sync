@@ -35,7 +35,7 @@ services:
       - PGRST_DB_ANON_ROLE=${POSTGRES_USER}
 
   dbt:
-    image: medic/dataemon:latest
+    image: medicmobile/dataemon:latest
     environment:
       - POSTGRES_USER=${DBT_POSTGRES_USER}
       - POSTGRES_PASSWORD=${DBT_POSTGRES_PASSWORD}
