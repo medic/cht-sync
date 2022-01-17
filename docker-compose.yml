@@ -14,33 +14,10 @@ services:
       - HTTP_ENDPOINT=postgrest:3000
 
   postgrest:
-    image: nginx
-    restart: always
-    environment:
-      - HOST=${COMPOSE_PROJECT_NAME}_postgrest-cluster
-      - PORT=3000
-    volumes:
-      - ./load-balancer.conf.template:/etc/nginx/templates/default.conf.template:z
-
-  postgrest-cluster:
     image: postgrest/postgrest
     restart: always
-    deploy:
-      mode: replicated
-      replicas: 2
     environment:
       - PGRST_DB_URI=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST:-postgres}:5432/${POSTGRES_DB}
       - PGRST_DB_SCHEMA=${POSTGRES_SCHEMA}
       # CHANGE FOR PROD!!!!
       - PGRST_DB_ANON_ROLE=${POSTGRES_USER}
-
-  dbt:
-    image: medicmobile/dataemon:latest
-    environment:
-      - POSTGRES_USER=${DBT_POSTGRES_USER}
-      - POSTGRES_PASSWORD=${DBT_POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_TABLE=${POSTGRES_TABLE}
-      - POSTGRES_SCHEMA=${DBT_POSTGRES_SCHEMA}
-      - ROOT_POSTGRES_SCHEMA=${POSTGRES_SCHEMA}
-      - DATAEMON_INITAL_PACKAGE=https://github.com/medic/cht-pipeline.git#first_release
