@@ -1,19 +1,25 @@
-# CHT Pipeline (EXPERIMENTAL)
+# CHT Sync
 
-CHT Pipeline brings data from CouchDB to Postgres, with transformations to make the data efficient to query.
+Bundling of LogStash CouchDB source and PostgREST to sync data from CouchDB to Postgres. This basically copies data from CouchDB and puts it into Postgres in real-time.
 
-You can deploy this as is, or with a **subpackage** like https://github.com/medic/cht-bombilla.
+**WARNING!** The schema differs from couch2pg. See [`init-db.sh`](./init-db.sh)
 
-### Deployment
+## Deployment
+
+1. Export env vars mapped in the linked [`docker-compose.yml`](./docker-compose.yml),
 
 ```
-# ONLY IF USING SUBPACKAGE
-export CHT_PIPELINE_SUBPACKAGE=https://github.com/medic/cht-bombilla.git
+POSTGRES_USER=<User with write access to the schema below>
+POSTGRES_PASSWORD=<user password>
+POSTGRES_DB=<Name of new database>
+POSTGRES_TABLE=couchdb
+POSTGRES_SCHEMA=v1
 
-export CHT_PIPELINE_STAGE=local # OR gamma/prod
-make $STAGE
+COUCHDB_USER=<read access user>
+COUCHDB_PASSWORD=<password>
+COUCHDB_DB=<main database with all records>
+COUCHDB_HOST=<hostname for couchdb server>
 ```
 
-### Subpackage
-
-Subpackages make use of https://docs.getdbt.com/docs/building-a-dbt-project/package-management to deploy a package that makes transformation in DBT
+2.  Create a table like in [`init-db.sh`](./init-db.sh)
+3. `docker-compose up`
