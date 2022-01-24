@@ -21,3 +21,21 @@ services:
       - PGRST_DB_SCHEMA=${POSTGRES_SCHEMA}
       # CHANGE FOR PROD!!!!
       - PGRST_DB_ANON_ROLE=${POSTGRES_USER}
+
+  postgres_bootstrap:
+    image: postgres:12
+    restart: on-failure:3
+    entrypoint: ["/bin/sh"]
+    command: /dev/init-db.sh
+    volumes:
+      - ./init-db.sh:/dev/init-db.sh:z
+    environment:
+      - POSTGRES_HOST=${POSTGRES_HOST:-postgres}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DBT_POSTGRES_USER=${DBT_POSTGRES_USER}
+      - DBT_POSTGRES_PASSWORD=${DBT_POSTGRES_PASSWORD}
+      - DBT_POSTGRES_SCHEMA=${DBT_POSTGRES_SCHEMA}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_TABLES=${POSTGRES_TABLE} ${POSTGRES_TABLE}_sentinel
+      - POSTGRES_SCHEMA=${POSTGRES_SCHEMA}

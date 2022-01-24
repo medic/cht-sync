@@ -16,7 +16,7 @@ services:
     image: postgres:12
     restart: always
     volumes:
-      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:z
+      - ./init-dbt-resources.sh:/docker-entrypoint-initdb.d/init-dbt-resources.sh:z
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
