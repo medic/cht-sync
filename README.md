@@ -19,6 +19,7 @@ COUCHDB_USER=<read access user>
 COUCHDB_PASSWORD=<password>
 COUCHDB_DB=<main database with all records>
 COUCHDB_HOST=<hostname for couchdb server>
+COUCHDB_PORT=<couchdb port>
 ```
 
 3. `docker-compose up`
