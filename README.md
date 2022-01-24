@@ -2,7 +2,7 @@
 
 Bundling of LogStash CouchDB source and PostgREST to sync data from CouchDB to Postgres. This basically copies data from CouchDB and puts it into Postgres in real-time.
 
-**WARNING!** The schema differs from couch2pg. See [`init-db.sh`](./init-db.sh)
+**WARNING!** The schema differs from couch2pg. See [`init-db.sh`](./init-db.sh). This schema is automatically created by docker-compose
 
 ## Deployment
 
@@ -21,5 +21,4 @@ COUCHDB_DB=<main database with all records>
 COUCHDB_HOST=<hostname for couchdb server>
 ```
 
-2.  Create a table like in [`init-db.sh`](./init-db.sh)
 3. `docker-compose up`
