@@ -11,7 +11,7 @@ services:
       - COUCHDB_DB=${COUCHDB_DB}
       - COUCHDB_HOST=${COUCHDB_HOST}
       - COUCHDB_PORT=${COUCHDB_PORT}
-      - COUCHDB_SEQ=/tmp/logstash/sequence_path.txt
+      - COUCHDB_SEQ=/opt/couchdb/sequence_path.txt
       - COUCHDB_SECURE=${COUCHDB_SECURE:-true}
       - POSTGRES_TABLE=${POSTGRES_TABLE}
       - HTTP_ENDPOINT=postgrest:3000
