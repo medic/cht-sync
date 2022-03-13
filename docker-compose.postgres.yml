@@ -10,6 +10,7 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_TABLE=${POSTGRES_TABLE}
       - POSTGRES_SCHEMA=${DBT_POSTGRES_SCHEMA}
+      - POSTGRES_HOST=postgres
       - ROOT_POSTGRES_SCHEMA=${POSTGRES_SCHEMA}
       - DATAEMON_INITAL_PACKAGE=https://github.com/medic/cht-pipeline.git#first_release
 
