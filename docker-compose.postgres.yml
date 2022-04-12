@@ -12,7 +12,7 @@ services:
       - POSTGRES_SCHEMA=${DBT_POSTGRES_SCHEMA}
       - POSTGRES_HOST=postgres
       - ROOT_POSTGRES_SCHEMA=${POSTGRES_SCHEMA}
-      - DATAEMON_INITAL_PACKAGE=https://github.com/medic/cht-pipeline.git#first_release
+      - DATAEMON_INITAL_PACKAGE=https://github.com/medic/cht-pipeline.git#function-material
 
   postgres:
     image: postgres:12
