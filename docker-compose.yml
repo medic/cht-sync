@@ -27,7 +27,7 @@ services:
 
   postgres_bootstrap:
     image: postgres:12
-    restart: on-failure:3
+    restart: on-failure
     entrypoint: ["/bin/sh"]
     command: /dev/init-db.sh
     volumes:

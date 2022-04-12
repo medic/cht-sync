@@ -24,6 +24,8 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" -h $
         doc_as_upsert BOOLEAN,
         UNIQUE ("_id", "_rev")
     );
+    CREATE INDEX IF NOT EXISTS _idx_$POSTGRES_TABLE ON $POSTGRES_SCHEMA.$POSTGRES_TABLE USING btree ("@timestamp");
+    GRANT SELECT ON ALL TABLES IN SCHEMA $POSTGRES_SCHEMA TO $DBT_POSTGRES_USER;
 EOSQL
 
 done
