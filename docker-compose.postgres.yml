@@ -26,3 +26,38 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_TABLES=${POSTGRES_TABLE} ${POSTGRES_TABLE}_sentinel
       - POSTGRES_SCHEMA=${POSTGRES_SCHEMA}
+
+
+  redis:
+    image: redis:latest
+    container_name: superset_cache
+    restart: unless-stopped
+    volumes:
+      - redis:/data
+
+  superset:
+    env_file: superset/.env
+    image: apache/superset
+    container_name: superset_app
+    command: ["/app/docker/docker-bootstrap.sh", "app-gunicorn"]
+    user: "root"
+    restart: unless-stopped
+    ports:
+      - 8088:8088
+    depends_on:
+      - redis
+    volumes:
+      - ./superset/:/app/docker/
+
+  superset-init:
+    image: apache/superset
+    container_name: superset_init
+    command: ["/app/docker/docker-init.sh"]
+    env_file: docker/.env
+    depends_on:
+      - redis
+      - postgres
+    user: "root"
+    volumes:
+      - ./superset/:/app/docker/
+
