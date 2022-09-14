@@ -42,3 +42,8 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_TABLES=${POSTGRES_TABLE} ${POSTGRES_TABLE}_sentinel
       - POSTGRES_SCHEMA=${POSTGRES_SCHEMA}
+
+  superset:
+    build: ./superset/
+    ports:
+      - 8080:8088
