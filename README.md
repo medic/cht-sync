@@ -22,4 +22,21 @@ COUCHDB_HOST=<hostname for couchdb server>
 COUCHDB_PORT=<couchdb port>
 ```
 
-3. `docker-compose up`
+2. `docker-compose up`
+
+## Superset dashboard intialisation
+Run the following commands on a separte terminal while `docker-compose up` is still running
+
+- Remember to change the variables as required
+```
+docker-compose exec -it superset superset fab create-admin \
+              --username admin \
+              --firstname Superset \
+              --lastname Admin \
+              --email admin@superset.com \
+              --password admin
+```
+
+- `docker-compose exec -it superset superset db upgrade`
+
+- `docker-compose exec -it superset superset init`
