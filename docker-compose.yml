@@ -44,6 +44,10 @@ services:
       - POSTGRES_SCHEMA=${POSTGRES_SCHEMA}
 
   superset:
-    build: ./superset/
+    build: 
+      context: ./superset/
+      args:
+        SUPERSET_PASSWORD: ${SUPERSET_PASSWORD}
     ports:
       - 8080:8088
+
