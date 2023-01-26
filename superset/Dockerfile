@@ -4,8 +4,8 @@ USER root
 
 ARG SUPERSET_PASSWORD
 ENV SUPERSET_PASSWORD $SUPERSET_PASSWORD
-
-RUN pip install psycopg2
+ARG SUPERSET_ADMIN_EMAIL
+ENV SUPERSET_ADMIN_EMAIL $SUPERSET_ADMIN_EMAIL
 
 RUN pip install psycopg2-binary
 
@@ -13,7 +13,7 @@ RUN superset superset fab create-admin \
                --username admin \
                --firstname Superset \
                --lastname Admin \
-               --email admin@superset.com \
+               --email SUPERSET_ADMIN_EMAIL \
                --password SUPERSET_PASSWORD
 
 RUN superset superset db upgrade
