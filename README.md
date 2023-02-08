@@ -20,6 +20,7 @@ COUCHDB_PASSWORD=<password>
 COUCHDB_DB=<main database with all records>
 COUCHDB_HOST=<hostname for couchdb server>
 COUCHDB_PORT=<couchdb port>
+CHT_PIPELINE_BRANCH_URL=<The CHT Pipeline  branch to use e.g. https://github.com/medic/cht-pipeline.git#first_release>
 ```
 
 2. `docker-compose up`
