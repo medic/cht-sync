@@ -11,8 +11,6 @@ import glob
 credentials = ('%s:%s' % (os.getenv("COUCHDB_USER"), os.getenv("COUCHDB_PASSWORD")))
 encoded_credentials = base64.b64encode(credentials.encode('ascii')).decode("ascii")
 
-print(credentials)
-
 for doc_path in glob.glob(os.getenv("DOCS_PATH")+"/*.json"):
     with open(doc_path, "rb") as doc_file:
         doc = json.loads(doc_file.read())
