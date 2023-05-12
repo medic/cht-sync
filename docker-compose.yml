@@ -16,33 +16,6 @@ services:
       - POSTGRES_TABLE=${POSTGRES_TABLE}
       - HTTP_ENDPOINT=postgrest:3000
 
-  postgrest:
-    image: postgrest/postgrest
-    restart: always
-    environment:
-      - PGRST_DB_URI=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST:-postgres}:5432/${POSTGRES_DB}
-      - PGRST_DB_SCHEMA=${POSTGRES_SCHEMA}
-      # CHANGE FOR PROD!!!!
-      - PGRST_DB_ANON_ROLE=${POSTGRES_USER}
-
-  postgres_bootstrap:
-    image: postgres:12
-    restart: on-failure:3
-    entrypoint: ["/bin/sh"]
-    command: /dev/init-db.sh
-    volumes:
-      - ./init-db.sh:/dev/init-db.sh:z
-    environment:
-      - POSTGRES_HOST=${POSTGRES_HOST:-postgres}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - DBT_POSTGRES_USER=${DBT_POSTGRES_USER}
-      - DBT_POSTGRES_PASSWORD=${DBT_POSTGRES_PASSWORD}
-      - DBT_POSTGRES_SCHEMA=${DBT_POSTGRES_SCHEMA}
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_TABLES=${POSTGRES_TABLE} ${POSTGRES_TABLE}_sentinel
-      - POSTGRES_SCHEMA=${POSTGRES_SCHEMA}
-
   superset:
     build: 
       context: ./superset/
@@ -52,3 +25,14 @@ services:
     ports:
       - 8080:8088
 
+  dbt:
+    image: medicmobile/dataemon:latest
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=${DBT_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${DBT_POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_TABLE=${POSTGRES_TABLE}
+      - POSTGRES_SCHEMA=${DBT_POSTGRES_SCHEMA}
+      - ROOT_POSTGRES_SCHEMA=${POSTGRES_SCHEMA}
+      - DATAEMON_INITAL_PACKAGE=${CHT_PIPELINE_BRANCH_URL}
