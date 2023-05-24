@@ -1,11 +1,17 @@
-down:
+down: clean
 	docker-compose -f docker-compose.couchdb.yml -f docker-compose.postgres.yml -f docker-compose.yml \
-		down --remove-orphans
+		down -v --remove-orphans
+
+extract-test-data:
+	tar -xzvf ./data/json_docs.tar.gz -C ./data
 
 build:
-	docker-compose build
+	docker-compose build 
 
-local: down build
+clean:
+	rm -rf ./data/json_docs
+	
+local: down extract-test-data build
 	docker-compose -f docker-compose.couchdb.yml -f docker-compose.postgres.yml -f docker-compose.yml \
 		up
 

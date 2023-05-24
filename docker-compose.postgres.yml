@@ -2,21 +2,16 @@ version: '3.7'
 
 services:
   dbt:
-    image: medicmobile/dataemon:latest
-    environment:
-      - POSTGRES_USER=${DBT_POSTGRES_USER}
-      - POSTGRES_PASSWORD=${DBT_POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_TABLE=${POSTGRES_TABLE}
-      - POSTGRES_SCHEMA=${DBT_POSTGRES_SCHEMA}
-      - ROOT_POSTGRES_SCHEMA=${POSTGRES_SCHEMA}
-      - DATAEMON_INITAL_PACKAGE=${CHT_PIPELINE_BRANCH_URL}
-
+    depends_on: 
+      - postgres
+  
   postgres:
-    image: postgres:12
+    image: postgres:13
     restart: always
+    ports:
+      - 5432:5432
     volumes:
-      - ./init-dbt-resources.sh:/docker-entrypoint-initdb.d/init-dbt-resources.sh:z
+      - ./postgres/init-dbt-resources.sh:/docker-entrypoint-initdb.d/init-dbt-resources.sh:z
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -26,3 +21,14 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_TABLES=${POSTGRES_TABLE} ${POSTGRES_TABLE}_sentinel
       - POSTGRES_SCHEMA=${POSTGRES_SCHEMA}
+
+  postgrest:
+    image: postgrest/postgrest
+    depends_on:
+      - postgres
+    restart: always
+    environment:
+      - PGRST_DB_URI=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST:-postgres}:5432/${POSTGRES_DB}
+      - PGRST_DB_SCHEMA=${POSTGRES_SCHEMA}
+      # CHANGE FOR PROD!!!!
+      - PGRST_DB_ANON_ROLE=${POSTGRES_USER}
