@@ -16,12 +16,15 @@ CHT sync is designed to run locally in a development environment to test models 
 ### Production Setup
 
 
+### Gamma Setup
+
+
 ## Architecture
 
 
 
 
-## Deployment
+## Environment Variables
 
 1. Export env vars mapped in the linked [`docker-compose.yml`](./docker-compose.yml),
 
@@ -39,22 +42,3 @@ COUCHDB_HOST=<hostname for couchdb server>
 COUCHDB_PORT=<couchdb port>
 CHT_PIPELINE_BRANCH_URL=<The CHT Pipeline  branch to use e.g. https://github.com/medic/cht-pipeline.git#first_release>
 ```
-
-2. `docker-compose up`
-
-## Superset dashboard intialisation
-Run the following commands on a separte terminal while `docker-compose up` is still running
-
-- Remember to change the variables as required
-```
-docker-compose exec -it superset superset fab create-admin \
-              --username admin \
-              --firstname Superset \
-              --lastname Admin \
-              --email admin@superset.com \
-              --password admin
-```
-
-- `docker-compose exec -it superset superset db upgrade`
-
-- `docker-compose exec -it superset superset init`
