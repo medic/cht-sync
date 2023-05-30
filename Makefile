@@ -16,8 +16,8 @@ local: down extract-test-data build
 		up
 
 prod: down build
-	docker-compose up logstash postgrest postgrest-cluster dbt
+	docker-compose up logstash postgrest dbt
 
 gamma: down build
 	COUCHDB_HOST=adp-sandbox.dev.medicmobile.org COUCHDB_DB=medic COUCHDB_USER=medic \
-	docker-compose up logstash postgres postgrest postgrest-cluster dbt
+	docker-compose up logstash postgres postgrest dbt
