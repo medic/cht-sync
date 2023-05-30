@@ -1,8 +1,25 @@
 # CHT Sync
 
-Bundling of LogStash CouchDB source and PostgREST to sync data from CouchDB to Postgres. This basically copies data from CouchDB and puts it into Postgres in real-time.
+CHT Sync is a bundling of Logstash CouchDB, and PostgREST to sync data from CouchDB to PostgreSQL for analytics to be displayed on a Superset dashboard. It copies data from CouchDB to PostgreSQL in realtime.
 
-**WARNING!** The schema differs from couch2pg. See [`init-db.sh`](./init-db.sh). This schema is automatically created by docker-compose
+**WARNING!** The schema differs from couch2pg. See [`init-db.sh`](./postgres/init-db.sh). 
+
+
+## Getting Started
+
+CHT sync is designed to run locally in a development environment to test models or workflow or in production.
+
+### Local Setup
+
+
+
+### Production Setup
+
+
+## Architecture
+
+
+
 
 ## Deployment
 
