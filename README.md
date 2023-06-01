@@ -9,7 +9,9 @@ CHT Sync is a bundled solution consisting of Logstash, CouchDB, and PostgREST. I
 
 CHT sync has been specifically designed to work in both local development environments for testing models or workflows, gamma environment, as well as in production environments. Each setup accommodates the needs of different stages or environment.
 
+### Prerequisites
 
+- `docker`
 ### Local Setup
 
 The local environment setup involves starting Logstash, PostgreSQL, PostgREST, DBT, and CouchDB. This configuration facilitates data synchronization, transformation, and storage for local development and testing. Fake data is generated for CouchDB. The required environment variables can be found in the `.env.template` file, which should be customized accordingly for the specific deployment needs.
