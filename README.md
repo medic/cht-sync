@@ -32,7 +32,7 @@ make gamma
 
 ### Production Setup
 
-The gamma environment setup involves starting Logstash, PostgREST, and DBT. This configuration facilitates data synchronization, transformation, and storage for CHT production hosting. The required environment variables can be found in the `.env.template` file, which should be customized accordingly for the specific deployment needs.
+The production environment setup involves starting Logstash, PostgREST, and DBT. This configuration facilitates data synchronization, transformation, and storage for CHT production hosting. The required environment variables can be found in the `.env.template` file, which should be customized accordingly for the specific deployment needs.
 
 ```sh
 # starts: logstash, superset, postgrest and dbt
