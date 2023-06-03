@@ -10,7 +10,7 @@ build:
 
 clean:
 	rm -rf ./data/json_docs
-	
+
 local: down extract-test-data build
 	docker-compose -f docker-compose.couchdb.yml -f docker-compose.postgres.yml -f docker-compose.yml \
 		up
