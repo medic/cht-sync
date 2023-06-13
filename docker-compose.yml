@@ -26,6 +26,7 @@ services:
       - 8080:8088
 
   dbt:
+    platform: linux/amd64
     image: medicmobile/dataemon:latest
     environment:
       - POSTGRES_HOST=postgres
