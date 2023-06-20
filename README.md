@@ -17,7 +17,7 @@ CHT sync has been specifically designed to work in both local development enviro
 
 ### Local Setup
 
-The local environment setup involves starting Logstash, PostgreSQL, PostgREST, DBT, and CouchDB. This configuration facilitates data synchronization, transformation, and storage for local development and testing. Fake data is generated for CouchDB. The required environment variables can be found in the `.env.template` file, which should be customized accordingly for the specific deployment needs.
+The local environment setup involves starting Logstash, PostgreSQL, PostgREST, DBT, and CouchDB. This configuration facilitates data synchronization, transformation, and storage for local development and testing. Fake data is generated for CouchDB. The required environment variables can be found in the `env.template` file, which should be customized accordingly for the specific deployment needs.
 
 ```sh
 # starts: logstash, superset, postgres, postgrest,  data-generator, couchdb and dbt
