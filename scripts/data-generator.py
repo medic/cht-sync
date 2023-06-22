@@ -1,5 +1,4 @@
 import urllib.request
-import random
 import os
 import time
 import json
