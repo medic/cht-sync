@@ -10,8 +10,6 @@ credentials = ('%s:%s' % (os.getenv("COUCHDB_USER"), os.getenv("COUCHDB_PASSWORD
 encoded_credentials = base64.b64encode(credentials.encode('ascii')).decode("ascii")
 
 
-# update this to loop through COUCHDB_DBS and update the COUCHDB_URL
-
 for db in os.getenv("COUCHDB_DBS").split(" "):
     url = os.path.join(os.getenv("COUCHDB_URL"), db)
 
