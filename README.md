@@ -13,7 +13,6 @@ CHT sync has been specifically designed to work in both local development enviro
 ### Prerequisites
 
 - `Docker`
-- `Make`
 
 ### Local Setup
 
@@ -21,7 +20,8 @@ The local environment setup involves starting Logstash, PostgreSQL, PostgREST, D
 
 ```sh
 # starts: logstash, superset, postgres, postgrest,  data-generator, couchdb and dbt
-make local
+npm install
+npm run local
 ```
 
 ### Gamma Setup
@@ -42,7 +42,8 @@ COUCHDB_SECURE=false
 1. Start docker containers
 ```sh
 # starts: logstash, superset, postgres, postgrest, and dbt
-make gamma
+npm install
+npm run gamma
 ```
 
 ### Production Setup
@@ -83,7 +84,8 @@ docker-compose -f docker-compose.postgres.yml -f docker-compose.yml up postgres
 1. Start docker containers
 ```sh
 # starts: logstash, superset, postgrest and dbt
-make prod
+npm install
+npm run prod
 ```
 
 ## Environment Variables

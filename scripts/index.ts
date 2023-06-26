@@ -9,17 +9,35 @@ const program = new Command();
 
 program
   .name("cht-sync")
-  .description("Creates setup script for all environments v" + version)
-  .option("-d, --databases", "couchdb databases to sync", "")
-  .option("-e, --environment", "'local', 'prod', 'gamma'", "local")
-  .option("-f --force", "overwrites existing configuration", false)
-  .option("-s --start", "starts environment after building config", true)
-  .action((_: string, opts: Record<string, any>): any =>
+  .description("CLI utility for generating and managing cht-sync toolkit");
+
+program
+  .command("init")
+  .description("generates setup scripts for cht-sync tools")
+  .option(
+    "-d, --databases [databases]",
+    "couchdb databases to sync with postgres",
+    ""
+  )
+  .option(
+    "-e, --environment [environment]",
+    "build environments 'local', 'prod', 'gamma'",
+    "local"
+  )
+  .option("-f, --force", "overwrites existing configurations", false)
+  .option(
+    "-s, --start",
+    "starts environment after generating configurations",
+    false
+  )
+  .action((opts): any =>
     Promise.resolve()
       .then(() => prepareEnviroment(opts.force))
       .then(() => buildLogstashConfig(opts.databases || COUCHDB_DBS))
-      .then(() => opts.start && handleStartup(opts.env))
+      .then(() => opts.start && handleStartup(opts.environment))
+      .then((output) => console.log(output || ""))
       .catch((err) => console.error(err))
+      .then(() => process.exit(1))
   );
 
 program.parse();

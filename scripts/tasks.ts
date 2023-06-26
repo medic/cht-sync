@@ -7,6 +7,7 @@ import {
   COMMANDS,
   ENV_COMMANDS,
   LOGSTASH_PIPELINE_DIR,
+  COMMAND_WORKING_DIRECTORY,
   ZIP_INPUT_DIR,
   ZIP_OUTPUT_DIR,
 } from "./config";
@@ -23,19 +24,15 @@ export async function prepareEnviroment(force: boolean) {
     await fs.rm(LOGSTASH_PIPELINE_DIR, { recursive: true, force: true });
   }
 
-  if (existsSync(ZIP_OUTPUT_DIR)) {
-    if (!force) {
-      new Error("Output directory already exists on disc.");
-    }
-
-    await fs.rm(LOGSTASH_PIPELINE_DIR, { recursive: true, force: true });
-  }
-
   await fs.mkdir(LOGSTASH_PIPELINE_DIR);
 }
 
 export async function buildLogstashConfig(rawDbs: string) {
   const databases = rawDbs.split(" ").filter((d: string) => d.length > 0);
+
+  if (databases.length == 0) {
+    throw new Error("Empty databases recieved");
+  }
 
   for (const db of databases) {
     const fileDir = path.join(LOGSTASH_PIPELINE_DIR, db + ".conf");
@@ -48,22 +45,20 @@ export async function handleStartup(env: string) {
   const isLocal = env === "local";
   const envCommand = ENV_COMMANDS[env];
 
-  if (envCommand) {
+  if (!envCommand) {
     throw new Error("Invalid environment: can't find command for " + env);
   }
 
+  const opts = { cwd: COMMAND_WORKING_DIRECTORY };
+
   const { stdout, stderr } = await Promise.resolve()
-    .then(() => execAsync(COMMANDS["down"]))
+    .then(() => execAsync(COMMANDS["down"], opts))
     .then((): any => isLocal && decompress(ZIP_INPUT_DIR, ZIP_OUTPUT_DIR))
-    .then(() => execAsync(COMMANDS["build"]))
-    .then(() => execAsync(envCommand))
+    .then(() => execAsync(COMMANDS["build"], opts))
+    .then(() => execAsync(envCommand, opts))
     .catch((err) => ({ stderr: err, stdout: undefined }));
 
-  if (stderr) {
-    throw new Error(stderr);
-  }
-
-  return stdout;
+  return stdout || stderr
 }
 
 const buildLogstashContent = (db: string) => `
