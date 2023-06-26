@@ -4,21 +4,24 @@
   "description": "",
   "main": "./scripts/index.ts",
   "scripts": {
-    "local": "echo local",
-    "prod": "echo production",
-    "gamma": "echo gamma"
+    "make:prod": "",
+    "make:local": "",
+    "make:gamma": "",
+    "start:prod": "",
+    "start:local": "",
+    "start:gamma": "",
+    "test": "",
+    "test:watch": ""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@types/commander": "^2.12.2",
-    "@types/lodash": "^4.14.195",
     "@types/node": "^20.3.1",
     "tsc": "^2.0.4"
   },
   "dependencies": {
-    "commander": "^11.0.0",
-    "lodash": "^4.17.21"
+    "commander": "^11.0.0"
   }
 }
