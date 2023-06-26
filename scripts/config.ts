@@ -20,9 +20,11 @@ export const COMMANDS: Record<string, any> = {
 
 export const ENV_COMMANDS: Record<string, any> = {
   gamma:
-    "COUCHDB_HOST=adp-sandbox.dev.medicmobile.org COUCHDB_DBS=medic COUCHDB_USER=medic \
-     docker-compose up -d logstash postgres postgrest dbt",
-  prod: "docker-compose up -d logstash postgrest dbt",
+    "COUCHDB_HOST=adp-sandbox.dev.medicmobile.org COUCHDB_DB=medic COUCHDB_USER=medic \
+    docker-compose -f docker-compose.couchdb.yml -f docker-compose.postgres.yml -f docker-compose.yml \
+      up -d logstash postgres postgrest dbt",
+  prod: "docker-compose -f docker-compose.couchdb.yml -f docker-compose.postgrest.yml -f docker-compose.yml \
+  up -d logstash postgrest dbt",
   local:
     "docker-compose -f docker-compose.couchdb.yml -f docker-compose.postgres.yml \
     -f docker-compose.yml up -d",
