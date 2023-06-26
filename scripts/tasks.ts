@@ -1,9 +1,16 @@
 import path from "node:path";
-import fs from "fs/promises";
-import util from "util";
-import { existsSync } from "node:fs";
-import cp from "child_process";
-import { COMMANDS, ENV_COMMANDS, LOGSTASH_PIPELINE_DIR } from "./config";
+import fs from "node:fs/promises";
+import util from "node:util";
+import { existsSync, rmdir } from "node:fs";
+import cp from "node:child_process";
+import {
+  COMMANDS,
+  ENV_COMMANDS,
+  LOGSTASH_PIPELINE_DIR,
+  ZIP_INPUT_DIR,
+  ZIP_OUTPUT_DIR,
+} from "./config";
+import decompress from "decompress";
 
 const execAsync = util.promisify(cp.exec);
 
@@ -13,7 +20,15 @@ export async function prepareEnviroment(force: boolean) {
       new Error("Output directory already exists on disc.");
     }
 
-    await fs.rmdir(LOGSTASH_PIPELINE_DIR);
+    await fs.rm(LOGSTASH_PIPELINE_DIR, { recursive: true, force: true });
+  }
+
+  if (existsSync(ZIP_OUTPUT_DIR)) {
+    if (!force) {
+      new Error("Output directory already exists on disc.");
+    }
+
+    await fs.rm(LOGSTASH_PIPELINE_DIR, { recursive: true, force: true });
   }
 
   await fs.mkdir(LOGSTASH_PIPELINE_DIR);
@@ -38,9 +53,8 @@ export async function handleStartup(env: string) {
   }
 
   const { stdout, stderr } = await Promise.resolve()
-    .then((): any => isLocal && execAsync(COMMANDS["clean"]))
     .then(() => execAsync(COMMANDS["down"]))
-    .then((): any => isLocal && execAsync(COMMANDS["extract"]))
+    .then((): any => isLocal && decompress(ZIP_INPUT_DIR, ZIP_OUTPUT_DIR))
     .then(() => execAsync(COMMANDS["build"]))
     .then(() => execAsync(envCommand))
     .catch((err) => ({ stderr: err, stdout: undefined }));

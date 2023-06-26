@@ -5,10 +5,10 @@
   "main": "./scripts/index.ts",
   "scripts": {
     "make:prod": "",
-    "make:local": "",
+    "make:local": "ts-node ./scripts/index.ts",
     "make:gamma": "",
     "start:prod": "",
-    "start:local": "",
+    "start:local": "ts-node ./scripts/index.ts",
     "start:gamma": "",
     "test": "",
     "test:watch": ""
@@ -18,10 +18,14 @@
   "license": "ISC",
   "devDependencies": {
     "@types/commander": "^2.12.2",
+    "@types/decompress": "^4.2.4",
     "@types/node": "^20.3.1",
+    "jest": "^29.5.0",
     "tsc": "^2.0.4"
   },
   "dependencies": {
-    "commander": "^11.0.0"
+    "commander": "^11.0.0",
+    "decompress": "^4.2.1",
+    "dotenv": "^16.3.1"
   }
 }
