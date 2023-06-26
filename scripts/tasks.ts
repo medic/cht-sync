@@ -1,7 +1,7 @@
 import path from "node:path";
 import fs from "node:fs/promises";
 import util from "node:util";
-import { existsSync, rmdir } from "node:fs";
+import { existsSync } from "node:fs";
 import cp from "node:child_process";
 import {
   COMMANDS,
