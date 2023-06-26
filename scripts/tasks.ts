@@ -97,7 +97,7 @@ output {
         format => "json"
         http_method => "post"
         ignorable_codes => 409
-        url => "http://\${HTTP_ENDPOINT}/\${POSTGRES_TABLE}"
+        url => "http://\${HTTP_ENDPOINT}/${db}"
     }
 }
 `;

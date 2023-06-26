@@ -3,7 +3,7 @@ import { version } from "../package.json";
 import { handleStartup } from "./tasks";
 import { prepareEnviroment } from "./tasks";
 import { buildLogstashConfig } from "./tasks";
-import { COUCHDB_DB } from "./config";
+import { COUCHDB_DBS } from "./config";
 
 const program = new Command();
 
@@ -17,7 +17,7 @@ program
   .action((_: string, opts: Record<string, any>): any =>
     Promise.resolve()
       .then(() => prepareEnviroment(opts.force))
-      .then(() => buildLogstashConfig(opts.databases || COUCHDB_DB || ""))
+      .then(() => buildLogstashConfig(opts.databases || COUCHDB_DBS))
       .then(() => opts.start && handleStartup(opts.env))
       .catch((err) => console.error(err))
   );

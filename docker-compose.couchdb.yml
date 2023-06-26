@@ -16,7 +16,9 @@ services:
     image: curlimages/curl
     depends_on:
       - couchdb
-    command: -X PUT http://${COUCHDB_USER}:${COUCHDB_PASSWORD}@couchdb:5984/${COUCHDB_DB}
+
+    # TODO => loop through COUCHDB_DBS to bootstrap
+    command: -X PUT http://${COUCHDB_USER}:${COUCHDB_PASSWORD}@couchdb:5984/${COUCHDB_DBS}
     restart: on-failure:5
 
   _couchdb_bootstrap_users:
@@ -32,10 +34,11 @@ services:
       - couchdb
     command: python3 /code/data-generator.py
     environment:
-      - URL=http://couchdb:5984/${COUCHDB_DB}/
+      - COUCHDB_URL=http://couchdb:5984/
       - DOCS_PATH=/data/
       - COUCHDB_USER=${COUCHDB_USER}
       - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
+      - COUCHDB_DBS=${COUCHDB_DBS}
     volumes:
       - ./data-generator.py:/code/data-generator.py:z
       - ./data/json_docs/:/data/:z

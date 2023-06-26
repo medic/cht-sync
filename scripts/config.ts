@@ -1,7 +1,7 @@
 import "dotenv/config"
 import path from "path";
 
-export const COUCHDB_DB = process.env.COUCHDB_DB;
+export const COUCHDB_DBS = process.env.COUCHDB_DBS || "";
 
 export const LOGSTASH_PIPELINE_DIR = path.join(
   __dirname,
@@ -19,7 +19,7 @@ export const COMMANDS: Record<string, any> = {
 
 export const ENV_COMMANDS: Record<string, any> = {
   gamma:
-    "COUCHDB_HOST=adp-sandbox.dev.medicmobile.org COUCHDB_DB=medic COUCHDB_USER=medic \
+    "COUCHDB_HOST=adp-sandbox.dev.medicmobile.org COUCHDB_DBS=medic COUCHDB_USER=medic \
      docker-compose up logstash postgres postgrest dbt",
   prod: "docker-compose up logstash postgrest dbt",
   local:
