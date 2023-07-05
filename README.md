@@ -18,6 +18,12 @@ CHT sync has been specifically designed to work in both local development enviro
 
 The local environment setup involves starting Logstash, PostgreSQL, PostgREST, DBT, and CouchDB. This configuration facilitates data synchronization, transformation, and storage for local development and testing. Fake data is generated for CouchDB. The required environment variables can be found in the `env.template` file, which should be customized accordingly for the specific deployment needs.
 
+1. Provide the databases you want to sync in the `.env` file:
+
+```
+COUCHDB_DBS=<dbs-to-sync> # space sperated list of databases you want to sync e.g "medic medic_sentinel"
+```
+
 ```sh
 # starts: logstash, superset, postgres, postgrest,  data-generator, couchdb and dbt
 npm install
@@ -33,6 +39,8 @@ The gamma environment setup involves starting Logstash, PostgreSQL, PostgREST, a
 ```
 # project wide: optional
 COMPOSE_PROJECT_NAME=pipeline
+
+COUCHDB_DBS=<dbs-to-sync> # space sperated list of databases you want to sync e.g "medic medic_sentinel"
 
 # couchdb and logstash: required environment variables for 'gamma', 'prod' and 'local'
 COUCHDB_PASSWORD=<your-couchdb-password>
@@ -55,6 +63,8 @@ The production environment setup involves starting Logstash, PostgREST, and DBT.
 ```
 # project wide: optional
 COMPOSE_PROJECT_NAME=pipeline
+
+COUCHDB_DBS=<dbs-to-sync> # space sperated list of databases you want to sync e.g "medic medic_sentinel"
 
 # postgrest and pogresql: required environment variables for 'gamma', prod and 'local'
 POSTGRES_USER=<your-postgres-user>
