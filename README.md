@@ -28,6 +28,18 @@ make local
 
 The gamma environment setup involves starting Logstash, PostgreSQL, PostgREST, and DBT. This configuration facilitates data synchronization, transformation, and storage for medic gamma hosting. The required environment variables can be found in the `env.template` file, which should be customized accordingly for the specific deployment needs.
 
+1. Update the following environment variables in your `.env` file:
+
+```
+# project wide: optional
+COMPOSE_PROJECT_NAME=pipeline
+
+# couchdb and logstash: required environment variables for 'gamma', 'prod' and 'local'
+COUCHDB_PASSWORD=<your-couchdb-password>
+COUCHDB_SECURE=false
+```
+
+1. Start docker containers
 ```sh
 # starts: logstash, superset, postgres, postgrest, and dbt
 make gamma
@@ -37,6 +49,38 @@ make gamma
 
 The production environment setup involves starting Logstash, PostgREST, and DBT. This configuration facilitates data synchronization, transformation, and storage for CHT production hosting. The required environment variables can be found in the `env.template` file, which should be customized accordingly for the specific deployment needs.
 
+1. Update the following environment variables in your `.env` file:
+
+```
+# project wide: optional
+COMPOSE_PROJECT_NAME=pipeline
+
+# postgrest and pogresql: required environment variables for 'gamma', prod and 'local'
+POSTGRES_USER=<your-postgres-user>
+POSTGRES_PASSWORD=<your-postgres-password>
+POSTGRES_DB=<your-database>
+POSTGRES_TABLE=<your-postgres-table>
+POSTGRES_SCHEMA=<your-base-postgres-schema>
+
+# dbt: required environment variables for 'gamma', 'prod' and 'local'
+DBT_POSTGRES_USER=<your-postgres-dbt-user>
+DBT_POSTGRES_PASSWORD=<your-postgres-password>
+DBT_POSTGRES_SCHEMA=<your-dbt-postgres-schema>
+DBT_POSTGRES_HOST=<your-postgres-host> # IP address
+
+# couchdb and logstash: required environment variables for 'gamma', 'prod' and 'local'
+COUCHDB_PASSWORD=<your-couchdb-password>
+COUCHDB_HOST=<your-couchdb-host>
+COUCHDB_PORT=<your-couchdb-port>
+COUCHDB_SECURE=false
+```
+
+1. (Optional) Start local version of PostgreSQL
+```
+docker-compose -f docker-compose.postgres.yml -f docker-compose.yml up postgres
+```
+
+1. Start docker containers
 ```sh
 # starts: logstash, superset, postgrest and dbt
 make prod

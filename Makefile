@@ -16,8 +16,10 @@ local: down extract-test-data build
 		up
 
 prod: down build
-	docker-compose up logstash postgrest dbt
+	docker-compose -f docker-compose.couchdb.yml -f docker-compose.postgrest.yml -f docker-compose.yml \
+		up logstash postgrest dbt
 
 gamma: down build
 	COUCHDB_HOST=adp-sandbox.dev.medicmobile.org COUCHDB_DB=medic COUCHDB_USER=medic \
-	docker-compose up logstash postgres postgrest dbt
+	docker-compose -f docker-compose.couchdb.yml -f docker-compose.postgres.yml -f docker-compose.yml \
+		up logstash postgres postgrest dbt
