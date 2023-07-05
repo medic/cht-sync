@@ -9,7 +9,8 @@ const program = new Command();
 
 program
   .name("cht-sync")
-  .description("CLI utility for generating and managing cht-sync toolkit");
+  .description(`cht-sync v${version}: CLI utility for generating and managing cht-sync toolkit`);
+
 
 program
   .command("init")
