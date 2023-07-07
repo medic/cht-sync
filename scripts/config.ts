@@ -1,7 +1,7 @@
 import "dotenv/config"
 import path from "path";
 
-export const COUCHDB_DBS = process.env.COUCHDB_DBS || "medic";
+export const COUCHDB_DBS = process.env.COUCHDB_DBS || "couchdb";
 
 export const LOGSTASH_PIPELINE_DIR = path.join(
   __dirname,
