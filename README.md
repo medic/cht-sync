@@ -40,7 +40,7 @@ The gamma environment setup involves starting Logstash, PostgreSQL, PostgREST, a
 # project wide: optional
 COMPOSE_PROJECT_NAME=pipeline
 
-COUCHDB_DBS=<dbs-to-sync> # space sperated list of databases you want to sync e.g "medic medic_sentinel"
+COUCHDB_DBS=<dbs-to-sync> # space separated list of databases you want to sync e.g "medic medic_sentinel"
 
 # couchdb and logstash: required environment variables for 'gamma', 'prod' and 'local'
 COUCHDB_PASSWORD=<your-couchdb-password>
