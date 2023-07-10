@@ -64,7 +64,7 @@ The production environment setup involves starting Logstash, PostgREST, and DBT.
 # project wide: optional
 COMPOSE_PROJECT_NAME=pipeline
 
-COUCHDB_DBS=<dbs-to-sync> # space sperated list of databases you want to sync e.g "medic medic_sentinel"
+COUCHDB_DBS=<dbs-to-sync> # space separated list of databases you want to sync e.g "medic medic_sentinel"
 
 # postgrest and pogresql: required environment variables for 'gamma', prod and 'local'
 POSTGRES_USER=<your-postgres-user>
