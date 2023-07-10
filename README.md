@@ -21,7 +21,7 @@ The local environment setup involves starting Logstash, PostgreSQL, PostgREST, D
 1. Provide the databases you want to sync in the `.env` file:
 
 ```
-COUCHDB_DBS=<dbs-to-sync> # space sperated list of databases you want to sync e.g "medic medic_sentinel"
+COUCHDB_DBS=<dbs-to-sync> # space separated list of databases you want to sync e.g "medic medic_sentinel"
 ```
 
 ```sh
