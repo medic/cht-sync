@@ -3,6 +3,23 @@ import path from "path";
 
 export const COUCHDB_DBS = process.env.COUCHDB_DBS || "couchdb";
 
+export const POSTGRES = {
+  username: process.env.POSTGRES_USER || 'root',
+  password: process.env.POSTGRES_PASSWORD || 'supercoolpassword',
+  db: process.env.POSTGRES_DB || 'db',
+  table: process.env.POSTGRES_TABLE,
+  schema: process.env.POSTGRES_SCHEMA
+};
+
+export const SUPERSET = {
+  username: process.env.SUPERSET_ADMIN_EMAIL || 'user@superset.com',
+  password: process.env.SUPERSET_PASSWORD || 'password',
+};
+
+export const DBT_POSTGRES = {
+  schema: process.env.DBT_POSTGRES_SCHEMA || 'dbt'
+}
+
 export const LOGSTASH_PIPELINE_DIR = path.join(
   __dirname,
   "../logstash/pipeline"
