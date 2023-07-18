@@ -26,6 +26,10 @@ jobs:
       SUPERSET_PASSWORD: "password"
       SUPERSET_ADMIN_EMAIL: "user@superset.com"
     steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
       - name: Get Docker Hub username
         id: get-docker-hub-username
         run: echo '::set-output name=dockerhub_username::${{ secrets.DOCKERHUB_USERNAME }}'
@@ -35,10 +39,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
         if: steps.get-docker-hub-username.outputs.dockerhub_username
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
-        with:
-          node-version: 16.x
       - name: Install and Run Local
         run: |
           npm install
