@@ -26,7 +26,7 @@ describe("Main workflow Test Suite", () => {
   });
 
   it("should be able to login to superset dashboard", async () => {
-    const createMediatorEndpointResponse = await request('http://localhost:8080')
+    const supersetDashboardResponse = await request('http://localhost:8080')
       .post('/api/v1/security/login')
       .send({
         password: SUPERSET.password,
@@ -34,6 +34,6 @@ describe("Main workflow Test Suite", () => {
         refresh: true,
         username: SUPERSET.username
       });
-    expect(createMediatorEndpointResponse.status).toBe(200);
+    expect(supersetDashboardResponse.status).toBe(200);
   });
 });
