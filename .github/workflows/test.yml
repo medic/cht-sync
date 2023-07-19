@@ -39,9 +39,11 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
         if: steps.get-docker-hub-username.outputs.dockerhub_username
-      - name: Install and Run Local
-        run: |
-          npm install
-          npm run local
+      - name: Install
+        run: npm install
+      - name: Run local
+        run: npm run local
+      - name: Sleep for 60 seconds
+        run: sleep 60s
       - name: Run e2e tests
         run: npm test
