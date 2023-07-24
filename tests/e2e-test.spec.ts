@@ -6,13 +6,9 @@ import { POSTGRES, SUPERSET, DBT_POSTGRES } from "../scripts/config";
 describe("Main workflow Test Suite", () => {
   let client: Client;
 
-  beforeAll(async () => {
-    client = await rootConnect();
-  });
+  beforeAll(async () => client = await rootConnect());
 
-  afterAll(async () => {
-    await client.end();
-  });
+  afterAll(async () => await client.end());
 
   it("should have data in postgres main tables", async () => {
     let couchdbTableResult = await client.query("SELECT * FROM " + POSTGRES.schema + "." + POSTGRES.table);
