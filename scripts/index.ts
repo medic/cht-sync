@@ -38,7 +38,7 @@ program
       .then(() => opts.start && handleStartup(opts.environment))
       .then((output) => console.log(output || ""))
       .catch((err) => console.error(err))
-      .then(() => process.exit(1))
+    //.then(() => process.exit(1))
   );
 
 program.parse();
