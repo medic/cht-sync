@@ -2,7 +2,7 @@
 
 CHT Sync is a bundled solution consisting of [Logstash](https://www.elastic.co/logstash/), [CouchDB](https://couchdb.apache.org/), [PostgREST](https://postgrest.org/en/stable/), [DBT](https://www.getdbt.com/), and [Superset](https://superset.apache.org/). Its purpose is to synchronize data from CouchDB to PostgreSQL, facilitating analytics on a Superset dashboard. This synchronization occurs in real-time, ensuring that the data displayed on the dashboard is always up-to-date. CHT Sync copies data from CouchDB to PostgreSQL, enabling seamless integration and timely analytics.
 
-**WARNING!** The schema differs from couch2pg. See [`./postgres/init-db-resources.sh`](./postgres/init-db-resources.sh). 
+**WARNING!** The schema differs from couch2pg. See [`./postgres/init-db-resources.sh`](./postgres/init-db-resources.sh).
 
 **Note**: In order for `cht-sync` to run, it needs a link to [cht-pipeline](https://github.com/medic/cht-pipeline), which contains transformation models for DBT.
 
@@ -28,6 +28,55 @@ COUCHDB_DBS=<dbs-to-sync> # space separated list of databases you want to sync e
 # starts: logstash, superset, postgres, postgrest,  data-generator, couchdb and dbt
 npm install
 npm run local
+```
+## Run end-to-end test locally
+1. Update the following environment variables in your .env file:
+
+```
+# project wide: optional
+COMPOSE_PROJECT_NAME=pipeline
+
+# postgrest and pogresql: required environment variables for 'gamma', prod and 'local'
+POSTGRES_USER=root
+POSTGRES_PASSWORD=supercoolpassword
+POSTGRES_DB=data
+POSTGRES_TABLE=couchdb # for dbt use only
+POSTGRES_SCHEMA=v1
+
+# dbt: required environment variables for 'gamma', 'prod' and 'local'
+DBT_POSTGRES_USER=dbt_user
+DBT_POSTGRES_PASSWORD=supercoolpassword
+DBT_POSTGRES_SCHEMA=dbt
+DBT_POSTGRES_HOST=postgres # Your postgres instance IP or endpoint in "prod".
+CHT_PIPELINE_BRANCH_URL="https://github.com/medic/cht-pipeline.git#main"
+
+# couchdb and logstash: required environment variables for 'gamma', 'prod' and 'local'
+COUCHDB_USER=test
+COUCHDB_PASSWORD=test
+COUCHDB_DBS="couchdb couchdb_sentinel" # space separated list of databases you want to sync e.g "medic medic_sentinel"
+COUCHDB_HOST=couchdb
+COUCHDB_PORT=5984
+COUCHDB_SECURE=false
+
+# superset: required environment variables for 'gamma', 'prod' and 'local'
+SUPERSET_PASSWORD=password
+SUPERSET_ADMIN_EMAIL=user@superset.com
+```
+
+2. Install and run locally
+
+```sh
+# starts: logstash, superset, postgres, postgrest,  data-generator, couchdb and dbt
+npm install
+npm run local
+```
+
+3. Wait for every container to be up and running.
+4. Run end-to-end test
+
+```sh
+# starts: logstash, superset, postgres, postgrest,  data-generator, couchdb and dbt
+npm test
 ```
 
 ### Gamma Setup
