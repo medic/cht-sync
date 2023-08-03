@@ -30,7 +30,7 @@ npm install
 npm run local
 ```
 #### Run end-to-end test locally
-1. Update the following environment variables in your .env file:
+1. Update the following environment variables in your `.env` file:
 
 ```
 # project wide: optional
@@ -77,6 +77,21 @@ npm run local
 ```sh
 # starts: logstash, superset, postgres, postgrest,  data-generator, couchdb and dbt
 npm test
+```
+
+5. Expected result:
+
+```sh
+ PASS  tests/e2e-test.spec.ts
+  Main workflow Test Suite
+    ✓ should have data in postgres main tables (66 ms)
+    ✓ should be able to login to superset dashboard (144 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       2 passed, 2 total
+Snapshots:   0 total
+Time:        3.078 s
+Ran all test suites.
 ```
 
 ### Gamma Setup
