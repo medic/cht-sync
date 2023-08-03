@@ -31,7 +31,7 @@ npm run local
 ```
 #### Run end-to-end test locally
 1. Update the following environment variables in your .env file:
-***This values serve as example***
+
 ```
 # project wide: optional
 COMPOSE_PROJECT_NAME=pipeline
