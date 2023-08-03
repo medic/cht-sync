@@ -79,21 +79,6 @@ npm run local
 npm test
 ```
 
-5. Expected result:
-
-```sh
- PASS  tests/e2e-test.spec.ts
-  Main workflow Test Suite
-    ✓ should have data in postgres main tables (66 ms)
-    ✓ should be able to login to superset dashboard (144 ms)
-
-Test Suites: 1 passed, 1 total
-Tests:       2 passed, 2 total
-Snapshots:   0 total
-Time:        3.078 s
-Ran all test suites.
-```
-
 ### Gamma Setup
 
 The gamma environment setup involves starting Logstash, PostgreSQL, PostgREST, and DBT. This configuration facilitates data synchronization, transformation, and storage for medic gamma hosting. The required environment variables can be found in the `env.template` file, which should be customized accordingly for the specific deployment needs.
