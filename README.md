@@ -29,7 +29,7 @@ COUCHDB_DBS=<dbs-to-sync> # space separated list of databases you want to sync e
 npm install
 npm run local
 ```
-## Run end-to-end test locally
+#### Run end-to-end test locally
 1. Update the following environment variables in your .env file:
 
 ```
