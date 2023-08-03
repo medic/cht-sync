@@ -31,36 +31,36 @@ npm run local
 ```
 #### Run end-to-end test locally
 1. Update the following environment variables in your .env file:
-
+***This values serve as example***
 ```
 # project wide: optional
 COMPOSE_PROJECT_NAME=pipeline
 
 # postgrest and pogresql: required environment variables for 'gamma', prod and 'local'
-POSTGRES_USER=root
-POSTGRES_PASSWORD=supercoolpassword
-POSTGRES_DB=data
-POSTGRES_TABLE=couchdb # for dbt use only
-POSTGRES_SCHEMA=v1
+POSTGRES_USER=<your-postgres-user>
+POSTGRES_PASSWORD=<your-postgres-password>
+POSTGRES_DB=<your-database>
+POSTGRES_TABLE=<your-postgres-table>
+POSTGRES_SCHEMA=<your-base-postgres-schema>
 
 # dbt: required environment variables for 'gamma', 'prod' and 'local'
-DBT_POSTGRES_USER=dbt_user
-DBT_POSTGRES_PASSWORD=supercoolpassword
-DBT_POSTGRES_SCHEMA=dbt
-DBT_POSTGRES_HOST=postgres # Your postgres instance IP or endpoint in "prod".
+DBT_POSTGRES_USER=<your-postgres-dbt-user>
+DBT_POSTGRES_PASSWORD=<your-postgres-password>
+DBT_POSTGRES_SCHEMA=<your-dbt-postgres-schema>
+DBT_POSTGRES_HOST=<your-postgres-host> # IP address
 CHT_PIPELINE_BRANCH_URL="https://github.com/medic/cht-pipeline.git#main"
 
 # couchdb and logstash: required environment variables for 'gamma', 'prod' and 'local'
-COUCHDB_USER=test
-COUCHDB_PASSWORD=test
-COUCHDB_DBS="couchdb couchdb_sentinel" # space separated list of databases you want to sync e.g "medic medic_sentinel"
-COUCHDB_HOST=couchdb
-COUCHDB_PORT=5984
+COUCHDB_USER=<your-couchdb-user>
+COUCHDB_PASSWORD=<your-couchdb-password>
+COUCHDB_DBS=<dbs-to-sync> # space separated list of databases you want to sync e.g "medic medic_sentinel"
+COUCHDB_HOST=<your-couchdb-host>
+COUCHDB_PORT=<your-couchdb-port>
 COUCHDB_SECURE=false
 
 # superset: required environment variables for 'gamma', 'prod' and 'local'
-SUPERSET_PASSWORD=password
-SUPERSET_ADMIN_EMAIL=user@superset.com
+SUPERSET_PASSWORD=<your-superset-password>
+SUPERSET_ADMIN_EMAIL=<your-superset-emaild>
 ```
 
 2. Install and run locally
