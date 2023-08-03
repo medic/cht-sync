@@ -75,7 +75,7 @@ npm run local
 4. Run end-to-end test
 
 ```sh
-# starts: logstash, superset, postgres, postgrest,  data-generator, couchdb and dbt
+# runs tests/e2e-test.spec.ts
 npm test
 ```
 
