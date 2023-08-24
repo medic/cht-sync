@@ -2,7 +2,7 @@
 
 CHT Sync is a bundled solution consisting of [Logstash](https://www.elastic.co/logstash/), [CouchDB](https://couchdb.apache.org/), [PostgREST](https://postgrest.org/en/stable/), [DBT](https://www.getdbt.com/), and [Superset](https://superset.apache.org/). Its purpose is to synchronize data from CouchDB to PostgreSQL, facilitating analytics on a Superset dashboard. This synchronization occurs in real-time, ensuring that the data displayed on the dashboard is always up-to-date. CHT Sync copies data from CouchDB to PostgreSQL, enabling seamless integration and timely analytics.
 
-**WARNING!** The schema differs from couch2pg. See [`./postgres/init-db-resources.sh`](./postgres/init-db-resources.sh).
+**WARNING!** The schema differs from couch2pg. See [`./postgres/init-dbt-resources.sh`](./postgres/init-dbt-resources.sh).
 
 **Note**: In order for `cht-sync` to run, it needs a link to [cht-pipeline](https://github.com/medic/cht-pipeline), which contains transformation models for DBT.
 
