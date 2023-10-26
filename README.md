@@ -27,7 +27,7 @@ CHT Sync has been specifically designed to work in both local development enviro
 ### Prerequisites
 
 - `Docker`
-- An `.env` file containing the environment variable placeholders from the `.env.template` file. The file should be  located in the root directory of the project or set by the operating system. The variables should be customized accordingly for the specific deployment needs.
+- An `.env` file containing the environment variable placeholders from the `.env.template` file. The file should be located in the root directory of the project or set by the operating system. The variables should be customized accordingly for the specific deployment needs.
 
 ### Local Setup
 
