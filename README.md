@@ -114,7 +114,7 @@ COUCHDB_PASSWORD=<your-couchdb-password>
 COUCHDB_SECURE=false
 ```
 
-1. Install the dependencies and start the Docker containers:
+2. Install the dependencies and start the Docker containers:
 ```sh
 # starts: logstash, superset, postgres, postgrest, and dbt
 npm install
@@ -153,12 +153,12 @@ COUCHDB_PORT=<your-couchdb-port>
 COUCHDB_SECURE=false
 ```
 
-1. (Optional) Start local version of PostgreSQL:
+2. (Optional) Start local version of PostgreSQL:
 ```
 docker-compose -f docker-compose.postgres.yml -f docker-compose.yml up postgres
 ```
 
-1. Install the dependencies and start the Docker containers:
+3. Install the dependencies and start the Docker containers:
 ```sh
 # starts: logstash, superset, postgrest and dbt
 npm install
