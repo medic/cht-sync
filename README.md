@@ -30,7 +30,7 @@ CHT Sync has been specifically designed to work in both local development enviro
 - An `.env` file containing the environment variable placeholders from the `.env.template` file. The file should be located in the root directory of the project or set by the operating system. The variables should be customized accordingly for the specific deployment needs.
 
 #### Environment variable
-We have four environment variable groups in the `.env.template` file. It is important to understand the difference between them.
+There are four environment variable groups in the `.env.template` file. To successfully set up `cht-sync`, It is important to understand the difference between them.
 1. Postgresql and Postgres: Are used to establish the Postgres database to synchronize CouchDB data. It also define the schema and table names to store the CouchDB data. The main objective is to define the environment where the raw CouchDB data is going to be copy to.
 2. DBT: These environment variables are exclusive to the DBT configuration. The main objective is to define the environment where the tables and views for the models defined in `CHT_PIPELINE_BRANCH_URL` will be created. It is important to separate this environments from the previous group. `DBT_POSTGRES_USER` and `DBT_POSTGRES_SCHEMA` must be different from `POSTGRES_USER` and `POSTGRES_SCHEMA`. `DBT_POSTGRES_HOST` has to be the Postgres instance created with the environment variables set in the first group.
 3. The following environment variables define the CouchDB instance we want to sync with. With `COUCHDB_DBS`, we can specify a list of databases to sync.
