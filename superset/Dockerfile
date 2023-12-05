@@ -1,20 +1,15 @@
-FROM apache/superset:2.0.0
+FROM apache/superset:2.1.2
 
 USER root
 
-ARG SUPERSET_PASSWORD=admin
-ARG SUPERSET_ADMIN_EMAIL=admin@superset.com
+RUN pip install mysqlclient
 
-RUN pip install psycopg2-binary
+COPY ./superset-init.sh /superset-init.sh
+
+COPY superset_config.py /app/
+ENV SUPERSET_CONFIG_PATH /app/superset_config.py
+
+RUN ["chmod", "+x", "/superset-init.sh"]
 
 USER superset
-
-RUN superset superset fab create-admin \
-              --username admin \
-              --firstname Superset \
-              --lastname Admin \
-              --email $SUPERSET_ADMIN_EMAIL \
-              --password $SUPERSET_PASSWORD
-
-RUN superset superset db upgrade
-RUN superset superset init
+ENTRYPOINT [ "/superset-init.sh" ]

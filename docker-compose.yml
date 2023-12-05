@@ -17,9 +17,10 @@ services:
   superset:
     build: 
       context: ./superset/
-      args:
-        SUPERSET_PASSWORD: ${SUPERSET_PASSWORD:-password}
-        SUPERSET_ADMIN_EMAIL: ${SUPERSET_ADMIN_EMAIL:-user@superset.com}
+    environment:
+      - SUPERSET_PASSWORD=${SUPERSET_PASSWORD:-password}
+      - SUPERSET_ADMIN_EMAIL=${SUPERSET_ADMIN_EMAIL:-user@superset.com}
+      - SUPERSET_SSH_TUNNELING=${SUPERSET_SSH_TUNNELING}
     ports:
       - 8080:8088
 
