@@ -40,9 +40,9 @@ export const ENV_COMMANDS: Record<string, any> = {
     "COUCHDB_HOST=adp-sandbox.dev.medicmobile.org COUCHDB_DB=medic COUCHDB_USER=medic \
     docker-compose -f docker-compose.couchdb.yml -f docker-compose.postgres.yml -f docker-compose.yml \
       up -d logstash postgres postgrest dbt",
-  prod: "docker-compose -f docker-compose.couchdb.yml -f docker-compose.postgrest.yml -f docker-compose.yml \
-  up -d logstash postgrest dbt",
+  prod: "docker-compose -f docker-compose.postgrest.yml -f docker-compose.superset-prod.yml \
+  -f docker-compose.yml up -d",
   local:
     "docker-compose -f docker-compose.couchdb.yml -f docker-compose.postgres.yml \
-    -f docker-compose.yml up -d",
+    -f docker-compose.superset-dev.yml -f docker-compose.yml up -d",
 };
