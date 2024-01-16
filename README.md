@@ -88,6 +88,8 @@ SUPERSET_PASSWORD=<your-superset-password>
 SUPERSET_ADMIN_EMAIL=<your-superset-emaild>
 ```
 
+If `CHT_PIPELINE_BRANCH_URL` is pointing to a private repo then you need to provide an access token in the url i.e. `https://<PAT>@github.com/medic/cht-pipeline.git#main`. In this example you will replace `<PAT>`  with an access token from Github. Instruction on how to generate one can be found [here](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
+
 2. Install the dependencies and run the Docker containers locally:
 
 ```sh
