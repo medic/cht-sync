@@ -14,15 +14,6 @@ services:
       - COUCHDB_SECURE=${COUCHDB_SECURE:-true}
       - HTTP_ENDPOINT=postgrest:3000
 
-  superset:
-    build: 
-      context: ./superset/
-      args:
-        SUPERSET_PASSWORD: ${SUPERSET_PASSWORD:-password}
-        SUPERSET_ADMIN_EMAIL: ${SUPERSET_ADMIN_EMAIL:-user@superset.com}
-    ports:
-      - 8080:8088
-
   dbt:
     platform: linux/amd64
     image: medicmobile/dataemon:latest

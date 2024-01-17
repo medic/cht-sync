@@ -1,6 +1,6 @@
 # CHT Sync
 
-CHT Sync is a bundled solution consisting of [Logstash](https://www.elastic.co/logstash/), [CouchDB](https://couchdb.apache.org/), [PostgREST](https://postgrest.org/en/stable/), [DBT](https://www.getdbt.com/), and [Superset](https://superset.apache.org/). Its purpose is to synchronize data from CouchDB to PostgreSQL, facilitating analytics on a Superset dashboard. This synchronization occurs in real-time, ensuring that the data displayed on the dashboard is always up-to-date. CHT Sync copies data from CouchDB to PostgreSQL, enabling seamless integration and timely analytics.
+CHT Sync is a bundled solution consisting of [Logstash](https://www.elastic.co/logstash/), [CouchDB](https://couchdb.apache.org/), [PostgREST](https://postgrest.org/en/stable/), and [DBT](https://www.getdbt.com/). Its purpose is to synchronize data from CouchDB to PostgreSQL, facilitating analytics on a dashboard. This synchronization occurs in real-time, ensuring that the data displayed on the dashboard is always up-to-date. CHT Sync copies data from CouchDB to PostgreSQL, enabling seamless integration and timely analytics.
 
 **WARNING!** The schema differs from couch2pg. See [`./postgres/init-dbt-resources.sh`](./postgres/init-dbt-resources.sh).
 
@@ -16,9 +16,7 @@ At the core of the CHT Sync are Logstash, PostgREST, and DBT. Logstash plays a k
 
 Once the data is synchronized and stored in PostgreSQL, it undergoes transformation using predefined DBT models from the [cht-pipeline](https://github.com/medic/cht-pipeline). DBT plays a crucial role in preparing the data in a format that is optimized for querying and analysis, ensuring the data is readily available for analytics purposes.
 
-CHT Sync also leverages Superset, an analytics and dashboarding platform, to provide intuitive visualizations and interactive analytics on the synchronized data stored in PostgreSQL. Superset empowers users to explore and gain valuable insights from the data, enabling informed decision-making and data-driven actions.
-
-The overall architecture of CHT-sync is driven by the seamless integration of these technologies. CouchDB serves as the source database, containing the original data to be synchronized. Logstash, PostgREST, and DBT facilitate the data flow from CouchDB to PostgreSQL, transforming it into a queriable format. PostgreSQL acts as the centralized repository for the synchronized and transformed data, while Superset provides the interface for users to explore and visualize the analytics.
+The overall architecture of CHT-sync is driven by the seamless integration of these technologies. CouchDB serves as the source database, containing the original data to be synchronized. Logstash, PostgREST, and DBT facilitate the data flow from CouchDB to PostgreSQL, transforming it into a queriable format. PostgreSQL acts as the centralized repository for the synchronized and transformed data.
 
 ## Getting Started
 
@@ -34,7 +32,6 @@ There are four environment variable groups in the `.env.template` file. To succe
 1. Postgresql and Postgres: Are used to establish the Postgres database to synchronize CouchDB data. They also define the schema and table names to store the CouchDB data. The main objective is to define the environment where the raw CouchDB data will be copied.
 2. DBT: These environment variables are exclusive to the DBT configuration. The main objective is to define the environment where the tables and views for the models defined in `CHT_PIPELINE_BRANCH_URL` will be created. It is important to separate this environment from the previous group. `DBT_POSTGRES_USER` and `DBT_POSTGRES_SCHEMA` must be different from `POSTGRES_USER` and `POSTGRES_SCHEMA`. `DBT_POSTGRES_HOST` has to be the Postgres instance created with the environment variables set in the first group.
 3. The following environment variables define the CouchDB instance we want to sync with. With `COUCHDB_DBS`, we can specify a list of databases to sync.
-4. Superset: These environment variables are exclusive to the Superset configuration.
 
 ### Local Setup
 
@@ -49,7 +46,7 @@ COUCHDB_DBS=<dbs-to-sync> # space separated list of databases you want to sync e
 2. Install the dependencies and run the Docker containers locally:
 
 ```sh
-# starts: logstash, superset, postgres, postgrest,  data-generator, couchdb and dbt
+# starts: logstash, postgres, postgrest,  data-generator, couchdb and dbt
 npm install
 npm run local
 ```
@@ -82,10 +79,6 @@ COUCHDB_DBS=<dbs-to-sync> # space separated list of databases you want to sync e
 COUCHDB_HOST=<your-couchdb-host>
 COUCHDB_PORT=<your-couchdb-port>
 COUCHDB_SECURE=false
-
-# superset: required environment variables for 'gamma', 'prod' and 'local'
-SUPERSET_PASSWORD=<your-superset-password>
-SUPERSET_ADMIN_EMAIL=<your-superset-emaild>
 ```
 
 If `CHT_PIPELINE_BRANCH_URL` is pointing to a private repo then you need to provide an access token in the url i.e. `https://<PAT>@github.com/medic/cht-pipeline.git#main`. In this example you will replace `<PAT>`  with an access token from Github. Instruction on how to generate one can be found [here](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
@@ -93,7 +86,7 @@ If `CHT_PIPELINE_BRANCH_URL` is pointing to a private repo then you need to prov
 2. Install the dependencies and run the Docker containers locally:
 
 ```sh
-# starts: logstash, superset, postgres, postgrest,  data-generator, couchdb and dbt
+# starts: logstash, postgres, postgrest,  data-generator, couchdb and dbt
 npm install
 npm run local
 ```
@@ -125,7 +118,7 @@ COUCHDB_SECURE=false
 
 2. Install the dependencies and start the Docker containers:
 ```sh
-# starts: logstash, superset, postgres, postgrest, and dbt
+# starts: logstash, postgres, postgrest, and dbt
 npm install
 npm run gamma
 ```
@@ -169,7 +162,7 @@ docker-compose -f docker-compose.postgres.yml -f docker-compose.yml up postgres
 
 3. Install the dependencies and start the Docker containers:
 ```sh
-# starts: logstash, superset, postgrest and dbt
+# starts: logstash, postgrest and dbt
 npm install
 npm run prod
 ```
