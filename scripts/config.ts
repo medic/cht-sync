@@ -11,11 +11,6 @@ export const POSTGRES = {
   schema: process.env.POSTGRES_SCHEMA
 };
 
-export const SUPERSET = {
-  username: process.env.SUPERSET_ADMIN_EMAIL || 'user@superset.com',
-  password: process.env.SUPERSET_PASSWORD || 'password',
-};
-
 export const DBT_POSTGRES = {
   schema: process.env.DBT_POSTGRES_SCHEMA || 'dbt'
 }
