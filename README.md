@@ -10,14 +10,19 @@ CHT Sync is a bundled solution consisting of [Logstash](https://www.elastic.co/l
 
 ![Architecture Diagram](./architecture.png)
 
-CHT Sync is an integrated solution designed to enable data synchronization between CouchDB and PostgreSQL for the purpose of analytics. It combines several technologies to achieve this seamless synchronization and provide an efficient workflow for data processing and visualization.
+CHT Sync is an integrated solution designed to enable data synchronization between CouchDB and PostgreSQL for the purpose of analytics. It combines several technologies to achieve this seamless synchronization and provides an efficient workflow for data processing and visualization.
 
-At the core of the CHT Sync are Logstash, PostgREST, and DBT. Logstash plays a key role in the data synchronization process, facilitating the extraction of data from CouchDB and transferring it to PostgREST, ensuring real-time updates in PostgreSQL. PostgREST, on the other hand, acts as a RESTful API layer, enabling convenient interactions with PostgreSQL for data storage and retrieval.
+At the core of the CHT Sync are Logstash, PostgREST, and DBT. 
+
+Logstash plays a key role in the data synchronization process, facilitating the extraction of data from CouchDB and transferring it to PostgREST, ensuring real-time updates in PostgreSQL. 
+
+PostgREST acts as a RESTful API layer, enabling convenient interactions with PostgreSQL for data storage and retrieval.
 
 Once the data is synchronized and stored in PostgreSQL, it undergoes transformation using predefined DBT models from the [cht-pipeline](https://github.com/medic/cht-pipeline). DBT plays a crucial role in preparing the data in a format that is optimized for querying and analysis, ensuring the data is readily available for analytics purposes.
 
-The overall architecture of CHT-sync is driven by the seamless integration of these technologies. CouchDB serves as the source database, containing the original data to be synchronized. Logstash, PostgREST, and DBT facilitate the data flow from CouchDB to PostgreSQL, transforming it into a queriable format. PostgreSQL acts as the centralized repository for the synchronized and transformed data.
+The overall architecture of CHT Sync is driven by the seamless integration of these technologies. CouchDB serves as the source database, containing the original data to be synchronized. Logstash, PostgREST, and DBT facilitate the data flow from CouchDB to PostgreSQL, transforming it into a queriable format. PostgreSQL acts as the centralized repository for the synchronized and transformed data.
 We suggest using Superset for creating your dashboards, data visualization, or infographics.
+
 ## Getting Started
 
 CHT Sync has been specifically designed to work in both local development environments for testing models or workflows, gamma environment, as well as in production environments. Each setup accommodates the needs of different stages or environments.
