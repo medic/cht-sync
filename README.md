@@ -1,38 +1,33 @@
 # CHT Sync
 
-CHT Sync is a bundled solution consisting of [Logstash](https://www.elastic.co/logstash/), [CouchDB](https://couchdb.apache.org/), [PostgREST](https://postgrest.org/en/stable/), and [DBT](https://www.getdbt.com/). Its purpose is to synchronize data from CouchDB to PostgreSQL, facilitating analytics on a dashboard. This synchronization occurs in real-time, ensuring that the data displayed on the dashboard is always up-to-date. CHT Sync copies data from CouchDB to PostgreSQL, enabling seamless integration and timely analytics.
+CHT Sync is an integrated solution designed to enable data synchronization between CouchDB and PostgreSQL for the purpose of analytics. It combines several technologies to achieve this synchronization and provides an efficient workflow for data processing and visualization. The synchronization occurs in real-time, ensuring that the data displayed on dashboards is up-to-date. 
 
-**WARNING!** The schema differs from couch2pg. See [`./postgres/init-dbt-resources.sh`](./postgres/init-dbt-resources.sh).
-
-**Note**: In order for `cht-sync` to run, it needs a link to [cht-pipeline](https://github.com/medic/cht-pipeline), which contains transformation models for DBT.
+**Notes**: 
+1. In order for `cht-sync` to run, it needs to be linked to [cht-pipeline](https://github.com/medic/cht-pipeline), which contains transformation models for DBT.
+1. The schema differs from couch2pg. See [`./postgres/init-dbt-resources.sh`](./postgres/init-dbt-resources.sh).
 
 ## Architecture
 
 ![Architecture Diagram](./architecture.png)
 
-CHT Sync is an integrated solution designed to enable data synchronization between CouchDB and PostgreSQL for the purpose of analytics. It combines several technologies to achieve this seamless synchronization and provides an efficient workflow for data processing and visualization.
+CHT Sync is a bundled solution consisting of [Logstash](https://www.elastic.co/logstash/), [CouchDB](https://couchdb.apache.org/), [PostgREST](https://postgrest.org/en/stable/), and [DBT](https://www.getdbt.com/). The overall architecture of CHT Sync is driven by the integration of these technologies. CouchDB serves as the source database, containing the original data to be synchronized. Logstash, PostgREST, and DBT facilitate the data flow from CouchDB to PostgreSQL, transforming it into a queriable format. PostgreSQL acts as the centralized repository for the synchronized and transformed data.
 
-At the core of the CHT Sync are Logstash, PostgREST, and DBT. 
+1. Logstash facilitates the extraction of data from CouchDB and transfers it to PostgREST, ensuring real-time updates in PostgreSQL. 
+1. PostgREST acts as a RESTful API layer, enabling interactions with PostgreSQL for data storage and retrieval.
+1. Once the data is synchronized and stored in PostgreSQL, it undergoes transformation using predefined DBT models from the [cht-pipeline](https://github.com/medic/cht-pipeline). DBT prepares the data in a format that is optimized for querying and analysis, ensuring the data is readily available for analytics purposes.
 
-Logstash plays a key role in the data synchronization process, facilitating the extraction of data from CouchDB and transferring it to PostgREST, ensuring real-time updates in PostgreSQL. 
-
-PostgREST acts as a RESTful API layer, enabling convenient interactions with PostgreSQL for data storage and retrieval.
-
-Once the data is synchronized and stored in PostgreSQL, it undergoes transformation using predefined DBT models from the [cht-pipeline](https://github.com/medic/cht-pipeline). DBT plays a crucial role in preparing the data in a format that is optimized for querying and analysis, ensuring the data is readily available for analytics purposes.
-
-The overall architecture of CHT Sync is driven by the seamless integration of these technologies. CouchDB serves as the source database, containing the original data to be synchronized. Logstash, PostgREST, and DBT facilitate the data flow from CouchDB to PostgreSQL, transforming it into a queriable format. PostgreSQL acts as the centralized repository for the synchronized and transformed data.
-We suggest using Superset for creating your dashboards, data visualization, or infographics.
+We recommend using [Superset](https://superset.apache.org/) for data exploration and visualization.
 
 ## Getting Started
 
-CHT Sync has been specifically designed to work in both local development environments for testing models or workflows, gamma environment, as well as in production environments. Each setup accommodates the needs of different stages or environments.
+CHT Sync has been designed to work in both local development environments for testing models or workflows, gamma environment, as well as in production environments. Each setup accommodates the needs of different stages or environments.
 
 ### Prerequisites
 
 - `Docker`
 - An `.env` file containing the environment variable placeholders from the `.env.template` file. The file should be located in the root directory of the project or set by the operating system. The variables should be customized accordingly for the specific deployment needs.
 
-#### Environment variable
+#### Environment variables
 There are four environment variable groups in the `.env.template` file. To successfully set up `cht-sync`, it is important to understand the difference between them.
 1. Postgresql and Postgres: Are used to establish the Postgres database to synchronize CouchDB data to. They also define the schema and table names to store the CouchDB data. The main objective is to define the environment where the raw CouchDB data will be copied.
 2. DBT: These environment variables are exclusive to the DBT configuration. The main objective is to define the environment where the tables and views for the models defined in `CHT_PIPELINE_BRANCH_URL` will be created. It is important to separate this environment from the previous group. `DBT_POSTGRES_USER` and `DBT_POSTGRES_SCHEMA` must be different from `POSTGRES_USER` and `POSTGRES_SCHEMA`. `DBT_POSTGRES_HOST` has to be the Postgres instance created with the environment variables set in the first group.
