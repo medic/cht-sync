@@ -22,7 +22,7 @@ program
   )
   .option(
     "-e, --environment [environment]",
-    "build environments 'local', 'prod', 'gamma'",
+    "build environments 'local', 'prod'",
     "local"
   )
   .option("-f, --force", "overwrites existing configurations", false)
