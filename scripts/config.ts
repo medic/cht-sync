@@ -31,8 +31,6 @@ export const COMMANDS: Record<string, any> = {
 };
 
 export const ENV_COMMANDS: Record<string, any> = {
-  prod: "docker-compose -f docker-compose.couchdb.yml -f docker-compose.postgrest.yml -f docker-compose.yml \
-      up -d logstash postgrest dbt",
-  local: "docker-compose -f docker-compose.couchdb.yml -f docker-compose.postgres.yml \
-    -f docker-compose.yml up -d",
+  prod: "docker-compose -f docker-compose.couchdb.yml -f docker-compose.postgrest.yml -f docker-compose.yml up -d logstash postgrest dbt",
+  local: "docker-compose -f docker-compose.couchdb.yml -f docker-compose.postgres.yml -f docker-compose.yml up -d",
 };
