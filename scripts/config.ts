@@ -37,7 +37,7 @@ export const ENV_COMMANDS: Record<string, any> = {
       up -d logstash postgres postgrest dbt",
   prod: 
     "docker-compose -f docker-compose.couchdb.yml -f docker-compose.postgrest.yml -f docker-compose.yml \
-  up -d logstash postgrest dbt",
+      up -d logstash postgrest dbt",
   local:
     "docker-compose -f docker-compose.couchdb.yml -f docker-compose.postgres.yml \
     -f docker-compose.yml up -d",
