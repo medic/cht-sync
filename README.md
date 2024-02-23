@@ -4,3 +4,6 @@ CHT Sync is an integrated solution designed to enable data synchronization betwe
 
 ## Using
 See our [docs site](https://docs.communityhealthtoolkit.org/apps/guides/data/analytics/setup)!
+
+## Testing
+See [testing](TESTING.md).
