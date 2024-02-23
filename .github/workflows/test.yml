@@ -10,7 +10,7 @@ jobs:
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "postgres"
       POSTGRES_DB: "data"
-      POSTGRES_TABLE: "comedicuchdb"
+      POSTGRES_TABLE: "medic"
       POSTGRES_SCHEMA: "v1"
       DBT_POSTGRES_USER: "postgres"
       DBT_POSTGRES_PASSWORD: "postgres"
