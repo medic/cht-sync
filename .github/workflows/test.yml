@@ -16,7 +16,7 @@ jobs:
       DBT_POSTGRES_PASSWORD: "postgres"
       DBT_POSTGRES_SCHEMA: "dbt"
       DBT_POSTGRES_HOST: "postgres"
-      CHT_PIPELINE_BRANCH_URL: "https://github.com/medic/cht-pipeline.git#hardcoded-variables"
+      CHT_PIPELINE_BRANCH_URL: "https://github.com/medic/cht-pipeline.git#main"
       COUCHDB_USER: "medic"
       COUCHDB_PASSWORD: "password"
       COUCHDB_DBS: "medic"
