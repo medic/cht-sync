@@ -1,0 +1,16 @@
+version: 2
+
+models:
+  - name: chws
+    columns:
+      - name: _id
+        tests:
+          - not_null
+      - name: _rev
+        tests:
+          - not_null
+    tests:
+      - dbt_utils.fewer_rows_than:
+          compare_model: ref('couchdb')
+      - dbt_utils.equal_rowcount:
+          compare_model: ref('person')

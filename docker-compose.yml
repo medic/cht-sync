@@ -17,6 +17,7 @@ services:
   dbt:
     platform: linux/amd64
     image: medicmobile/dataemon:latest
+    build: ./dbt/
     environment:
       - POSTGRES_HOST=${DBT_POSTGRES_HOST}
       - POSTGRES_USER=${DBT_POSTGRES_USER}
@@ -26,4 +27,12 @@ services:
       - POSTGRES_SCHEMA=${DBT_POSTGRES_SCHEMA}
       - ROOT_POSTGRES_SCHEMA=${POSTGRES_SCHEMA}
       - DATAEMON_INITAL_PACKAGE=${CHT_PIPELINE_BRANCH_URL}
+
+  postgrest:
+    image: postgrest/postgrest
+    environment:
+      - PGRST_DB_URI=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST:-postgres}:5432/${POSTGRES_DB}
+      - PGRST_DB_SCHEMA=${POSTGRES_SCHEMA}
+      # CHANGE FOR PROD!!!!
+      - PGRST_DB_ANON_ROLE=${POSTGRES_USER}
 

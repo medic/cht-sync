@@ -1,0 +1,22 @@
+version: 2
+
+sources:
+  - name: couchdb
+    database: "{{ env_var('POSTGRES_DB') }}"
+    schema: "{{ env_var('POSTGRES_SCHEMA') }}"
+    tables:
+      - name: "{{ env_var('POSTGRES_TABLE') }}"
+models:
+  - name: couchdb
+    columns:
+      - name: _id
+        tests:
+          - not_null
+      - name: _rev
+        tests:
+          - not_null
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - _id
+            - _rev

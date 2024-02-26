@@ -1,0 +1,25 @@
+version: 2
+
+models:
+  - name: reports_by_location
+    columns:
+      - name: uuid
+        tests:
+          - not_null
+      - name: longitude
+        tests:
+          - not_null
+      - name: latitude
+        tests:
+          - not_null
+    tests:
+      - dbt_utils.equal_rowcount:
+          compare_model: ref('reports')
+  - name: reports
+    columns:
+      - name: uuid
+        tests:
+          - not_null
+    tests:
+      - dbt_utils.fewer_rows_than:
+          compare_model: ref('couchdb')

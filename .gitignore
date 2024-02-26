@@ -1,3 +1,8 @@
 .env
 node_modules
 .idea
+
+dbt/target/
+dbt/dbt_modules/
+dbt/dbt_packages/
+dbt/logs/

@@ -1,0 +1,11 @@
+version: 2
+
+models:
+  - name: household_visits
+    columns:
+      - name: doc
+        tests:
+          - not_null
+    tests:
+      - dbt_utils.fewer_rows_than:
+          compare_model: ref('couchdb')

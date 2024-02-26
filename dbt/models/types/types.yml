@@ -1,0 +1,25 @@
+version: 2
+
+models:
+  - name: data_record
+    columns:
+      - name: _id
+        tests:
+          - not_null
+      - name: _rev
+        tests:
+          - not_null
+    tests:
+      - dbt_utils.fewer_rows_than:
+          compare_model: ref('couchdb')
+  - name: person
+    columns:
+      - name: _id
+        tests:
+          - not_null
+      - name: _rev
+        tests:
+          - not_null
+    tests:
+      - dbt_utils.fewer_rows_than:
+          compare_model: ref('couchdb')

@@ -1,0 +1,26 @@
+version: 2
+
+models:
+  - name: raw_contacts
+    columns:
+      - name: doc
+        tests:
+          - not_null
+    tests:
+      - dbt_utils.fewer_rows_than:
+          compare_model: ref('couchdb')
+  - name: contactview_metadata
+    columns:
+      - name: uuid
+        tests:
+          - not_null
+          - unique
+      - name: type
+        tests:
+          - not_null
+          - accepted_values:
+              values:
+                [contact, clinic, district_hospital, health_center, person]
+    tests:
+      - dbt_utils.equal_rowcount:
+          compare_model: ref('raw_contacts')

@@ -1,0 +1,11 @@
+default:
+  target: production
+  outputs:
+    production:
+      type: postgres
+      host: "{{ env_var('DBT_POSTGRES_HOST') }}"
+      user: "{{ env_var('DBT_POSTGRES_USER') }}"
+      password: "{{ env_var('DBT_POSTGRES_PASSWORD') }}"
+      port: "{{ env_var('DBT_POSTGRES_PORT', '5432') | as_number }}"
+      dbname: "{{ env_var('POSTGRES_DB') }}"
+      schema: "{{ env_var('DBT_POSTGRES_SCHEMA') }}"
