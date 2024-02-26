@@ -27,3 +27,12 @@ services:
       - ROOT_POSTGRES_SCHEMA=${POSTGRES_SCHEMA}
       - DATAEMON_INITAL_PACKAGE=${CHT_PIPELINE_BRANCH_URL}
 
+  postgrest:
+    image: postgrest/postgrest
+    restart: always
+    environment:
+      - PGRST_DB_URI=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST:-postgres}:5432/${POSTGRES_DB}
+      - PGRST_DB_SCHEMA=${POSTGRES_SCHEMA}
+      # CHANGE FOR PROD!!!!
+      - PGRST_DB_ANON_ROLE=${POSTGRES_USER}
+
