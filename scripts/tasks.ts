@@ -6,7 +6,6 @@ import cp from "node:child_process";
 import {
   COMMANDS,
   ENV_COMMANDS,
-  LOGSTASH_PIPELINE_DIR,
   COMMAND_WORKING_DIRECTORY,
   ZIP_INPUT_DIR,
   ZIP_OUTPUT_DIR,
@@ -14,32 +13,6 @@ import {
 import decompress from "decompress";
 
 const execAsync = util.promisify(cp.exec);
-
-export async function prepareEnviroment(force: boolean) {
-  if (existsSync(LOGSTASH_PIPELINE_DIR)) {
-    if (!force) {
-      new Error("Output directory already exists on disc.");
-    }
-
-    await fs.rm(LOGSTASH_PIPELINE_DIR, { recursive: true, force: true });
-  }
-
-  await fs.mkdir(LOGSTASH_PIPELINE_DIR);
-}
-
-export async function buildLogstashConfig(rawDbs: string) {
-  const databases = rawDbs.split(" ").filter((d: string) => d.length > 0);
-
-  if (databases.length == 0) {
-    throw new Error("Empty databases recieved");
-  }
-
-  for (const db of databases) {
-    const fileDir = path.join(LOGSTASH_PIPELINE_DIR, db + ".conf");
-    const content = buildLogstashContent(db);
-    await fs.writeFile(fileDir, content);
-  }
-}
 
 export async function handleStartup(env: string) {
   const isLocal = env === "local";
@@ -60,39 +33,3 @@ export async function handleStartup(env: string) {
 
   return stdout || stderr
 }
-
-const buildLogstashContent = (db: string) => `
-input {
-    couchdb_changes {
-        always_reconnect => true
-        db => "${db}"
-        host => "\${COUCHDB_HOST}"
-        username => "\${COUCHDB_USER}"
-        password => "\${COUCHDB_PASSWORD}"
-        keep_id => true
-        keep_revision => true
-        secure => "\${COUCHDB_SECURE}"
-        port => "\${COUCHDB_PORT}"
-        sequence_path => "\${COUCHDB_SEQ}"
-    }
-}
-
-filter {
-    json{
-        source => "message"
-    }
-    mutate {
-       add_field => { "_id" => "%{[doc][_id]}" }
-       add_field => { "_rev" => "%{[doc][_rev]}" }
-    }
-}
-
-output {
-    http {
-        format => "json"
-        http_method => "post"
-        ignorable_codes => 409
-        url => "http://\${HTTP_ENDPOINT}/${db}"
-    }
-}
-`;

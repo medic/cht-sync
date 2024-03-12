@@ -1,8 +1,6 @@
 import { Command } from "commander";
 import { version } from "../package.json";
 import { handleStartup } from "./tasks";
-import { prepareEnviroment } from "./tasks";
-import { buildLogstashConfig } from "./tasks";
 import { COUCHDB_DBS } from "./config";
 
 const program = new Command();
@@ -33,8 +31,6 @@ program
   )
   .action((opts): any =>
     Promise.resolve()
-      .then(() => prepareEnviroment(opts.force))
-      .then(() => buildLogstashConfig(opts.databases || COUCHDB_DBS))
       .then(() => opts.start && handleStartup(opts.environment))
       .then((output) => console.log(output || ""))
       .catch((err) => console.error(err))
