@@ -26,7 +26,8 @@ services:
     image: python:3
     depends_on:
       - couchdb
-    command: python3 /code/data-generator.py
+    command: >
+      bash -c "mkdir /data/ && tar -xzf /json_docs.tar.gz -C /data/ --strip-components=1 && python3 /code/data-generator.py"
     environment:
       - COUCHDB_URL=http://couchdb:5984/
       - DOCS_PATH=/data/
@@ -35,5 +36,5 @@ services:
       - COUCHDB_DBS=${COUCHDB_DBS}
     volumes:
       - ./data/data-generator.py:/code/data-generator.py:z
-      - ./data/json_docs/:/data/:z
+      - ./data/json_docs.tar.gz/:/json_docs.tar.gz:z
     restart: always

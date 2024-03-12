@@ -7,8 +7,6 @@ import {
   COMMANDS,
   ENV_COMMANDS,
   COMMAND_WORKING_DIRECTORY,
-  ZIP_INPUT_DIR,
-  ZIP_OUTPUT_DIR,
 } from "./config";
 import decompress from "decompress";
 
@@ -26,7 +24,6 @@ export async function handleStartup(env: string) {
 
   const { stdout, stderr } = await Promise.resolve()
     .then(() => execAsync(COMMANDS["down"], opts))
-    .then((): any => isLocal && decompress(ZIP_INPUT_DIR, ZIP_OUTPUT_DIR))
     .then(() => execAsync(COMMANDS["build"], opts))
     .then(() => execAsync(envCommand, opts))
     .catch((err) => ({ stderr: err, stdout: undefined }));

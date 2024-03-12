@@ -15,8 +15,6 @@ export const DBT_POSTGRES = {
   schema: process.env.DBT_POSTGRES_SCHEMA || 'dbt'
 }
 
-export const ZIP_OUTPUT_DIR = path.join(__dirname, "../data/");
-export const ZIP_INPUT_DIR = path.join(__dirname, "../data/json_docs.tar.gz");
 export const COMMAND_WORKING_DIRECTORY = path.join(__dirname, "../");
 
 export const COMMANDS: Record<string, any> = {
