@@ -14,7 +14,7 @@ jobs:
       POSTGRES_SCHEMA: "v1"
       DBT_POSTGRES_USER: "dbt_user"
       DBT_POSTGRES_PASSWORD: "supercoolpassword"
-      DBT_POSTGRES_SCHEMA: "dbt"
+      DBT_POSTGRES_SCHEMA: "v1"
       DBT_POSTGRES_HOST: "postgres"
       CHT_PIPELINE_BRANCH_URL: "https://github.com/medic/cht-pipeline.git#main"
       COUCHDB_USER: "test"
