@@ -12,7 +12,7 @@ npm install
 3. Run the Docker containers locally:
 ```sh
 # starts: logstash, postgres, postgrest, data-generator, couchdb and dbt
-npm run local
+docker-compose -f docker-compose.couchdb.yml -f docker-compose.postgres.yml -f docker-compose.yml up -d
 ```
 
 3. Wait for every container to be up and running.

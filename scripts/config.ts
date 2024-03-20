@@ -1,12 +1,12 @@
 import "dotenv/config"
 import path from "path";
 
-export const COUCHDB_DBS = process.env.COUCHDB_DBS || "couchdb";
+export const COUCHDB_DBS = process.env.COUCHDB_DBS || "medic";
 
 export const POSTGRES = {
-  username: process.env.POSTGRES_USER || 'root',
-  password: process.env.POSTGRES_PASSWORD || 'supercoolpassword',
-  db: process.env.POSTGRES_DB || 'db',
+  username: process.env.POSTGRES_USER || 'postgres',
+  password: process.env.POSTGRES_PASSWORD || 'postgres',
+  db: process.env.POSTGRES_DB || 'data',
   table: process.env.POSTGRES_TABLE,
   schema: process.env.POSTGRES_SCHEMA
 };
