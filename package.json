@@ -4,8 +4,6 @@
   "description": "",
   "main": "./scripts/index.ts",
   "scripts": {
-    "prod": "ts-node ./scripts/index.ts init -s -e prod",
-    "local": "ts-node ./scripts/index.ts init -s -e local",
     "test": "jest"
   },
   "keywords": [],

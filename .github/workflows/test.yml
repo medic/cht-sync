@@ -40,7 +40,12 @@ jobs:
       - name: Install
         run: npm install
       - name: Run local
-        run: npm run local
+        run: >
+          docker-compose
+          -f docker-compose.couchdb.yml
+          -f docker-compose.postgres.yml
+          -f docker-compose.yml
+          up -d
       - name: Sleep for 60 seconds
         run: sleep 60s
       - name: Run e2e tests
