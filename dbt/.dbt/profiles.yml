@@ -1,7 +1,7 @@
 default:
-  target: dev
+  target: default
   outputs:
-    dev:
+    default:
       type: postgres
       host: "{{ env_var('POSTGRES_HOST') }}"
       user: "{{ env_var('POSTGRES_USER') }}"
