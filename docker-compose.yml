@@ -18,6 +18,8 @@ services:
   dbt:
     platform: linux/amd64
     image: medicmobile/dataemon:latest
+    build: ./dbt/
+    working_dir: /dbt/
     environment:
       - POSTGRES_HOST=${DBT_POSTGRES_HOST}
       - POSTGRES_USER=${DBT_POSTGRES_USER}
