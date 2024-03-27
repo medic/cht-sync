@@ -45,7 +45,7 @@ with connection() as conn:
         """)
     conn.commit()
 
-init_package = urlparse(os.getenv("DATAEMON_INITAL_PACKAGE"))
+init_package = urlparse(os.getenv("CHT_PIPELINE_BRANCH_URL"))
 if init_package.scheme in ["http", "https"]:
     with connection() as conn:
         with conn.cursor() as cur:
