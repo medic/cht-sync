@@ -19,10 +19,8 @@ def connection():
                 f"port={os.getenv('POSTGRES_PORT') or '5432'} "
             )
         except psycopg2.OperationalError as e:
-            print('Unable to connect!', e)
-        else:
-            break
-    raise Exception("Could not connect to postgres")
+            print(f"Unable to connect! (Attempt {attempt})", e)
+    raise psycopg2.OperationalError("Could not connect to postgres")
 
 
 # Create schema
