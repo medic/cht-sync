@@ -18,6 +18,8 @@ services:
   dbt:
     platform: linux/amd64
     image: medicmobile/dataemon:latest
+    build: ./dbt/
+    working_dir: /dbt/
     environment:
       - POSTGRES_HOST=${DBT_POSTGRES_HOST}
       - POSTGRES_USER=${DBT_POSTGRES_USER}
@@ -26,5 +28,6 @@ services:
       - POSTGRES_TABLE=${POSTGRES_TABLE}
       - POSTGRES_SCHEMA=${DBT_POSTGRES_SCHEMA}
       - ROOT_POSTGRES_SCHEMA=${POSTGRES_SCHEMA}
-      - DATAEMON_INITAL_PACKAGE=${CHT_PIPELINE_BRANCH_URL}
+      - CHT_PIPELINE_BRANCH_URL=${CHT_PIPELINE_BRANCH_URL}
+      - DATAEMON_INTERVAL=${DATAEMON_INTERVAL}
 
