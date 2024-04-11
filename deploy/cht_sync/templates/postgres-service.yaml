@@ -1,0 +1,12 @@
+{{- if .Values.postgres.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgress
+spec:
+  selector:
+    app: cht-sync
+  ports:
+    - protocol: TCP
+      port: {{ .Values.postgres.port | default "5432" }}
+{{- end }}

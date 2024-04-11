@@ -1,0 +1,33 @@
+# templates/postgrest.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cht-sync-postgrest
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cht-sync
+  template:
+    metadata:
+      labels:
+        app: cht-sync
+    spec:
+      containers:
+        - name: postgrest
+          image: postgrest/postgrest
+          # Add environment variables and volume mounts as needed
+          env:
+            - name: PGRST_DB_URI
+              value: |
+                {{ printf "postgres://%s:%s@%s:%s/%s"
+                    (.Values.postgres.user | default "postgres")
+                    (.Values.postgres.password | default "postgres")
+                    (.Values.postgres.host | default "postgress")
+                    (.Values.postgres.port | default "5432")
+                    (.Values.postgres.db | default "data") }}
+            - name: PGRST_DB_SCHEMA
+              value: "{{ .Values.postgres.schema }}"
+            - name: PGRST_DB_ANON_ROLE
+              value: "{{ .Values.postgres.user }}"

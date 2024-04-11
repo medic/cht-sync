@@ -1,0 +1,31 @@
+# templates/postgres.yaml
+
+{{- if .Values.postgres.enaled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cht-sync-postgres
+spec:
+  serviceName: postgress
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cht-sync
+  template:
+    metadata:
+      labels:
+        app: cht-sync
+    spec:
+      containers:
+        - name: postgres-c
+          image: postgres:13
+          env:
+            - name: POSTGRES_USER
+              value: "{{ .Values.postgres.user }}"
+            - name: POSTGRES_PASSWORD
+              value: "{{ .Values.postgres.password }}"
+            - name: POSTGRES_DB
+              value: "{{ .Values.postgres.db }}"
+          ports:
+            - containerPort: {{ .Values.postgres.port | default "5432" }}
+{{- end }}

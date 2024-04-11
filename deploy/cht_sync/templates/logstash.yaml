@@ -1,0 +1,36 @@
+# templates/logstash.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cht-sync-logstash
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cht-sync
+  template:
+    metadata:
+      labels:
+        app: cht-sync
+    spec:
+      containers:
+        - name: logstash
+          image: medicmobile/cht-logstash-couchdb:latest
+          env:
+            - name: COUCHDB_USER
+              value: "{{ .Values.couchdb.user }}"
+            - name: COUCHDB_PASSWORD
+              value: "{{ .Values.couchdb.password }}"
+            - name: COUCHDB_HOST
+              value: "{{ .Values.couchdb.host }}"
+            - name: COUCHDB_DBS
+              value: "{{ .Values.couchdb.dbs }}"
+            - name: COUCHDB_PORT
+              value: "{{ .Values.couchdb.port }}"
+            - name: COUCHDB_SECURE
+              value: "{{ .Values.couchdb.secure }}"
+            - name: COUCHDB_SEQ # don't allow this to be changed
+              value: "/tmp/couchdb/sequence_path.txt"
+            - name: HTTP_ENDPOINT # don't allow this to be changed
+              value: "postgrest:3000"
