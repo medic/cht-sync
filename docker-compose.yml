@@ -14,6 +14,9 @@ services:
       - COUCHDB_SEQ=/tmp/couchdb/sequence_path.txt
       - COUCHDB_SECURE=${COUCHDB_SECURE:-true}
       - HTTP_ENDPOINT=postgrest:3000
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_KEY=${REDIS_KEY}
 
   dbt:
     platform: linux/amd64

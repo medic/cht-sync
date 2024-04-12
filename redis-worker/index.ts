@@ -4,20 +4,21 @@ const axios = require('axios');
 const REDIS_HOST = process.env.REDIS_HOST;
 const REDIS_PORT = process.env.REDIS_PORT;
 const REDIS_LIST_KEY = process.env.REDIS_KEY;
-const POSTGREST_URL = `http://${process.env.POSTGREST_ENDPOINT}/v1/medic`; // TODO: Make this dynamic to handle multiple DBs
+const POSTGREST_URL = `http://${process.env.POSTGREST_ENDPOINT}/medic`; // TODO: Make this dynamic to handle multiple DBs
 const BATCH_SIZE = 100; // TODO: read this from env variable
 
 async function main() {
-  const redisClient = createClient({ host: REDIS_HOST, port: REDIS_PORT });
-  console.log('connecting')
-  await redisClient.connect();
+  const redisClient = createClient({ 
+    url: `redis://${REDIS_HOST}:${REDIS_PORT}`
+   });
 
   try {
+    await redisClient.connect();
     while (true) {
       const data = await redisClient.lRange(REDIS_LIST_KEY, 0, BATCH_SIZE - 1);
       if (data.length === 0) {
         console.log('No data in queue, waiting...');
-        await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second
+        await new Promise(resolve => setTimeout(resolve, 1000 * 60)); // 1 minute
         continue;
       }
 

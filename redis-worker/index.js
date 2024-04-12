@@ -13,19 +13,21 @@ const axios = require('axios');
 const REDIS_HOST = process.env.REDIS_HOST;
 const REDIS_PORT = process.env.REDIS_PORT;
 const REDIS_LIST_KEY = process.env.REDIS_KEY;
-const POSTGREST_URL = `http://${process.env.POSTGREST_ENDPOINT}/v1/medic`; // TODO: Make this dynamic to handle multiple DBs
+const POSTGREST_URL = `http://${process.env.POSTGREST_ENDPOINT}/medic`; // TODO: Make this dynamic to handle multiple DBs
 const BATCH_SIZE = 100; // TODO: read this from env variable
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
-        const redisClient = createClient({ host: REDIS_HOST, port: REDIS_PORT });
-        console.log('connecting');
-        yield redisClient.connect();
+        const redisClient = createClient({
+            url: `redis://${REDIS_HOST}:${REDIS_PORT}`
+        });
+        console.log('connecting', REDIS_HOST, REDIS_PORT);
         try {
+            yield redisClient.connect();
             while (true) {
                 const data = yield redisClient.lRange(REDIS_LIST_KEY, 0, BATCH_SIZE - 1);
                 if (data.length === 0) {
                     console.log('No data in queue, waiting...');
-                    yield new Promise(resolve => setTimeout(resolve, 1000)); // 1 second
+                    yield new Promise(resolve => setTimeout(resolve, 1000 * 60)); // 1 minute
                     continue;
                 }
                 yield updatePostgrest(data);
