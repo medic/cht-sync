@@ -18,17 +18,14 @@ filter {
     json{
         source => "message"
     }
-    mutate {
-       add_field => { "_id" => "%{[doc][_id]}" }
-       add_field => { "_rev" => "%{[doc][_rev]}" }
-    }
+
 }
 
 output {
-    http {
-        format => "json"
-        http_method => "post"
-        ignorable_codes => 409
-        url => "http://${HTTP_ENDPOINT}/${COUCHDB_DB}"
+    redis {
+        host => "${REDIS_HOST}"
+        port => "${REDIS_PORT}"
+        data_type => "list"
+        key => "${REDIS_KEY}"
     }
 }
