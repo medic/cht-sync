@@ -9,7 +9,7 @@ const config = {
     key: process.env.REDIS_KEY,
   },
   postgrest: {
-    url: `http://${process.env.POSTGREST_ENDPOINT}/medic`, // TODO: Make this dynamic to handle multiple DBs
+    url: `http://${process.env.POSTGREST_ENDPOINT}/medic`,
   },
   batchSize: parseInt(process.env.BATCH_SIZE ?? '100', 10),
 };

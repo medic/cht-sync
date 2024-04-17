@@ -15,18 +15,23 @@ export async function main() {
 
   try {
     while (true) {
-      const data = await redisClient.lRange(config.redis.key!, 0, config.batchSize - 1);
+      const data = await redisClient.lRange(config.redis.key as string, 0, config.batchSize - 1);
       if (data.length === 0) {
         console.log('No data in queue, waiting...');
         await new Promise(resolve => setTimeout(resolve, 1000 * 10)); // 10 seconds
         continue;
       }
 
-      await updatePostgrest(data);
-      console.log('Data processed:', data);
+      const update = await updatePostgrest(data);
 
-      const removedCount = await redisClient.lTrim(config.redis.key!, config.batchSize, -1);
-      console.log(`Updated ${data.length} items to PostgREST, removed ${removedCount} from queue.`);
+      if (update?.status === 201) {
+        await redisClient.lTrim(config.redis.key as string, config.batchSize, -1);
+        console.log(`Updated ${data.length} items to PostgREST and removed them from the queue.`);
+        continue;
+      } else {
+        console.error('Failed to update PostgREST:', update?.data);
+        continue;
+      }
     }
   } catch (error) {
     console.error('Error processing data:', error);
@@ -36,13 +41,12 @@ export async function main() {
 }
 
 export async function updatePostgrest(data: string[]) {
-  console.log('called with', data)
   const formattedData = data.map(item => JSON.parse(item));
   
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
-      await axios.post(config.postgrest.url, formattedData);
-      return;
+      const response = await axios.post(config.postgrest.url, formattedData);
+      return response;
     } catch (error) {
       console.error(`Error updating PostgREST on attempt ${attempt + 1}:`, error);
     }
