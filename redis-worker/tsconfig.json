@@ -9,5 +9,5 @@
     "rootDir": "./src",
     "outDir": "./dist",
   },
-  "exclude": ["jest.config.ts", "node_modules", "dist"]
+  "exclude": ["jest.config.ts", "jest.setup.redis-mock.ts", "node_modules", "dist"]
 }
