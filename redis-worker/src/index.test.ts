@@ -41,6 +41,7 @@ describe('main', () => {
   it('should process data from redis', async () => {
     redisClient.lRange.mockResolvedValueOnce(data);
     redisClient.lTrim.mockResolvedValueOnce(2);
+    mockedAxios.post.mockResolvedValue({ data: "success", status: 201 });
   
     const promise = main();
     jest.runOnlyPendingTimers();
