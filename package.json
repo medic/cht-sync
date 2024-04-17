@@ -4,7 +4,7 @@
   "description": "",
   "main": "./scripts/index.ts",
   "scripts": {
-    "test": "jest"
+    "test:e2e": "jest --testPathPattern=tests/.*\\.spec\\.ts$"
   },
   "keywords": [],
   "author": "",
