@@ -1,3 +1,5 @@
 .env
 node_modules
 .idea
+*/coverage/*
+logstash/couch-seq/sequence_path.txt

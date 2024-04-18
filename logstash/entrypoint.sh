@@ -15,6 +15,7 @@ rm "${TEMPLATE_FILE}"
 
 if [[ -f "${COUCHDB_SEQ}" && -s "${COUCHDB_SEQ}" ]]; then
     echo "Using existing sequence file"
+    echo "Current sequence: $(cat ${COUCHDB_SEQ})"
 else
     mkdir -p `dirname ${COUCHDB_SEQ}` \
         && chown -R $USER.$USER `dirname ${COUCHDB_SEQ}` \
