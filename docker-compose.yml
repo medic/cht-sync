@@ -7,7 +7,7 @@ services:
     restart: always
     volumes:
       - type: bind
-        source: ./logstash/couch-seq
+        source: ./logstash
         target: /tmp/couchdb
     environment:
       - COUCHDB_USER=${COUCHDB_USER}

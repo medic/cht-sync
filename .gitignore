@@ -2,4 +2,4 @@
 node_modules
 .idea
 */coverage/*
-logstash/couch-seq/sequence_path.txt
+logstash/sequence_path.txt
