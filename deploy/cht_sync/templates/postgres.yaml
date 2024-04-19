@@ -2,7 +2,7 @@
 
 {{- if .Values.postgres.enabled }}
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: cht-sync-postgres
 spec:
@@ -30,4 +30,13 @@ spec:
               value: "{{ .Values.postgres.db }}"
           ports:
             - containerPort: {{ .Values.postgres.port | default "5432" }}
+
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: {{ .Values.storageSize | default "1Gi" }}
 {{- end }}
