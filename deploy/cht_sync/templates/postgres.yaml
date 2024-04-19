@@ -1,20 +1,22 @@
 # templates/postgres.yaml
 
-{{- if .Values.postgres.enaled }}
+{{- if .Values.postgres.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cht-sync-postgres
 spec:
-  serviceName: postgress
+  serviceName: postgres
   replicas: 1
   selector:
     matchLabels:
       app: cht-sync
+      inner.service: postgres
   template:
     metadata:
       labels:
         app: cht-sync
+        inner.service: postgres
     spec:
       containers:
         - name: postgres-c

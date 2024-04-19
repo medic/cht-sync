@@ -5,14 +5,17 @@ kind: Deployment
 metadata:
   name: cht-sync-postgrest
 spec:
+  serviceName: postgrest
   replicas: 1
   selector:
     matchLabels:
       app: cht-sync
+      inner.service: postgrest
   template:
     metadata:
       labels:
         app: cht-sync
+        inner.service: postgrest
     spec:
       containers:
         - name: postgrest
@@ -20,13 +23,7 @@ spec:
           # Add environment variables and volume mounts as needed
           env:
             - name: PGRST_DB_URI
-              value: |
-                {{ printf "postgres://%s:%s@%s:%s/%s"
-                    (.Values.postgres.user | default "postgres")
-                    (.Values.postgres.password | default "postgres")
-                    (.Values.postgres.host | default "postgress")
-                    (.Values.postgres.port | default "5432")
-                    (.Values.postgres.db | default "data") }}
+              value: "postgres://postgres:postgres@postgres:5432/data"
             - name: PGRST_DB_SCHEMA
               value: "{{ .Values.postgres.schema }}"
             - name: PGRST_DB_ANON_ROLE
