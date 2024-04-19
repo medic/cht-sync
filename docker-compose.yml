@@ -49,7 +49,7 @@ services:
       - REDIS_PORT=${REDIS_PORT}
       - REDIS_KEY=${REDIS_KEY}
       - POSTGREST_ENDPOINT=postgrest:3000
-      - BATCH_SIZE=${REDIS_BATCH_SIZE}
+      - REDIS_BATCH_SIZE=${REDIS_BATCH_SIZE}
     depends_on:
       - redis
     restart: unless-stopped

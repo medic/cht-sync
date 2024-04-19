@@ -11,7 +11,7 @@ const config = {
   postgrest: {
     url: `http://${process.env.POSTGREST_ENDPOINT}/medic`,
   },
-  batchSize: parseInt(process.env.BATCH_SIZE ?? '100', 10),
+  batchSize: parseInt(process.env.REDIS_BATCH_SIZE ?? '100', 10),
 };
 
 export default config;
