@@ -6,9 +6,6 @@ jobs:
   e2e-tests:
     name: E2E Tests
     runs-on: ubuntu-latest
-    container:
-      image: .
-      options: -v ./logstash:/tmp/couchdb
     env:
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "postgres"
