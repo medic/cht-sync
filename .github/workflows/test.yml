@@ -23,6 +23,12 @@ jobs:
       COUCHDB_HOST: "couchdb"
       COUCHDB_PORT: 5984
       COUCHDB_SECURE: false
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_KEY: medic
+      POSTGREST_ENDPOINT: postgrest:3000
+      REDIS_BATCH_SIZE: 100
+      POSTGRES_HOST: postgres
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
@@ -49,4 +55,18 @@ jobs:
       - name: Sleep for 60 seconds
         run: sleep 60s
       - name: Run e2e tests
+        run: npm run test:e2e
+  worker-tests:
+    name: Worker Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+      - name: Install
+        working-directory: ./redis-worker
+        run: npm install
+      - name: Run worker tests
+        working-directory: ./redis-worker
         run: npm test
