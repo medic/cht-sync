@@ -14,6 +14,9 @@ services:
       - COUCHDB_SEQ=/tmp/couchdb/sequence_path.txt
       - COUCHDB_SECURE=${COUCHDB_SECURE:-true}
       - HTTP_ENDPOINT=postgrest:3000
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_KEY=${REDIS_KEY}
 
   dbt:
     platform: linux/amd64
@@ -31,3 +34,24 @@ services:
       - CHT_PIPELINE_BRANCH_URL=${CHT_PIPELINE_BRANCH_URL}
       - DATAEMON_INTERVAL=${DATAEMON_INTERVAL}
 
+  redis:
+    image: redis:latest
+    restart: unless-stopped
+    ports:
+      - 6379:6379
+    volumes:
+      - redis-data:/data
+
+  redis-worker:
+    build: ./redis-worker/
+    environment:
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_KEY=${REDIS_KEY}
+      - POSTGREST_ENDPOINT=postgrest:3000
+      - REDIS_BATCH_SIZE=${REDIS_BATCH_SIZE}
+    depends_on:
+      - redis
+    restart: unless-stopped
+volumes:
+  redis-data:
