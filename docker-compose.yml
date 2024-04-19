@@ -5,10 +5,10 @@ services:
     image: medicmobile/cht-logstash-couchdb:latest
     build: ./logstash/
     restart: always
-    volumes:
-      - type: bind
-        source: ./logstash
-        target: /tmp/couchdb
+    # volumes:
+    #   - type: bind
+    #     source: ./logstash
+    #     target: /tmp/couchdb
     environment:
       - COUCHDB_USER=${COUCHDB_USER}
       - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}

@@ -46,7 +46,7 @@ jobs:
           -f docker-compose.postgres.yml
           -f docker-compose.yml
           up -d
-      - name: Sleep for 120 seconds
-        run: sleep 120s
+      - name: Sleep for 60 seconds
+        run: sleep 60s
       - name: Run e2e tests
         run: npm test
