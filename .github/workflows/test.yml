@@ -23,6 +23,7 @@ jobs:
       COUCHDB_HOST: "couchdb"
       COUCHDB_PORT: 5984
       COUCHDB_SECURE: false
+      COUCHDB_SEQ: /tmp/couchdb/sequence_path.txt
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
