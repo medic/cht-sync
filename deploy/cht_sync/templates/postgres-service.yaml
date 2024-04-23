@@ -3,10 +3,16 @@ apiVersion: v1
 kind: Service
 metadata:
   name: postgres
+  annotations:
+      service.beta.kubernetes.io/aws-load-balancer-type: external
+      service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+      service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
 spec:
+  type: LoadBalancer
   selector:
     inner.service: postgres
   ports:
     - protocol: TCP
       port: {{ .Values.postgres.port | default "5432" }}
+      targetPort: 5432
 {{- end }}
