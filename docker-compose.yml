@@ -43,7 +43,7 @@ services:
       - redis-data:/data
 
   redis-worker:
-    image: medicmobile/cht-sync-redis-worker:latest
+    image: dockermedic/cht-sync-redis-worker:latest
     build: ./redis-worker/
     environment:
       - REDIS_HOST=${REDIS_HOST}
