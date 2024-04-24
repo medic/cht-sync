@@ -52,8 +52,32 @@ export async function main() {
 }
 
 
+type CouchRecord = {
+    "@version": string | null;
+    "@timestamp": string | null;
+    "_id": string | null;
+    "_rev": string | null;
+    "doc": any | null;
+    "doc_as_upsert": boolean | null;
+}
+
+function format(item: any) {
+  const template: CouchRecord = {
+    "@version": null,
+    "@timestamp": null,
+    "_id": null,
+    "_rev": null,
+    "doc": null,
+    "doc_as_upsert": null,
+  };
+
+  const obj = JSON.parse(item);
+  return { ...obj, ...template};
+}
+
 export async function updatePostgrest(data: string[]) {
-  const formattedData = data.map(item => JSON.parse(item));
+
+  const formattedData = data.map(format);
   
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
