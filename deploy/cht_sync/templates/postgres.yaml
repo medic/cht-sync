@@ -33,10 +33,10 @@ spec:
 
   volumeClaimTemplates:
     - metadata:
-        name: data
+        name: postgres-data
       spec:
         accessModes: [ "ReadWriteOnce" ]
         resources:
           requests:
-            storage: {{ .Values.storageSize | default "1Gi" }}
+            storage: {{ .Values.postgres.storageSize | default "1Gi" }}
 {{- end }}

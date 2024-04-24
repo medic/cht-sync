@@ -32,5 +32,9 @@ spec:
               value: "{{ .Values.couchdb.secure }}"
             - name: COUCHDB_SEQ # don't allow this to be changed
               value: "/tmp/couchdb/sequence_path.txt"
-            - name: HTTP_ENDPOINT # don't allow this to be changed
-              value: "postgrest:3000"
+            - name: REDIS_HOST
+              value: "{{ .Values.redis.host }}"
+            - name: REDIS_PORT
+              value: "{{ .Values.redis.port }}"
+            - name: REDIS_KEY
+              value: "{{ .Values.redis.key }}"

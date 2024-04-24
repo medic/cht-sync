@@ -1,0 +1,30 @@
+# templates/postgrest.yaml
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: cht-sync-redis
+spec:
+  serviceName: redis
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cht-sync
+      inner.service: redis
+  template:
+    metadata:
+      labels:
+        app: cht-sync
+        inner.service: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:latest
+  volumeClaimTemplates:
+    - metadata:
+        name: redis-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: {{ .Values.redis.storageSize | default "1Gi" }}

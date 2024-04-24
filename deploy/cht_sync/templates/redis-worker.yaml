@@ -1,0 +1,30 @@
+# templates/postgrest.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cht-sync-redis-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cht-sync
+  template:
+    metadata:
+      labels:
+        app: cht-sync
+    spec:
+      containers:
+        - name: redis-worker
+          image: dockermedic/cht-sync-redis-worker:latest
+          env:
+            - name: REDIS_HOST
+              value: "{{ .Values.redis.host }}"
+            - name: REDIS_PORT
+              value: "{{ .Values.redis.port }}"
+            - name: REDIS_KEY
+              value: "{{ .Values.redis.key }}"
+            - name: POSTGREST_ENDPOINT
+              value: "postgrest:3000"
+            - name: REDIS_BATCH_SIZE
+              value: "{{ .Values.redis.batch_size }}"
