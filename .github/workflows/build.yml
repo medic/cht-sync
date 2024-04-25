@@ -46,4 +46,4 @@ jobs:
           context: ./redis-worker
           file: ./redis-worker/Dockerfile
           push: true
-          tags: medicmobile/cht-sync-redis-worker:${{ env.BUILD_TIMESTAMP }}
+          tags: dockermedic/cht-sync-redis-worker:${{ env.BUILD_TIMESTAMP }}
