@@ -17,9 +17,14 @@ spec:
         app: cht-sync
         inner.service: redis
     spec:
+      automountServiceAccountToken: false
       containers:
         - name: redis
           image: redis:latest
+          resources:
+            limits:
+              cpu: 500m
+              memory: 2Gi
   volumeClaimTemplates:
     - metadata:
         name: redis-data

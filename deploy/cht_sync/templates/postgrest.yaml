@@ -16,9 +16,14 @@ spec:
         app: cht-sync
         inner.service: postgrest
     spec:
+      automountServiceAccountToken: false
       containers:
         - name: postgrest
           image: postgrest/postgrest
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 500Mi
           env:
             - name: PGRST_DB_URI
               value: {{ printf "postgres://%s:%s@%s:5432/%s" .Values.postgres.user .Values.postgres.password .Values.postgres.host .Values.postgres.db }}

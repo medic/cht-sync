@@ -12,9 +12,14 @@ spec:
       labels:
         app: cht-sync
     spec:
+      automountServiceAccountToken: false
       containers:
         - name: dbt
           image: medicmobile/dataemon:latest
+          resources:
+            limits:
+              cpu: 500m
+              memory: 1Gi
           env:
             - name: POSTGRES_HOST
               value: "{{ .Values.postgres.host }}"

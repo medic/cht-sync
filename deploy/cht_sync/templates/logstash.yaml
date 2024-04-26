@@ -14,9 +14,14 @@ spec:
       labels:
         app: cht-sync
     spec:
+      automountServiceAccountToken: false
       containers:
         - name: logstash
           image: medicmobile/cht-logstash-couchdb:latest
+          resources:
+            limits:
+              cpu: 2
+              memory: 2Gi
           env:
             - name: COUCHDB_USER
               value: "{{ .Values.couchdb.user }}"

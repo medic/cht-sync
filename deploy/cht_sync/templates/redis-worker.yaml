@@ -14,9 +14,14 @@ spec:
       labels:
         app: cht-sync
     spec:
+      automountServiceAccountToken: false
       containers:
         - name: redis-worker
           image: dockermedic/cht-sync-redis-worker:latest
+          resources:
+            limits:
+              cpu: 500m
+              memory: 500Mi
           env:
             - name: REDIS_HOST
               value: "{{ .Values.redis.host }}"
