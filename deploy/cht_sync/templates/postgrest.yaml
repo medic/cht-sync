@@ -22,12 +22,18 @@ spec:
           image: postgrest/postgrest
           resources:
             limits:
-              cpu: 1000m
-              memory: 500Mi
+              cpu: {{ (.Values.postgrest).cpu_limit | default "1000m" }}
+              memory: {{ (.Values.postgrest).memory_limit | default "500Mi" }}
           env:
             - name: PGRST_DB_URI
-              value: {{ printf "postgres://%s:%s@%s:5432/%s" .Values.postgres.user .Values.postgres.password .Values.postgres.host .Values.postgres.db }}
+              value: |
+                {{ printf "postgres://%s:%s@%s:%d/%s"
+                .Values.postgres.user
+                .Values.postgres.password
+                ( .Values.postgres.host | default "postgres" )
+                (int .Values.postgres.port | default 5432)
+                .Values.postgres.db }}
             - name: PGRST_DB_SCHEMA
-              value: "{{ .Values.postgres.schema }}"
+              value: {{ .Values.postgres.schema }}
             - name: PGRST_DB_ANON_ROLE
-              value: "{{ .Values.postgres.user }}"
+              value: {{ .Values.postgres.user }}

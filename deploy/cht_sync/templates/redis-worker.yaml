@@ -20,16 +20,16 @@ spec:
           image: dockermedic/cht-sync-redis-worker:latest
           resources:
             limits:
-              cpu: 500m
-              memory: 500Mi
+              cpu: {{ (.Values.redis_worker).cpu_limit | default "500m" }}
+              memory: {{ (.Values.redis_worker).memory_limit | default "500Mi" }}
           env:
             - name: REDIS_HOST
-              value: "{{ .Values.redis.host }}"
+              value: "redis"
             - name: REDIS_PORT
-              value: "{{ .Values.redis.port }}"
+              value: "6739"
             - name: REDIS_KEY
-              value: "{{ .Values.redis.key }}"
+              value: {{ (.Values.redis).key | default "couchdb" }}
             - name: POSTGREST_ENDPOINT
               value: "postgrest:3000"
             - name: REDIS_BATCH_SIZE
-              value: "{{ .Values.redis.batch_size }}"
+              value: {{ (.Values.redis).batch_size | default "100" | quote }}

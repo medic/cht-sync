@@ -1,5 +1,3 @@
-project_name: "cht-sync-k3s"
-namespace: "cht-sync-k3s"
 
 postgres:
   enabled: true  # if true a postgres service will not be created in this cluster
@@ -7,8 +5,9 @@ postgres:
   password: "postgres"
   db: "data"
   schema: "v1"
-  table: "medic" # for dbt use only
-  host: "postgres" # Your postgres instance IP or endpoint in "prod".
+  table: "medic"  
+  host: "postgres" # if postgres is outside the cluster
+  port: 5432 # if postgres is outside the cluster
 
 cht_pipeline_branch_url: "https://github.com/medic/cht-pipeline.git#main"
 
@@ -19,3 +18,8 @@ couchdb:
   host: "couchdb"
   port: "5984"
   secure: "false"
+
+# redis
+redis:
+  key: "couchdb"
+  batch_size: 1000

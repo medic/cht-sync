@@ -20,26 +20,26 @@ spec:
           image: medicmobile/cht-logstash-couchdb:latest
           resources:
             limits:
-              cpu: 2
-              memory: 2Gi
+              cpu: {{ (.Values.logstash).cpu_limit | default "2" }}
+              memory: {{ (.Values.logstash).memory_limit | default "2Gi" }}
           env:
             - name: COUCHDB_USER
-              value: "{{ .Values.couchdb.user }}"
+              value: {{ .Values.couchdb.user }}
             - name: COUCHDB_PASSWORD
-              value: "{{ .Values.couchdb.password }}"
+              value: {{ .Values.couchdb.password }}
             - name: COUCHDB_HOST
-              value: "{{ .Values.couchdb.host }}"
+              value: {{ .Values.couchdb.host }}
             - name: COUCHDB_DBS
-              value: "{{ .Values.couchdb.dbs }}"
+              value: {{ .Values.couchdb.dbs }}
             - name: COUCHDB_PORT
-              value: "{{ .Values.couchdb.port }}"
+              value: {{ .Values.couchdb.port | quote }}
             - name: COUCHDB_SECURE
-              value: "{{ .Values.couchdb.secure }}"
+              value: {{ .Values.couchdb.secure | default "false" | quote }}
             - name: COUCHDB_SEQ # don't allow this to be changed
               value: "/tmp/couchdb/sequence_path.txt"
             - name: REDIS_HOST
-              value: "{{ .Values.redis.host }}"
+              value: "redis"
             - name: REDIS_PORT
-              value: "{{ .Values.redis.port }}"
+              value: "6379"
             - name: REDIS_KEY
-              value: "{{ .Values.redis.key }}"
+              value: {{ (.Values.redis).key | default "couchdb" }}

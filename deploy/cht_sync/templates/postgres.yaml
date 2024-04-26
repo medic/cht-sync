@@ -24,15 +24,15 @@ spec:
           image: postgres:13
           resources:
             limits:
-              cpu: 1000m
-              memory: 2Gi
+              cpu: {{ (.Values.postgres).cpu_limit | default "1000m" }}
+              memory: {{ (.Values.postgres).memory_limit | default "2Gi" }}
           env:
             - name: POSTGRES_USER
-              value: "{{ .Values.postgres.user }}"
+              value: {{ .Values.postgres.user }}
             - name: POSTGRES_PASSWORD
-              value: "{{ .Values.postgres.password }}"
+              value: {{ .Values.postgres.password }}
             - name: POSTGRES_DB
-              value: "{{ .Values.postgres.db }}"
+              value: {{ .Values.postgres.db }}
           ports:
             - containerPort: {{ .Values.postgres.port | default "5432" }}
 

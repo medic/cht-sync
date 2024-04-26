@@ -18,25 +18,25 @@ spec:
           image: medicmobile/dataemon:latest
           resources:
             limits:
-              cpu: 500m
-              memory: 1Gi
+              cpu: {{ (.Values.dbt).cpu_limit | default "500m" }}
+              memory: {{ (.Values.dbt).memory_limit | default "1Gi" }}
           env:
             - name: POSTGRES_HOST
-              value: "{{ .Values.postgres.host }}"
+              value: {{ .Values.postgres.host | default "postgres" }}
             - name: POSTGRES_USER
-              value: "{{ .Values.postgres.user }}"
+              value: {{ .Values.postgres.user }}
             - name: POSTGRES_PORT
-              value: "{{ .Values.postgres.port }}"
+              value: {{ .Values.postgres.port | default "5432" | quote }}
             - name: POSTGRES_PASSWORD
-              value: "{{ .Values.postgres.password }}"
+              value: {{ .Values.postgres.password }}
             - name: POSTGRES_DB
-              value: "{{ .Values.postgres.db }}"
+              value: {{ .Values.postgres.db }}
             - name: POSTGRES_TABLE
-              value: "{{ .Values.postgres.table }}"
+              value: {{ .Values.postgres.table }}
             - name: POSTGRES_SCHEMA
-              value: "{{ .Values.postgres.schema }}"
+              value: {{ .Values.postgres.schema }}
             - name: ROOT_POSTGRES_SCHEMA
-              value: "{{ .Values.postgres.schema }}"
+              value: {{ .Values.postgres.schema }}
             - name: CHT_PIPELINE_BRANCH_URL
-              value: "{{ .Values.cht_pipeline_branch_url }}"
+              value: {{ .Values.cht_pipeline_branch_url }}
 

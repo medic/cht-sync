@@ -23,8 +23,8 @@ spec:
           image: redis:latest
           resources:
             limits:
-              cpu: 500m
-              memory: 2Gi
+              cpu: {{ (.Values.redis).cpu_limit | default "500m" }}
+              memory: {{ (.Values.redis).memory_limit | default "2Gi" }}
   volumeClaimTemplates:
     - metadata:
         name: redis-data
@@ -32,4 +32,4 @@ spec:
         accessModes: [ "ReadWriteOnce" ]
         resources:
           requests:
-            storage: {{ .Values.redis.storageSize | default "1Gi" }}
+            storage: {{ (.Values.redis).storageSize | default "1Gi" }}
