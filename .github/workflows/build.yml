@@ -1,22 +1,23 @@
 name: Build cht-sync containers
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
-      BUILD_TIMESTAMP: ${{ steps.outputtimestamp.outputs.BUILD_TIMESTAMP }}
+      BRANCH: ${{ steps.output_branch.outputs.BRANCH }}
     steps:
-      - name: Build timestamp
-        id: timestamp
-        run: echo "BUILD_TIMESTAMP=$(date +%Y%m%d%H%M)" >> $GITHUB_ENV
-
-      - id: outputtimestamp
-        run: echo "::set-output name=BUILD_TIMESTAMP::${{ env.BUILD_TIMESTAMP }}"
-
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Extract branch name
+        shell: bash
+        run: echo "BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_ENV
+        id: extract_branch
+
+      - id: output_branch
+        run: echo "::set-output name=BRANCH::${{ env.BRANCH }}"
 
       - name: Login to Docker Hub
         uses: docker/login-action@v2
@@ -30,7 +31,7 @@ jobs:
           context: ./logstash
           file: ./logstash/Dockerfile
           push: true
-          tags: medicmobile/cht-logstash-couchdb:${{ env.BUILD_TIMESTAMP }}
+          tags: medicmobile/cht-logstash-couchdb:${{ env.BRANCH }}
 
       - name: Build and push dataemon
         uses: docker/build-push-action@v4
@@ -38,7 +39,7 @@ jobs:
           context: ./dbt
           file: ./dbt/Dockerfile
           push: true
-          tags: medicmobile/dataemon:${{ env.BUILD_TIMESTAMP }}
+          tags: medicmobile/dataemon:${{ env.BRANCH }}
 
       - name: Build and push redis-worker
         uses: docker/build-push-action@v4
@@ -46,4 +47,4 @@ jobs:
           context: ./redis-worker
           file: ./redis-worker/Dockerfile
           push: true
-          tags: dockermedic/cht-sync-redis-worker:${{ env.BUILD_TIMESTAMP }}
+          tags: dockermedic/cht-sync-redis-worker:${{ env.BRANCH }}
