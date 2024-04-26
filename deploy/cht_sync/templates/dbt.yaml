@@ -15,7 +15,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: dbt
-          image: medicmobile/dataemon:latest
+          image: medicmobile/dataemon:{{ .Values.image_tag | default "latest" }}
           resources:
             limits:
               cpu: {{ (.Values.dbt).cpu_limit | default "500m" }}

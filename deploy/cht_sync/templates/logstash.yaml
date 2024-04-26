@@ -17,7 +17,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: logstash
-          image: medicmobile/cht-logstash-couchdb:latest
+          image: medicmobile/cht-logstash-couchdb:{{ .Values.image_tag | default "latest" }}
           resources:
             limits:
               cpu: {{ (.Values.logstash).cpu_limit | default "2" }}
