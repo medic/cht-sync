@@ -74,6 +74,6 @@ while True:
             with open("/dbt/packages.yml", "w") as f:
                 f.write(json.dumps(cur.fetchone()[0]))
 
-    subprocess.run(["dbt", "deps", "--profiles-dir", ".dbt", "--force"])
+    subprocess.run(["dbt", "deps", "--profiles-dir", ".dbt", "--upgrade"])
     subprocess.run(["dbt", "run",  "--profiles-dir", ".dbt"])
     time.sleep(int(os.getenv("DATAEMON_INTERVAL") or 5))
