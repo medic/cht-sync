@@ -53,7 +53,9 @@ export async function main() {
 
 
 export async function updatePostgrest(data: string[]) {
-  const formattedData = data.map(item => JSON.parse(item));
+  const formattedData = data
+    .map(item => JSON.parse(item))
+    .filter(item => item.doc !== undefined);
   
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
