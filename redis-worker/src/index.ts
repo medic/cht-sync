@@ -66,7 +66,7 @@ export async function updatePostgrest(data: string[]) {
     }
   }
 
-  console.error('Failed to update PostgREST after 3 attempts');
+  console.error('Failed to update PostgREST after 3 attempts.');
 }
 
 if (require.main === module) {
