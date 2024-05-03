@@ -28,7 +28,17 @@ with connection() as conn:
     with conn.cursor() as cur:
         cur.execute(f"""
             CREATE SCHEMA IF NOT EXISTS 
-            {os.getenv('POSTGRES_SCHEMA')}
+            {os.getenv('POSTGRES_SCHEMA')};
+
+            CREATE TABLE IF NOT EXISTS {os.getenv('POSTGRES_SCHEMA')}.{os.getenv('POSTGRES_TABLE')} (
+                "@version" TEXT,
+                "@timestamp" TIMESTAMP,
+                "_id" TEXT,
+                "_rev" TEXT,
+                doc jsonb,
+                doc_as_upsert BOOLEAN,
+                UNIQUE ("_id", "_rev")
+            );
         """)
     conn.commit()
 
@@ -38,42 +48,67 @@ with connection() as conn:
             CREATE TABLE IF NOT EXISTS
             {os.getenv('POSTGRES_SCHEMA')}._dataemon (
                 inserted_on TIMESTAMP DEFAULT NOW(),
-                packages jsonb
+                packages jsonb, manifest jsonb
             )
         """)
     conn.commit()
 
+package_json = '{}'
+
 init_package = urlparse(os.getenv("CHT_PIPELINE_BRANCH_URL"))
 if init_package.scheme in ["http", "https"]:
-    with connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                f"INSERT INTO {os.getenv('POSTGRES_SCHEMA')}._dataemon "
-                "(packages) VALUES (%s)",
-                [json.dumps({
-                    "packages": [
-                        {
-                            "git": init_package._replace(fragment='').geturl(),
-                            "revision": init_package.fragment
-                        }
-                    ]
-                })]
-            )
-            conn.commit()
+    package_json = json.dumps({"packages": [{
+      "git": init_package._replace(fragment='').geturl(),
+      "revision": init_package.fragment
+    }]})
 
+    with open("/dbt/packages.yml", "w") as f:
+        f.write(package_json)
+
+subprocess.run(["dbt", "deps", "--profiles-dir", ".dbt"])
+
+# load old manifest from db
+with connection() as conn:
+    with conn.cursor() as cur:
+        cur.execute(f"""
+            SELECT manifest
+            FROM {os.getenv('POSTGRES_SCHEMA')}._dataemon
+            ORDER BY inserted_on DESC
+        """)
+        manifest = cur.fetchone()
+
+        # save to file if found
+        if manifest:
+          with open("/dbt/old_manifest/mainfest.json", "w") as f:
+              f.write(json.dumps(manifest));
+
+        # run dbt ls to make sure current manifest is generated
+        subprocess.run(["dbt", "ls",  "--profiles-dir", ".dbt"])
+
+        new_manifest = '{}'
+        with open("/dbt/target/manifest.json", "r") as f:
+          new_manifest = f.read()
+
+        cur.execute(
+            f"INSERT INTO {os.getenv('POSTGRES_SCHEMA')}._dataemon "
+            "(packages, manifest) VALUES (%s, %s);",
+            [package_json, new_manifest]
+        )
+        conn.commit()
+
+# anything that changed, run a full refresh
+subprocess.run(["dbt", "run",
+  "--profiles-dir",
+   ".dbt",
+   "--select",
+   "state:modified",
+    "--full-refresh",
+    "--state",
+    "./old_manifest"])
+
+# run views (which may not have changed but need to be created)
+subprocess.run(["dbt", "run",  "--profiles-dir", ".dbt", "--select", "config.materialized:view"])
 
 while True:
-    with connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute(f"""
-                SELECT packages
-                FROM {os.getenv('POSTGRES_SCHEMA')}._dataemon
-                ORDER BY inserted_on DESC
-            """)
-
-            with open("/dbt/packages.yml", "w") as f:
-                f.write(json.dumps(cur.fetchone()[0]))
-
-    subprocess.run(["dbt", "deps", "--profiles-dir", ".dbt"])
-    subprocess.run(["dbt", "run",  "--profiles-dir", ".dbt"])
+    subprocess.run(["dbt", "run",  "--profiles-dir", ".dbt", "--exclude", "config.materialized:view"])
     time.sleep(int(os.getenv("DATAEMON_INTERVAL") or 5))
