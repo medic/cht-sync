@@ -1,0 +1,72 @@
+name: Test
+
+on: [push, pull_request]
+
+jobs:
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    env:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB: "data"
+      POSTGRES_TABLE: "medic"
+      POSTGRES_SCHEMA: "v1"
+      DBT_POSTGRES_USER: "postgres"
+      DBT_POSTGRES_PASSWORD: "postgres"
+      DBT_POSTGRES_SCHEMA: "dbt"
+      DBT_POSTGRES_HOST: "postgres"
+      CHT_PIPELINE_BRANCH_URL: "https://github.com/medic/cht-pipeline.git#main"
+      COUCHDB_USER: "medic"
+      COUCHDB_PASSWORD: "password"
+      COUCHDB_DBS: "medic"
+      COUCHDB_HOST: "couchdb"
+      COUCHDB_PORT: 5984
+      COUCHDB_SECURE: false
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_KEY: medic
+      POSTGREST_ENDPOINT: postgrest:3000
+      REDIS_BATCH_SIZE: 100
+      POSTGRES_HOST: postgres
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+      - name: Get Docker Hub username
+        id: get-docker-hub-username
+        run: echo '::set-output name=dockerhub_username::${{ secrets.DOCKERHUB_USERNAME }}'
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+        if: steps.get-docker-hub-username.outputs.dockerhub_username
+      - name: Install
+        run: npm install
+      - name: Run local
+        run: >
+          docker-compose
+          -f docker-compose.couchdb.yml
+          -f docker-compose.postgres.yml
+          -f docker-compose.yml
+          up -d
+      - name: Sleep for 60 seconds
+        run: sleep 60s
+      - name: Run e2e tests
+        run: npm run test:e2e
+  worker-tests:
+    name: Worker Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+      - name: Install
+        working-directory: ./redis-worker
+        run: npm install
+      - name: Run worker tests
+        working-directory: ./redis-worker
+        run: npm test
