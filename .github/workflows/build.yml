@@ -24,7 +24,7 @@ jobs:
           context: ./logstash
           file: ./logstash/Dockerfile
           push: true
-          tags: medicmobile/cht-logstash-couchdb:${{ env.BRANCH }}
+          tags: medicmobile/cht-logstash-couchdb:latest
 
       - name: Build and push dataemon
         uses: docker/build-push-action@v4
@@ -32,7 +32,7 @@ jobs:
           context: ./dbt
           file: ./dbt/Dockerfile
           push: true
-          tags: medicmobile/dataemon:${{ env.BRANCH }}
+          tags: medicmobile/dataemon:latest
 
       - name: Build and push redis-worker
         uses: docker/build-push-action@v4
@@ -40,4 +40,4 @@ jobs:
           context: ./redis-worker
           file: ./redis-worker/Dockerfile
           push: true
-          tags: dockermedic/cht-sync-redis-worker:${{ env.BRANCH }}
+          tags: dockermedic/cht-sync-redis-worker:latest
