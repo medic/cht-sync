@@ -6,7 +6,7 @@ async function connectToRedis(redisClient: any) {
   try {
     await redisClient.connect();
   } catch (error) {
-    console.error(`Error connecting to redis with url redis://${config.redis.host}:${config.redis.port}:`, error);
+    console.error(`Error connecting to redis with url redis://${config.redis.host}:${config.redis.port}: `, error);
     throw error;
   }
 }
