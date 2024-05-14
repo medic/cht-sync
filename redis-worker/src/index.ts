@@ -6,7 +6,7 @@ async function connectToRedis(redisClient: any) {
   try {
     await redisClient.connect();
   } catch (error) {
-    console.error(`Error connecting to redis with url redis://${config.redis.host}:${config.redis.port}:`, error);
+    console.error(`Error connecting to redis with url redis://${config.redis.host}:${config.redis.port}: `, error);
     throw error;
   }
 }
@@ -53,7 +53,9 @@ export async function main() {
 
 
 export async function updatePostgrest(data: string[]) {
-  const formattedData = data.map(item => JSON.parse(item));
+  const formattedData = data
+    .map(item => JSON.parse(item))
+    .filter(item => item.doc !== undefined);
   
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
@@ -64,7 +66,7 @@ export async function updatePostgrest(data: string[]) {
     }
   }
 
-  console.error('Failed to update PostgREST after 3 attempts');
+  console.error('Failed to update PostgREST after 3 attempts.');
 }
 
 if (require.main === module) {
