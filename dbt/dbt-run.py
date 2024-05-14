@@ -78,9 +78,9 @@ with connection() as conn:
         manifest = cur.fetchone()
 
         # save to file if found
-        if manifest:
-          with open("/dbt/old_manifest/mainfest.json", "w") as f:
-              f.write(json.dumps(manifest));
+        if manifest and len(mainfest) > 0:
+          with open("/dbt/old_manifest/manifest.json", "w") as f:
+              f.write(json.dumps(manifest[0]));
 
         # run dbt ls to make sure current manifest is generated
         subprocess.run(["dbt", "ls",  "--profiles-dir", ".dbt"])
