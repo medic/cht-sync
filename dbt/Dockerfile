@@ -8,6 +8,7 @@ FROM ubuntu:22.04 AS release
 
 RUN apt-get update \
     && apt-get --no-install-recommends install -y \
+      build-essential \
       git \
       libpq-dev \
       python3-dev \
