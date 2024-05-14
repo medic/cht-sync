@@ -78,7 +78,7 @@ with connection() as conn:
         manifest = cur.fetchone()
 
         # save to file if found
-        if manifest and len(mainfest) > 0:
+        if manifest and len(manifest) > 0:
           with open("/dbt/old_manifest/manifest.json", "w") as f:
               f.write(json.dumps(manifest[0]));
 
