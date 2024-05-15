@@ -22,10 +22,10 @@ filter {
 }
 
 output {
-    redis {
-        host => "${REDIS_HOST}"
-        port => "${REDIS_PORT}"
-        data_type => "list"
-        key => "${REDIS_KEY}"
+    http {
+        http_method => "post"
+        ignorable_codes => 409
+        url => "http://${HTTP_ENDPOINT}/${COUCHDB_DB}"
+        format => "json_batch"
     }
 }
