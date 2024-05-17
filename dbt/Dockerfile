@@ -8,6 +8,7 @@ FROM ubuntu:22.04 AS release
 
 RUN apt-get update \
     && apt-get --no-install-recommends install -y \
+      build-essential \
       git \
       libpq-dev \
       python3-dev \
@@ -26,5 +27,7 @@ WORKDIR /dbt/
 COPY dbt-run.py dbt-run.py
 COPY .dbt .dbt
 COPY dbt_project.yml dbt_project.yml
+
+RUN mkdir old_manifest
 
 CMD ["python3", "/dbt/dbt-run.py"]
