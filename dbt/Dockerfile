@@ -28,4 +28,6 @@ COPY dbt-run.py dbt-run.py
 COPY .dbt .dbt
 COPY dbt_project.yml dbt_project.yml
 
+RUN mkdir old_manifest
+
 CMD ["python3", "/dbt/dbt-run.py"]

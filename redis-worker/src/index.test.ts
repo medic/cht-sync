@@ -14,7 +14,7 @@ jest.mock('redis', () => ({
 }));
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 const consoleSpy = jest.spyOn(console, "error");
-const data = ['{"_id": 1, "_rev": "rev1"}', '{"_id": 2, "_rev": "rev2"}'];
+const data = ['{"_id": 1, "_rev": "rev1", "doc": {}}', '{"_id": 2, "_rev": "rev2", "doc": {}}'];
 
 afterEach(() => {
   consoleSpy.mockClear();
@@ -65,7 +65,7 @@ describe("updatePostgrest", () => {
 
     expect(axios.post).toHaveBeenCalledWith(
       `http://${process.env.POSTGREST_ENDPOINT}/medic`,
-      [{ _id: 1, _rev: "rev1" }, { _id: 2, _rev: "rev2" }]
+      [{ _id: 1, _rev: "rev1", doc: {} }, { _id: 2, _rev: "rev2", doc: {} }]
     );
   });
 
@@ -75,8 +75,7 @@ describe("updatePostgrest", () => {
     await updatePostgrest(data);
 
     expect(axios.post).toHaveBeenCalledTimes(3);
-    expect(consoleSpy).toHaveBeenCalledWith(
-      "Failed to update PostgREST after 3 attempts"
-    );
+    expect(consoleSpy).toHaveBeenCalledTimes(4);
+    expect(consoleSpy.mock.calls[3][0]).toContain("Failed to update PostgREST after 3 attempt");
   });
 });
