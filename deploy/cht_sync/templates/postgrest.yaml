@@ -27,12 +27,12 @@ spec:
           env:
             - name: PGRST_DB_URI
               value: |
-                {{ printf "postgres://%s:%s@%s:%d/%s"
+                {{ (printf "postgres://%s:%s@%s:%d/%s"
                 .Values.postgres.user
                 .Values.postgres.password
                 ( .Values.postgres.host | default "postgres" )
                 (int .Values.postgres.port | default 5432)
-                .Values.postgres.db }}
+                .Values.postgres.db) | trimSuffix "\n" }}
             - name: PGRST_DB_SCHEMA
               value: {{ .Values.postgres.schema }}
             - name: PGRST_DB_ANON_ROLE
