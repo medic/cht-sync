@@ -1,10 +1,4 @@
-version: '3.7'
-
 services:
-  dbt:
-    depends_on: 
-      - postgres
-  
   postgres:
     image: postgres:13
     restart: always
@@ -27,8 +21,19 @@ services:
     depends_on:
       - postgres
     restart: always
+    ports:
+      - 3000:3000
     environment:
       - PGRST_DB_URI=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST:-postgres}:5432/${POSTGRES_DB}
       - PGRST_DB_SCHEMA=${POSTGRES_SCHEMA}
       # CHANGE FOR PROD!!!!
       - PGRST_DB_ANON_ROLE=${POSTGRES_USER}
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
