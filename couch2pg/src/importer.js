@@ -1,11 +1,8 @@
 const BATCH_SIZE = process.env.BATCH_SIZE || 1000;
-const DEFAULT_DATABASE = 'default-source';
-const PAUSE_INTERVAL = 5 * 60 * 60 * 1000;
 
-const db = require('./db');
+import * as db from './db.js';
 
 const SELECT_SEQ_STMT = `SELECT seq FROM ${db.postgresProgressTable} WHERE source = $1`;
-const UPDATE_SEQ_SOURCE_STMT = `UPDATE ${db.postgresProgressTable} SET source = %L WHERE source = $1`;
 const INSERT_SEQ_STMT = `INSERT INTO ${db.postgresProgressTable}(seq, source) VALUES ($1, $2)`;
 const UPDATE_SEQ_STMT = `UPDATE ${db.postgresProgressTable} SET seq = $1 WHERE source = $2`;
 const INSERT_DOCS_STMT = `INSERT INTO ${db.postgresTable} ("@timestamp", _id, _rev, doc) VALUES`;
@@ -34,18 +31,17 @@ const getRevNumber = (doc) => doc._rev.split('-')[0];
 
 const getSeq = async (source) => {
   const client = await db.getPgClient();
-  let result = await client.query(SELECT_SEQ_STMT, [source]);
+  const result = await client.query(SELECT_SEQ_STMT, [source]);
+  let seq;
   if (!result.rows.length) {
-    result = await client.query(SELECT_SEQ_STMT, [DEFAULT_DATABASE]);
-    if (!result.rows.length) {
-      await client.query(INSERT_SEQ_STMT, [0, source]);
-      await client.end();
-      return 0;
-    }
-    await client.query(UPDATE_SEQ_SOURCE_STMT, [source, DEFAULT_DATABASE]);
+    seq = 0;
+    await client.query(INSERT_SEQ_STMT, [seq, source]);
+  } else {
+    seq = result.rows[0].seq;
   }
+
   await client.end();
-  return result.rows[0].seq;
+  return seq;
 };
 
 const storeSeq = async (seq, source) => {
@@ -71,7 +67,7 @@ const buildBulkInsertQuery = (allDocs) => {
     query: `${INSERT_DOCS_STMT} ${insertStmts.join(',')} ${ON_CONFLICT_STMT}`,
     values: docsToInsert,
   };
-}
+};
 
 /*
  Downloads all given documents from couchdb and stores them in Postgres, in batches.
@@ -84,7 +80,7 @@ const loadAndStoreDocs = async (couchdb, docsToDownload) => {
 
   const docIds = docsToDownload.map(change => change.id);
   const allDocsResult = await couchdb.allDocs({ keys: docIds, include_docs: true });
-  console.debug('Pulled ' + allDocsResult.rows.length + ' results from couchdb');
+  console.info('Pulled ' + allDocsResult.rows.length + ' results from couchdb');
 
   const { query, values } = buildBulkInsertQuery(allDocsResult);
 
@@ -94,12 +90,12 @@ const loadAndStoreDocs = async (couchdb, docsToDownload) => {
 };
 
 const deleteDocs = async () => {
- // todo do we even delete docs??
+  // todo do we even delete docs??
 };
 
 const importChangesBatch = async (couchDb, source) => {
   const seq = await getSeq(source);
-  console.debug('Downloading CouchDB changes feed from ' + seq);
+  console.info('Downloading CouchDB changes feed from ' + seq);
 
   const changes = await couchDb.changes({ limit: BATCH_SIZE, since: seq, seq_interval: BATCH_SIZE });
   console.log('There are ' + changes.results.length + ' changes to process');
@@ -108,7 +104,7 @@ const importChangesBatch = async (couchDb, source) => {
   const docsToDownload = [];
   changes.results.forEach(change => change.deleted ? docsToDelete.push(change) : docsToDownload.push(change));
 
-  console.debug('There are ' +
+  console.info('There are ' +
             docsToDelete.length + ' deletions and ' +
             docsToDownload.length + ' new / changed documents');
 
@@ -119,13 +115,15 @@ const importChangesBatch = async (couchDb, source) => {
   return changes.results.length;
 };
 
-module.exports.import = async (couchdb) => {
+export default async (couchdb) => {
   const info = await couchdb.info();
-  const source = info.db_name;
+
+  let totalDocs = 0;
+  let batchDocs = 0;
+
   do {
-    const nbrChanges = await importChangesBatch(couchdb, source);
-    if (!nbrChanges) {
-      await new Promise(r => setTimeout(r, PAUSE_INTERVAL));
-    }
-  } while (true);
+    batchDocs = await importChangesBatch(couchdb, info.db_name);
+    totalDocs += batchDocs;
+  } while (batchDocs);
 };
+

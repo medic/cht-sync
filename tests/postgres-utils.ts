@@ -1,5 +1,5 @@
-import { Client, SSLMode } from "ts-postgres";
-import { POSTGRES } from "../scripts/config";
+import { Client, SSLMode } from 'ts-postgres';
+import { POSTGRES } from '../scripts/config';
 
 export const rootConnect = async () => connectToDatabase(POSTGRES.db);
 

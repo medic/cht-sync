@@ -1,5 +1,14 @@
 const { COUCHDB_SECURE, COUCHDB_USER, COUCHDB_PASSWORD, COUCHDB_HOST, COUCHDB_PORT, COUCHDB_DBS } = process.env;
-const { POSTGRES_SCHEMA, POSTGRES_TABLE, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST, POSTGRES_DB, POSTGRES_PORT } = process.env;
+const
+  {
+    POSTGRES_SCHEMA,
+    POSTGRES_TABLE,
+    POSTGRES_USER,
+    POSTGRES_PASSWORD,
+    POSTGRES_HOST,
+    POSTGRES_DB,
+    POSTGRES_PORT
+  } = process.env;
 
 const PG_OPTS = {
   user: POSTGRES_USER,
@@ -8,29 +17,28 @@ const PG_OPTS = {
   port: POSTGRES_PORT,
   database: POSTGRES_DB,
 };
-const COUCHDB_URL = `${COUCHDB_SECURE === 'true' ? 'https' : 'http'}://${COUCHDB_USER}:${COUCHDB_PASSWORD}@${COUCHDB_HOST}:${COUCHDB_PORT}/${COUCHDB_DBS}`;
 
-const PouchDb = require('pouchdb-core');
-PouchDb.plugin(require('pouchdb-adapter-http'));
-PouchDb.plugin(require('pouchdb-session-authentication'));
+import PouchDb from 'pouchdb-core';
+import http from 'pouchdb-adapter-http';
+import session from 'pouchdb-session-authentication';
 
-const pg = require('pg');
+PouchDb.plugin(http);
+PouchDb.plugin(session);
 
-const couchDb = new PouchDb(COUCHDB_URL);
+import pg from 'pg';
 
-const postgresTable = `${POSTGRES_SCHEMA}.${POSTGRES_TABLE}`;
-const postgresProgressTable = `${POSTGRES_SCHEMA}.couchdb_progress`;
+export const postgresTable = `${POSTGRES_SCHEMA}.${POSTGRES_TABLE}`;
+export const postgresProgressTable = `${POSTGRES_SCHEMA}.couchdb_progress`;
+export const postgresSchema = POSTGRES_SCHEMA;
 
-const getPgClient = async () => {
+export const getPgClient = async () => {
   const client = new pg.Client(PG_OPTS);
   await client.connect();
   return client;
-}
+};
 
-module.exports = {
-  getPgClient,
-  couchDb,
-  postgresSchema: POSTGRES_SCHEMA,
-  postgresTable,
-  postgresProgressTable,
-}
+export const getCouchDbClient = async (dbName) => {
+  dbName = dbName || COUCHDB_DBS;
+  const url = `${COUCHDB_SECURE === 'true' ? 'https' : 'http'}://${COUCHDB_USER}:${COUCHDB_PASSWORD}@${COUCHDB_HOST}:${COUCHDB_PORT}/${dbName}`;
+  return new PouchDb(url);
+};

@@ -3,11 +3,6 @@ const importer = require('./importer');
 const db = require('./db');
 
 (async() => {
-  try {
-    await setup.createDatabase();
-    await importer.import(db.couchDb);
-  } catch (err) {
-    console.error(err);
-    process.exit(1);
-  }
+  await setup.createDatabase();
+  await (await importer.import(db.couchDb)).watch();
 })();

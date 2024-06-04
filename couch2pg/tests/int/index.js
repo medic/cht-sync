@@ -1,22 +1,22 @@
-var _ = require('underscore'),
-    common = require('../common'),
-    expect = common.expect,
-    log = require('loglevel'),
-    pouchdb = require('../../db'),
-    spawn = require('child_process').spawn;
+const _ = require('underscore');
+const common = require('../common');
+const expect = common.expect;
+const log = require('loglevel');
+const pouchdb = require('../../db');
+const spawn = require('child_process').spawn;
 
-var RSVP = require('rsvp'),
-    Promise = RSVP.Promise,
-    pgp = require('pg-promise')({ 'promiseLib': Promise });
+const RSVP = require('rsvp');
+const Promise = RSVP.Promise;
+const pgp = require('pg-promise')({ 'promiseLib': Promise });
 
-var INT_PG_HOST = process.env.INT_PG_HOST || 'localhost',
-    INT_PG_PORT = process.env.INT_PG_PORT || 5432,
-    INT_PG_USER = process.env.INT_PG_USER,
-    INT_PG_PASS = process.env.INT_PG_PASS,
-    INT_PG_DB   = process.env.INT_PG_DB || 'medic-analytics-test',
-    INT_COUCHDB_URL = process.env.INT_COUCHDB_URL || 'http://admin:pass@localhost:5984/medic-analytics-test';
+const INT_PG_HOST = process.env.INT_PG_HOST || 'localhost';
+const INT_PG_PORT = process.env.INT_PG_PORT || 5432;
+const INT_PG_USER = process.env.INT_PG_USER;
+const INT_PG_PASS = process.env.INT_PG_PASS;
+const INT_PG_DB   = process.env.INT_PG_DB || 'medic-analytics-test';
+const INT_COUCHDB_URL = process.env.INT_COUCHDB_URL || 'http://admin:pass@localhost:5984/medic-analytics-test';
 
-var POSTGRESQL_URL = 'postgres://' +
+const POSTGRESQL_URL = 'postgres://' +
   (INT_PG_USER ? INT_PG_USER : '') +
   (INT_PG_PASS ? ':' + INT_PG_PASS : '') +
   (INT_PG_USER ? '@' : '') +
@@ -24,15 +24,15 @@ var POSTGRESQL_URL = 'postgres://' +
 
 log.setDefaultLevel('error'); // CHANGE ME TO debug FOR MORE DETAILS
 
-var DOCS_TO_CREATE = 10;
-var DOCS_TO_ADD = 5;
-var DOCS_TO_EDIT = 5;
-var DOCS_TO_DELETE = 5;
+const DOCS_TO_CREATE = 10;
+const DOCS_TO_ADD = 5;
+const DOCS_TO_EDIT = 5;
+const DOCS_TO_DELETE = 5;
 
-var pgdb = pgp(POSTGRESQL_URL);
+const pgdb = pgp(POSTGRESQL_URL);
 
 // drop and re-create couchdb
-var initialiseCouchDb = function() {
+const initialiseCouchDb = function() {
   return pouchdb(INT_COUCHDB_URL).destroy().then(function() {
     return new Promise(function(res) {
       res(pouchdb(INT_COUCHDB_URL));
@@ -40,36 +40,36 @@ var initialiseCouchDb = function() {
   });
 };
 
-var resetPostgres = function() {
+const resetPostgres = function() {
   return pgdb.query('drop schema public cascade')
     .then(function() {
       return pgdb.query('create schema public');
     });
 };
 
-var randomData = function() {
+const randomData = function() {
   return [
     _.sample(['happy', 'sad', 'angry', 'scared', 'morose', 'pensive', 'quixotic']),
     _.sample(['red', 'blue', 'green', 'orange', 'pink', 'mustard', 'vermillion']),
     _.sample(['cat', 'dog', 'panda', 'tiger', 'ant', 'lemur', 'dugong', 'vontsira'])
-    ].join('-');
+  ].join('-');
 };
 
-var generateRandomDocument = function() {
+const generateRandomDocument = function() {
   return {
     data: randomData()
   };
 };
 
 describe('couch2pg', function() {
-  var couchdb;
+  let couchdb;
 
-  var createDocs = function(docs) {
+  const createDocs = function(docs) {
     return couchdb.bulkDocs(docs).then(function(results) {
       return _.zip(docs, results).map(function(docAndResult) {
         // TODO replace with destructuring when node supports it
-        var doc = docAndResult[0];
-        var result = docAndResult[1];
+        const doc = docAndResult[0];
+        const result = docAndResult[1];
 
         if (!result.ok) {
           throw ['Document failed to be saved', result];
@@ -83,7 +83,7 @@ describe('couch2pg', function() {
     });
   };
 
-  var couchDbDocs = function() {
+  const couchDbDocs = function() {
     return couchdb.allDocs({
       include_docs: true
     }).then(function(results) {
@@ -91,11 +91,11 @@ describe('couch2pg', function() {
     });
   };
 
-  var itRunsSuccessfully = (postgresTable='couchdb') => {
+  const itRunsSuccessfully = (postgresTable='couchdb') => {
     return new Promise(function(res, rej) {
-      var run = spawn('node', [ 'cli.js', INT_COUCHDB_URL, POSTGRESQL_URL, postgresTable]);
+      const run = spawn('node', [ 'cli.js', INT_COUCHDB_URL, POSTGRESQL_URL, postgresTable]);
 
-      var logIt = function(targetFn) {
+      const logIt = function(targetFn) {
         return function(data) {
           data = data.toString();
           data = data.substring(0, data.length - 1);
@@ -120,13 +120,13 @@ describe('couch2pg', function() {
     });
   };
 
-  var itHasTheSameNumberOfDocs = (table='couchdb') => {
+  const itHasTheSameNumberOfDocs = (table='couchdb') => {
     return RSVP.all([
       pgdb.one(`SELECT COUNT(*) FROM ${table}`),
       couchDbDocs()
     ]).then(function(results) {
-      var pgCount = parseInt(results[0].count),
-          couchCount = results[1].length;
+      const pgCount = parseInt(results[0].count);
+      const couchCount = results[1].length;
 
       expect(pgCount).to.equal(couchCount);
     });
@@ -134,20 +134,20 @@ describe('couch2pg', function() {
 
   // It's OK to not pass _rev values in existingDocs, but if you do pass them
   // we will compare them
-  var itHasExactlyTheseDocuments = function(existingDocs, table='couchdb') {
+  const itHasExactlyTheseDocuments = function(existingDocs, table='couchdb') {
     return RSVP.all([
       pgdb.query(`SELECT * from ${table}`),
       existingDocs
     ]).then(function(results) {
-      var pgdocs = _.pluck(results[0], 'doc');
-      var docs = results[1];
+      let pgdocs = _.pluck(results[0], 'doc');
+      let docs = results[1];
 
       expect(pgdocs.length).to.equal(docs.length);
 
       pgdocs = _.sortBy(pgdocs, '_id');
       docs = _.sortBy(docs, '_id');
 
-      for (var i = 0; i < pgdocs.length; i++) {
+      for (let i = 0; i < pgdocs.length; i++) {
         if (!docs[i]._rev) {
           delete pgdocs[i]._rev;
         }
@@ -157,11 +157,11 @@ describe('couch2pg', function() {
     });
   };
 
-  var itHasTheSameDocuments = (table='couchdb') => {
+  const itHasTheSameDocuments = (table='couchdb') => {
     return itHasExactlyTheseDocuments(couchDbDocs(), table);
   };
 
-  var resetDbState = function() {
+  const resetDbState = function() {
     return initialiseCouchDb()
       .then(function(db) {
         log.info('CouchDB ready');
@@ -186,37 +186,37 @@ describe('couch2pg', function() {
   describe('subsequent creations, updates and deletions', function() {
     before(function() {
       return couchDbDocs().then(function(docs) {
-        var deletedDocs = _.sample(docs, DOCS_TO_DELETE);
+        const deletedDocs = _.sample(docs, DOCS_TO_DELETE);
         docs = _.difference(docs, deletedDocs);
         deletedDocs.forEach(function(doc) {
           doc._deleted = true;
         });
 
-        var updatedDocs = _.sample(docs, DOCS_TO_EDIT);
+        const updatedDocs = _.sample(docs, DOCS_TO_EDIT);
         updatedDocs.forEach(function(doc) {
           doc.data = randomData();
         });
 
-        var createdDocs =_.range(DOCS_TO_ADD).map(generateRandomDocument);
+        const createdDocs =_.range(DOCS_TO_ADD).map(generateRandomDocument);
 
         return couchdb.bulkDocs(deletedDocs)
-        .then(function() {
-          return couchdb.bulkDocs(updatedDocs).then(function(results) {
-            results.forEach(function(result) {
-              var doc = _.find(docs, function(d) {
-                return d._id === result.id;
-              });
+          .then(function() {
+            return couchdb.bulkDocs(updatedDocs).then(function(results) {
+              results.forEach(function(result) {
+                const doc = _.find(docs, function(d) {
+                  return d._id === result.id;
+                });
 
-              doc._id = result.id;
-              doc._rev = result.rev;
+                doc._id = result.id;
+                doc._rev = result.rev;
+              });
+            });
+          })
+          .then(function() {
+            return createDocs(createdDocs).then(function(createdDocs) {
+              docs = docs.concat(createdDocs);
             });
           });
-        })
-        .then(function() {
-          return createDocs(createdDocs).then(function(createdDocs) {
-            docs = docs.concat(createdDocs);
-          });
-        });
       });
     });
 
@@ -297,7 +297,7 @@ describe('couch2pg', function() {
         });
     });
     it('Escapes actual 1-byte 0x00 values', function() {
-      var badValue = 'foo\0bar';
+      const badValue = 'foo\0bar';
       return couchdb.put({
         _id: badValue,
         data: badValue
