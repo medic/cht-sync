@@ -5,13 +5,18 @@
   "main": "",
   "scripts": {
     "test:e2e": "jest --testPathPattern=tests/.*\\.spec\\.ts$",
-    "lint": "eslint --color --cache ."
+    "lint": "eslint --color --cache .",
+    "test": "cd couch2pg && npm run test"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "devDependencies": {
     "@medic/eslint-config": "^1.1.0",
+    "c8": "^9.1.0",
     "chai": "^5.1.1",
     "chai-as-promised": "^7.1.2",
     "dotenv": "^16.4.5",

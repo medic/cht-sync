@@ -39,16 +39,21 @@
     "no-alert": "error",
     "no-else-return": "error",
     "no-extra-bind": "error",
+    "no-console": "off",
     "no-lone-blocks": "error",
     "no-nested-ternary": "error",
     "no-undef-init": "error",
     "no-useless-rename": "error",
     "no-whitespace-before-property": "error",
     "node/no-exports-assign": "error",
+    "node/no-unsupported-features/es-syntax": "off",
     "rest-spread-spacing": ["error", "never"],
     "semi-spacing": ["error", { "before": false, "after": true }],
     "semi-style": ["error", "last"],
     "template-curly-spacing": "error",
-    "unicode-bom": ["error", "never"]
+    "unicode-bom": ["error", "never"],
+    "node/no-extraneous-import": ["error", {
+      "allowModules": ["chai", "chai-as-promised", "sinon", "esmock"]
+    }]
   }
 }

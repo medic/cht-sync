@@ -2,4 +2,5 @@
 node_modules
 .idea
 */coverage/*
-logstash/sequence_path.txt
+/couch2pg/.nyc_output/
+/.eslintcache

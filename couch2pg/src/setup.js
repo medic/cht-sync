@@ -1,4 +1,4 @@
-const db = require('./db');
+import * as db from './db.js';
 
 const createSchema = `CREATE SCHEMA IF NOT EXISTS ${db.postgresSchema}`;
 const createTable = `
@@ -8,8 +8,7 @@ CREATE TABLE IF NOT EXISTS ${db.postgresTable} (
   _rev int,
   doc jsonb,
   UNIQUE (_id, _rev)
-)
-`;
+)`;
 
 const createProgressTable = `
 CREATE TABLE IF NOT EXISTS ${db.postgresProgressTable} (
@@ -18,14 +17,10 @@ CREATE TABLE IF NOT EXISTS ${db.postgresProgressTable} (
   UNIQUE (source)
 );`;
 
-const createDatabase = async () => {
+export const createDatabase = async () => {
   const client = await db.getPgClient();
   await client.query(createSchema);
   await client.query(createTable);
   await client.query(createProgressTable);
   await client.end();
-};
-
-module.exports = {
-  createDatabase,
 };

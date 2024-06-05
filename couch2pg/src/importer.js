@@ -116,14 +116,17 @@ const importChangesBatch = async (couchDb, source) => {
 };
 
 export default async (couchdb) => {
-  const info = await couchdb.info();
+  const couchUrl = new URL(couchdb.name);
+  const source = `${couchUrl.hostname}${couchUrl.pathname}`;
 
   let totalDocs = 0;
   let batchDocs = 0;
 
   do {
-    batchDocs = await importChangesBatch(couchdb, info.db_name);
+    batchDocs = await importChangesBatch(couchdb, source);
     totalDocs += batchDocs;
   } while (batchDocs);
+
+  return totalDocs;
 };
 

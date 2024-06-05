@@ -3,6 +3,20 @@ name: Test
 on: [push, pull_request]
 
 jobs:
+  unit-tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 20.x
+      - run: npm ci
+      - run: npm ci
+        working-directory: ./couch2pg
+      - run: npm run lint
+      - run: npm run test
+
   e2e-tests:
     name: E2E Tests
     runs-on: ubuntu-latest
@@ -44,7 +58,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
         if: steps.get-docker-hub-username.outputs.dockerhub_username
       - name: Install
-        run: npm install
+        run: npm ci
       - name: Run local
         run: >
           docker-compose
@@ -56,17 +70,4 @@ jobs:
         run: sleep 60s
       - name: Run e2e tests
         run: npm run test:e2e
-  worker-tests:
-    name: Couch2pg Tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
-        with:
-          node-version: 20.x
-      - name: Install
-        working-directory: ./couch2pg
-        run: npm ci
-      - name: Run worker tests
-        working-directory: ./couch2pg
-        run: npm test
+

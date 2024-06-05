@@ -1,8 +1,9 @@
-const setup = require('./setup');
-const importer = require('./importer');
-const db = require('./db');
+import * as setup from './setup.js';
+import * as db from './db.js';
+import importer from './importer.js';
 
 (async() => {
   await setup.createDatabase();
-  await (await importer.import(db.couchDb)).watch();
+
+  await importer(db.getCouchDbClient());
 })();
