@@ -1,26 +1,29 @@
-import { Client } from 'ts-postgres';
-import { rootConnect } from './postgres-utils';
-import { POSTGRES, DBT_POSTGRES } from '../scripts/config';
+import { rootConnect } from './postgres-utils.js';
+const {
+  POSTGRES_SCHEMA,
+  DBT_POSTGRES_SCHEMA,
+  POSTGRES_TABLE,
+} = process.env;
 
 describe('Main workflow Test Suite', () => {
-  let client: Client;
+  let client;
 
-  beforeAll(async () => client = await rootConnect());
+  before(async () => client = await rootConnect());
 
-  afterAll(async () => await client.end());
+  after(async () => await client.end());
 
   it('should have data in postgres medic table', async () => {
-    const couchdbTableResult = await client.query('SELECT * FROM ' + POSTGRES.schema + '.' + POSTGRES.table);
-    expect(couchdbTableResult.rows.length).toBeGreaterThan(0);
+    const couchdbTableResult = await client.query('SELECT * FROM ' + POSTGRES_SCHEMA + '.' + POSTGRES_TABLE);
+    expect(couchdbTableResult.rows.length).to.be.greaterThan(0);
   });
 
   it('should have data in postgres person table', async () => {
-    const personTableResult = await client.query('SELECT * FROM ' + DBT_POSTGRES.schema + '.person');
-    expect(personTableResult.rows.length).toBeGreaterThan(0);
+    const personTableResult = await client.query('SELECT * FROM ' + DBT_POSTGRES_SCHEMA + '.person');
+    expect(personTableResult.rows.length).to.be.greaterThan(0);
   });
 
   it('should have data in postgres data_record table', async () => {
-    const dataRecordTableResult = await client.query('SELECT * FROM ' + DBT_POSTGRES.schema + '.data_record');
-    expect(dataRecordTableResult.rows.length).toBeGreaterThan(0);
+    const dataRecordTableResult = await client.query('SELECT * FROM ' + DBT_POSTGRES_SCHEMA + '.data_record');
+    expect(dataRecordTableResult.rows.length).to.be.greaterThan(0);
   });
 });
