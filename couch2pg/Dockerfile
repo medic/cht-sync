@@ -4,6 +4,6 @@ WORKDIR /
 
 COPY package.json package-lock.json ./
 COPY ./src ./src
-RUN npm ci
+RUN npm ci --ignore-scripts
 
 CMD ["node", "src/index.js"]
