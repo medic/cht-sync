@@ -36,7 +36,13 @@ jobs:
         if: steps.get-docker-hub-username.outputs.dockerhub_username
       - run: npm ci
       - name: Start containers
-        run: docker compose --env-file ./tests/.e2e-env up -d
+        run: >
+          docker compose 
+          --env-file ./tests/.e2e-env
+          -f docker-compose.yml
+          -f docker-compose.couchdb.yml
+          -f docker-compose.postgres.yml
+          up -d
       - name: Sleep for 60 seconds
         run: sleep 60s
       - name: Run e2e tests

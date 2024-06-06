@@ -1,7 +1,0 @@
-{
-  "settings": {
-    "node": {
-      "allowModules": ["pg"]
-    }
-  }
-}

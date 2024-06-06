@@ -15,4 +15,4 @@ COUCHDB_HOST="couchdb"
 COUCHDB_PORT=5984
 COUCHDB_SECURE=false
 POSTGRES_HOST=postgres
-COMPOSE_FILE=../docker-compose.yml:../docker-compose.postgres.yml:../docker-compose.couchdb.yml
+COMPOSE_FILE=docker-compose.yml:docker-compose.postgres.yml:docker-compose.couchdb.yml
