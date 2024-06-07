@@ -27,18 +27,7 @@ def connection():
 with connection() as conn:
     with conn.cursor() as cur:
         cur.execute(f"""
-            CREATE SCHEMA IF NOT EXISTS 
-            {os.getenv('POSTGRES_SCHEMA')};
-
-            CREATE TABLE IF NOT EXISTS {os.getenv('POSTGRES_SCHEMA')}.{os.getenv('POSTGRES_TABLE')} (
-                "@version" TEXT,
-                "@timestamp" TIMESTAMP,
-                "_id" TEXT,
-                "_rev" TEXT,
-                doc jsonb,
-                doc_as_upsert BOOLEAN,
-                UNIQUE ("_id", "_rev")
-            );
+            CREATE SCHEMA IF NOT EXISTS {os.getenv('POSTGRES_SCHEMA')};
         """)
     conn.commit()
 
