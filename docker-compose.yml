@@ -1,26 +1,29 @@
-version: '3.7'
-
 services:
-  logstash:
-    image: medicmobile/cht-logstash-couchdb:latest
-    build: ./logstash/
-    restart: always
+  couch2pg:
+    build: ./couch2pg/
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "512m"
     environment:
       - COUCHDB_USER=${COUCHDB_USER}
       - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
       - COUCHDB_HOST=${COUCHDB_HOST}
       - COUCHDB_DBS=${COUCHDB_DBS}
       - COUCHDB_PORT=${COUCHDB_PORT}
-      - COUCHDB_SEQ=/tmp/couchdb/sequence_path.txt
       - COUCHDB_SECURE=${COUCHDB_SECURE:-true}
-      - HTTP_ENDPOINT=postgrest:3000
-      - REDIS_HOST=${REDIS_HOST}
-      - REDIS_PORT=${REDIS_PORT}
-      - REDIS_KEY=${REDIS_KEY}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_PORT=5432
+      - POSTGRES_SCHEMA=${POSTGRES_SCHEMA}
+      - POSTGRES_TABLE=${POSTGRES_TABLE}
+    restart: always
 
   dbt:
-    platform: linux/amd64
-    image: medicmobile/dataemon:latest
     build: ./dbt/
     working_dir: /dbt/
     environment:
@@ -33,26 +36,3 @@ services:
       - ROOT_POSTGRES_SCHEMA=${POSTGRES_SCHEMA}
       - CHT_PIPELINE_BRANCH_URL=${CHT_PIPELINE_BRANCH_URL}
       - DATAEMON_INTERVAL=${DATAEMON_INTERVAL}
-
-  redis:
-    image: redis:latest
-    restart: unless-stopped
-    ports:
-      - 6379:6379
-    volumes:
-      - redis-data:/data
-
-  redis-worker:
-    image: dockermedic/cht-sync-redis-worker:latest
-    build: ./redis-worker/
-    environment:
-      - REDIS_HOST=${REDIS_HOST}
-      - REDIS_PORT=${REDIS_PORT}
-      - REDIS_KEY=${REDIS_KEY}
-      - POSTGREST_ENDPOINT=postgrest:3000
-      - REDIS_BATCH_SIZE=${REDIS_BATCH_SIZE}
-    depends_on:
-      - redis
-    restart: unless-stopped
-volumes:
-  redis-data:

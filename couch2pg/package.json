@@ -1,0 +1,21 @@
+{
+  "name": "couch2pg",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "c8 mocha tests/unit/**/*.js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "type": "module",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "pg": "^8.11.5",
+    "pouchdb-adapter-http": "^8.0.1",
+    "pouchdb-core": "^8.0.1",
+    "pouchdb-session-authentication": "^1.2.0"
+  }
+}

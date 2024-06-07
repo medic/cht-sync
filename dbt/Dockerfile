@@ -4,19 +4,9 @@ RUN pip install flake8
 
 RUN flake8 dbt-run.py
 
-FROM ubuntu:22.04 AS release
+FROM python:3 AS release
 
-RUN apt-get update \
-    && apt-get --no-install-recommends install -y \
-      build-essential \
-      git \
-      libpq-dev \
-      python3-dev \
-      python3-pip \
-      postgresql-client \
-    && apt-get remove -y python3-cffi \
-    && apt-get clean \
-    && pip install --upgrade cffi \
+RUN pip install --upgrade cffi \
     && pip install cryptography~=3.4 \
     && pip install dbt-core dbt-postgres
 
