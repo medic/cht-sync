@@ -10,5 +10,6 @@ export default async (dbName) => {
     if (!processedChanges) {
       await new Promise(r => setTimeout(r, DELAY));
     }
+    // eslint-disable-next-line no-constant-condition
   } while (true);
 };
