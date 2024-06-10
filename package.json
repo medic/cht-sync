@@ -6,6 +6,7 @@
   "scripts": {
     "test:e2e": "mocha tests/**/*.spec.js",
     "lint": "eslint --color --cache .",
+    "test:e2e-start": "docker compose --env-file ./tests/.e2e-env -f docker-compose.yml -f docker-compose.couchdb.yml -f docker-compose.postgres.yml up -d",
     "test": "cd couch2pg && npm run test"
   },
   "keywords": [],
