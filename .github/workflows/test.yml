@@ -38,7 +38,7 @@ jobs:
       - name: Start containers
         run: npm run test:e2e-start
       - name: Sleep for 60 seconds
-        run: sleep 60s
+        run: sleep 120s
       - name: Run e2e tests
         run: npm run test:e2e
 
