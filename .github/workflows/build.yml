@@ -18,13 +18,13 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push logstash
+      - name: Build and push couch2pg
         uses: docker/build-push-action@v4
         with:
-          context: ./logstash
-          file: ./logstash/Dockerfile
+          context: ./couch2pg
+          file: ./couch2pg/Dockerfile
           push: true
-          tags: medicmobile/cht-logstash-couchdb:latest
+          tags: medicmobile/cht-sync-couch2pg:latest
 
       - name: Build and push dataemon
         uses: docker/build-push-action@v4
@@ -33,11 +33,3 @@ jobs:
           file: ./dbt/Dockerfile
           push: true
           tags: medicmobile/dataemon:latest
-
-      - name: Build and push redis-worker
-        uses: docker/build-push-action@v4
-        with:
-          context: ./redis-worker
-          file: ./redis-worker/Dockerfile
-          push: true
-          tags: dockermedic/cht-sync-redis-worker:latest
