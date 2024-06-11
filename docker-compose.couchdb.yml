@@ -9,7 +9,7 @@ services:
       - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
 
   bootstrap:
-    build: ./data/
+    build: ./tests/data/
     depends_on:
       - couchdb
     restart: on-failure:5
