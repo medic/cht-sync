@@ -18,8 +18,3 @@ couchdb:
   host: ""
   port: "5984"
   secure: "false"
-
-# redis
-redis:
-  key: "couchdb"
-  batch_size: 1000
