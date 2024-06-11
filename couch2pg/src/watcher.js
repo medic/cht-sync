@@ -1,7 +1,7 @@
 import importer from './importer.js';
 import * as db from './db.js';
 
-const DELAY = 5 * 60 * 1000; // 5 minutes
+const DELAY = 5 * 1000; // 5 seconds
 
 export default async (dbName) => {
   const couchDb = db.getCouchDbClient(dbName);

@@ -54,7 +54,7 @@ describe('watcher', () => {
     expect(importer.calledThrice).to.equal(true);
     await Promise.resolve();
     expect(importer.calledThrice).to.equal(true);
-    clock.tick(5 * 60 * 1000);
+    clock.tick(5 * 1000);
     await Promise.resolve();
     expect(importer.callCount).to.equal(4);
     await Promise.resolve();

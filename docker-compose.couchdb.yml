@@ -31,6 +31,6 @@ services:
       - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
       - COUCHDB_DBS=${COUCHDB_DBS}
     volumes:
-      - ./data/data-generator.py:/code/data-generator.py:z
-      - ./data/json_docs.tar.gz/:/json_docs.tar.gz:z
+      - ./tests/data/data-generator.py:/code/data-generator.py:z
+      - ./tests/data/json_docs.tar.gz/:/json_docs.tar.gz:z
     restart: always

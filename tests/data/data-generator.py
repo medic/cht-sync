@@ -10,7 +10,7 @@ credentials = ('%s:%s' % (os.getenv("COUCHDB_USER"), os.getenv("COUCHDB_PASSWORD
 encoded_credentials = base64.b64encode(credentials.encode('ascii')).decode("ascii")
 
 
-for db in os.getenv("COUCHDB_DBS").split(" "):
+for db in os.getenv("COUCHDB_DBS").split(","):
     url = os.path.join(os.getenv("COUCHDB_URL"), db)
 
     for doc_path in glob.glob(os.getenv("DOCS_PATH")+"/*.json"):
@@ -30,4 +30,3 @@ for db in os.getenv("COUCHDB_DBS").split(" "):
             print(doc_path, res.info())
         except Exception as e:
             print(e)
-        time.sleep(2)
