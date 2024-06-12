@@ -11,16 +11,22 @@ const waitForDbt = async (pgClient, retry = 50) => {
     throw new Error('DBT models missing records after 50s');
   }
 
-  const dbtDataRecords = await pgClient.query(`SELECT * FROM ${DBT_POSTGRES_SCHEMA}.data_record`);
-  const expectedDataRecords = dataRecords().length * dbNames.length;
+  try {
+    const dbtDataRecords = await pgClient.query(`SELECT * FROM ${DBT_POSTGRES_SCHEMA}.data_record`);
+    const expectedDataRecords = dataRecords().length * dbNames.length;
 
-  const dbtPersons = await pgClient.query(`SELECT * FROM ${DBT_POSTGRES_SCHEMA}.person`);
-  const expectedPersons = persons().length * dbNames.length;
+    const dbtPersons = await pgClient.query(`SELECT * FROM ${DBT_POSTGRES_SCHEMA}.person`);
+    const expectedPersons = persons().length * dbNames.length;
 
-  if (dbtDataRecords.rows.length < expectedDataRecords || dbtPersons.rows.length > expectedPersons) {
-    await new Promise(r => setTimeout(r, 1000));
-    return waitForDbt(pgClient, retry--);
+    if (dbtDataRecords.rows.length === expectedDataRecords && dbtPersons.rows.length === expectedPersons) {
+      return;
+    }
+  } catch {
+    // not done yet
   }
+
+  await new Promise(r => setTimeout(r, 1000));
+  return waitForDbt(pgClient, retry--);
 };
 
 describe('Main workflow Test Suite', () => {
