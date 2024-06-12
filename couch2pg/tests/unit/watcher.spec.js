@@ -37,7 +37,7 @@ describe('watcher', () => {
     expect(importer.calledThrice).to.equal(true);
   });
 
-  it('should wait for 5 minutes after no results are processed', async () => {
+  it('should wait for 5 seconds after no results are processed', async () => {
     importer.onCall(0).resolves(2);
     importer.onCall(1).resolves(3);
     importer.onCall(2).resolves(0);
