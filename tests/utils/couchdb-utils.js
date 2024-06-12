@@ -21,7 +21,8 @@ const loadDocs = async () => {
 };
 
 const importDocs = async (dbName) => {
-  const db = new PouchDb(dbUrl(dbName), { auth: { username: env.COUCHDB_USER, password: env.COUCHDB_PASSWORD, skip_setup: false } });
+  const opts =  { auth: { username: env.COUCHDB_USER, password: env.COUCHDB_PASSWORD, skip_setup: false } };
+  const db = new PouchDb(dbUrl(dbName), opts);
 
   const dbDocs = docs.map(doc => ({  ...doc, _id: `${dbName}-${doc._id}` }));
   while (dbDocs.length) {
