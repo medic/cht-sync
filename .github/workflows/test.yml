@@ -35,10 +35,6 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
         if: ${{ env.INTERNAL_CONTRIBUTOR }}
       - run: npm ci
-      - name: Start containers
-        run: npm run test:e2e-start
-      - name: Sleep for 60 seconds
-        run: sleep 60s
       - name: Run e2e tests
         run: npm run test:e2e
 

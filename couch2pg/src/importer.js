@@ -82,11 +82,23 @@ const loadAndStoreDocs = async (couchdb, docsToDownload) => {
   const allDocsResult = await couchdb.allDocs({ keys: docIds, include_docs: true });
   console.info('Pulled ' + allDocsResult.rows.length + ' results from couchdb');
 
-  const { query, values } = buildBulkInsertQuery(allDocsResult);
+  await storeDocs(allDocsResult);
+};
 
-  const client = await db.getPgClient();
-  await client.query(query, values);
-  await client.end();
+const storeDocs = async (allDocsResult) => {
+  try {
+    const { query, values } = buildBulkInsertQuery(allDocsResult);
+
+    const client = await db.getPgClient();
+    await client.query(query, values);
+    await client.end();
+  } catch (err) {
+    if (err.code === '40P01') {
+      // deadlock detected
+      return storeDocs(allDocsResult);
+    }
+    throw err;
+  }
 };
 
 const deleteDocs = async () => {

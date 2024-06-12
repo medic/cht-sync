@@ -2,35 +2,10 @@ version: '3.7'
 
 services:
   couchdb:
-    image: couchdb
+    image: public.ecr.aws/medic/cht-couchdb:4.8.0
     restart: always
+    ports:
+      - "5984:5984"
     environment:
       - COUCHDB_USER=${COUCHDB_USER}
       - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
-
-  bootstrap:
-    build: ./tests/data/
-    depends_on:
-      - couchdb
-    restart: on-failure:5
-    environment:
-      - COUCHDB_USER=${COUCHDB_USER}
-      - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
-      - COUCHDB_DBS=${COUCHDB_DBS}
-
-  generator:
-    image: python:3
-    depends_on:
-      - couchdb
-    command: >
-      bash -c "mkdir /data/ -p && tar -xzf /json_docs.tar.gz -C /data/ --strip-components=1 && python3 /code/data-generator.py"
-    environment:
-      - COUCHDB_URL=http://couchdb:5984/
-      - DOCS_PATH=/data/
-      - COUCHDB_USER=${COUCHDB_USER}
-      - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
-      - COUCHDB_DBS=${COUCHDB_DBS}
-    volumes:
-      - ./tests/data/data-generator.py:/code/data-generator.py:z
-      - ./tests/data/json_docs.tar.gz/:/json_docs.tar.gz:z
-    restart: always
