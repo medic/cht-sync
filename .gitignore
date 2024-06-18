@@ -4,3 +4,4 @@ node_modules
 */coverage/*
 /couch2pg/.nyc_output/
 /.eslintcache
+/tests/data/json_docs
