@@ -26,10 +26,10 @@ const waitForDbt = async (pgClient, retry = 50) => {
   }
 
   await new Promise(r => setTimeout(r, 1000));
-  return waitForDbt(pgClient, retry--);
+  return waitForDbt(pgClient, --retry);
 };
 
-describe('Main workflow Test Suite', () => {
+describe('End-to-End Tests for CouchDB to Postgres Sync', () => {
   let client;
 
   before(async () => {
@@ -42,18 +42,57 @@ describe('Main workflow Test Suite', () => {
 
   after(async () => await client?.end());
 
-  it('should have data in postgres medic table', async () => {
-    const couchdbTableResult = await client.query(`SELECT * FROM ${POSTGRES_SCHEMA}.${POSTGRES_TABLE}`);
-    expect(couchdbTableResult.rows.length).to.equal(docs.length * dbNames.length);
+  describe('should sync all initial data in postgres medic table', () => {
+    it('should sync initial data in postgres medic table', async () => {
+      const couchdbTableResult = await client.query(`SELECT * FROM ${POSTGRES_SCHEMA}.${POSTGRES_TABLE}`);
+      expect(couchdbTableResult.rows.length).to.equal(docs.length * dbNames.length);
+    });
+
+    it('should sync all initial data in postgres person table', async () => {
+      const personTableResult = await client.query(`SELECT * FROM ${DBT_POSTGRES_SCHEMA}.person`);
+      expect(personTableResult.rows.length).to.equal(persons().length * dbNames.length);
+    });
+
+    it('should sync all initial data in postgres data_record table', async () => {
+      const dataRecordTableResult = await client.query(`SELECT * FROM ${DBT_POSTGRES_SCHEMA}.data_record`);
+      expect(dataRecordTableResult.rows.length).to.equal(dataRecords().length * dbNames.length);
+    });
+
+    it('should have the expected data in a record in postgres person table', async () => {
+      let person = persons().at(0);
+      const personTableResult = await client.query(`SELECT * FROM ${DBT_POSTGRES_SCHEMA}.person where _id='medic-` + person._id + `'`);
+      expect(personTableResult.rows.length).to.equal(1);
+      expect(personTableResult.rows[0]._id).to.equal('medic-' + person._id);
+      expect(personTableResult.rows[0].name).to.equal(person.name);
+      expect(personTableResult.rows[0].date_of_birth).to.equal(person.date_of_birth);
+      expect(personTableResult.rows[0].phone).to.equal(person.phone);
+      expect(personTableResult.rows[0].sex).to.equal(person.sex);
+      expect(personTableResult.rows[0].reported_date).to.equal(person.reported_date);
+      expect(personTableResult.rows[0].patient_id).to.equal(person.patient_id);
+      expect(personTableResult.rows[0].type).to.equal(person.type);
+      person._id = 'medic-' + person._id;
+      person._rev = personTableResult.rows[0].doc._rev;
+      expect(personTableResult.rows[0].doc).to.deep.equal(person);
+    });
+
+    it('should have the expected data in a record in postgres data_record table', async () => {
+      let data_record = dataRecords().at(0);
+      const dataRecordTableResult = await client.query(`SELECT * FROM ${DBT_POSTGRES_SCHEMA}.data_record where _id='medic-` + data_record._id + `'`);
+      expect(dataRecordTableResult.rows.length).to.equal(1);
+      expect(dataRecordTableResult.rows[0]._id).to.equal('medic-' + data_record._id);
+      expect(dataRecordTableResult.rows[0].form).to.equal(data_record.form);
+      expect(dataRecordTableResult.rows[0].reported_date).to.equal(data_record.reported_date);
+      expect(dataRecordTableResult.rows[0].patient_id).to.equal(data_record.patient_id);
+      expect(dataRecordTableResult.rows[0].type).to.equal(data_record.type);
+      data_record._id = 'medic-' + data_record._id;
+      data_record._rev = dataRecordTableResult.rows[0].doc._rev;
+      expect(dataRecordTableResult.rows[0].doc).to.deep.equal(data_record);
+    });
   });
 
-  it('should have data in postgres person table', async () => {
-    const personTableResult = await client.query(`SELECT * FROM ${DBT_POSTGRES_SCHEMA}.person`);
-    expect(personTableResult.rows.length).to.equal(persons().length * dbNames.length);
-  });
+  describe.skip('should sync continuous data correctly', () => {
+    it('should sync incremental inserts, with no redundant data processing.', async () => {
+    });
 
-  it('should have data in postgres data_record table', async () => {
-    const dataRecordTableResult = await client.query(`SELECT * FROM ${DBT_POSTGRES_SCHEMA}.data_record`);
-    expect(dataRecordTableResult.rows.length).to.equal(dataRecords().length * dbNames.length);
   });
 });
