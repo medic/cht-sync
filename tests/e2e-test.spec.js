@@ -6,9 +6,9 @@ const {
   POSTGRES_TABLE,
 } = process.env;
 
-const waitForDbt = async (pgClient, retry = 50) => {
+const waitForDbt = async (pgClient, retry = 30) => {
   if (retry <= 0) {
-    throw new Error('DBT models missing records after 50s');
+    throw new Error('DBT models missing records after 30s');
   }
 
   try {
@@ -26,7 +26,7 @@ const waitForDbt = async (pgClient, retry = 50) => {
   }
 
   await new Promise(r => setTimeout(r, 1000));
-  return waitForDbt(pgClient, retry--);
+  return waitForDbt(pgClient, --retry);
 };
 
 describe('Main workflow Test Suite', () => {
