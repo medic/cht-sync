@@ -5,8 +5,13 @@ import * as db from './db.js';
 const SELECT_SEQ_STMT = `SELECT seq FROM ${db.postgresProgressTable} WHERE source = $1`;
 const INSERT_SEQ_STMT = `INSERT INTO ${db.postgresProgressTable}(seq, source) VALUES ($1, $2)`;
 const UPDATE_SEQ_STMT = `UPDATE ${db.postgresProgressTable} SET seq = $1 WHERE source = $2`;
-const INSERT_DOCS_STMT = `INSERT INTO ${db.postgresTable} ("@timestamp", _id, _rev, doc) VALUES`;
-const ON_CONFLICT_STMT = 'ON CONFLICT (_id, _rev) DO NOTHING';
+const INSERT_DOCS_STMT = `INSERT INTO ${db.postgresTable} ("@timestamp", _id, _deleted, doc) VALUES`;
+const ON_CONFLICT_STMT = `
+ON CONFLICT (_id) DO UPDATE SET 
+  "@timestamp" = EXCLUDED."@timestamp", 
+  _deleted = EXCLUDED._deleted, 
+  doc = EXCLUDED.doc
+`;
 
 const sanitise = (string) => {
   // PostgreSQL doesn't support \u0000 in JSON strings, see:
@@ -15,7 +20,7 @@ const sanitise = (string) => {
   // This is true for both actual 1 byte 0x00 values, as well as 6 byte
   // '\u0000' ones. Because '\\u0000u0000' would be replaced as '\u0000', we
   // also aggressively remove any concurrent slashes as well
-  return string.replace(/(\\+u0000)|\u0000/g, ''); // eslint-disable-line
+  return string?.replace(/(\\+u0000)|\u0000/g, ''); // eslint-disable-line
 };
 
 const removeSecurityDetails = (doc) => {
@@ -26,8 +31,6 @@ const removeSecurityDetails = (doc) => {
     delete doc.salt;
   }
 };
-
-const getRevNumber = (doc) => doc._rev.split('-')[0];
 
 const getSeq = async (source) => {
   const client = await db.getPgClient();
@@ -60,7 +63,7 @@ const buildBulkInsertQuery = (allDocs) => {
   allDocs.rows.forEach((row) => {
     removeSecurityDetails(row.doc);
     insertStmts.push(`($${idx++}, $${idx++}, $${idx++}, $${idx++})`);
-    docsToInsert.push(now, row.id, getRevNumber(row.doc), sanitise(JSON.stringify(row.doc)));
+    docsToInsert.push(now, row.id, !!row.deleted, sanitise(JSON.stringify(row.doc)));
   });
 
   return {
@@ -78,31 +81,32 @@ const loadAndStoreDocs = async (couchdb, docsToDownload) => {
     return;
   }
 
-  const docIds = docsToDownload.map(change => change.id);
+  const deletedDocs = docsToDownload.filter(change => change.deleted);
+  const docIds = docsToDownload.filter(change => !change.deleted).map(change => change.id);
   const allDocsResult = await couchdb.allDocs({ keys: docIds, include_docs: true });
   console.info('Pulled ' + allDocsResult.rows.length + ' results from couchdb');
+
+  deletedDocs.forEach(change => allDocsResult.rows.push({ ...change, key: change.id }));
 
   await storeDocs(allDocsResult);
 };
 
 const storeDocs = async (allDocsResult) => {
+  let client;
   try {
     const { query, values } = buildBulkInsertQuery(allDocsResult);
 
-    const client = await db.getPgClient();
+    client = await db.getPgClient();
     await client.query(query, values);
     await client.end();
   } catch (err) {
     if (err.code === '40P01') {
       // deadlock detected
+      await client.end();
       return storeDocs(allDocsResult);
     }
     throw err;
   }
-};
-
-const deleteDocs = async () => {
-  // todo do we even delete docs??
 };
 
 const importChangesBatch = async (couchDb, source) => {
@@ -120,8 +124,7 @@ const importChangesBatch = async (couchDb, source) => {
             docsToDelete.length + ' deletions and ' +
             docsToDownload.length + ' new / changed documents');
 
-  await deleteDocs(); // toDo ???
-  await loadAndStoreDocs(couchDb, docsToDownload);
+  await loadAndStoreDocs(couchDb, changes.results);
   await storeSeq(changes.last_seq, source);
 
   return changes.results.length;

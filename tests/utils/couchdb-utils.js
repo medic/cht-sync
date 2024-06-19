@@ -11,6 +11,9 @@ export const dbNames = env.COUCHDB_DBS.split(',');
 const dbUrl = name => `http://127.0.0.1:${env.COUCHDB_PORT}/${name}`;
 
 export const docs = [];
+const docsByDb = { };
+
+const dbs = {};
 
 const loadDocs = async () => {
   const dir = path.join(import.meta.dirname, '..', 'data', 'json_docs');
@@ -20,23 +23,52 @@ const loadDocs = async () => {
   }
 };
 
-const importDocs = async (dbName) => {
+const getDb = (dbName) => {
+  if (dbs[dbName]) {
+    return dbs[dbName];
+  }
   const opts =  { auth: { username: env.COUCHDB_USER, password: env.COUCHDB_PASSWORD, skip_setup: false } };
-  const db = new PouchDb(dbUrl(dbName), opts);
+  dbs[dbName] = new PouchDb(dbUrl(dbName), opts);
+  return dbs[dbName];
+};
 
-  const dbDocs = docs.map(doc => ({  ...doc, _id: `${dbName}-${doc._id}` }));
-  while (dbDocs.length) {
-    const batch = dbDocs.splice(0, 1000);
+const importDocs = async (dbName, docs) => {
+  const db = getDb(dbName);
+
+  while (docs.length) {
+    const batch = docs.splice(0, 1000);
     await db.bulkDocs(batch);
   }
 };
 
 export const importAllDocs = async () => {
   await loadDocs();
+  const batchSize = Math.ceil(docs.length / dbNames.length);
+  const docsCopy = [...docs];
   for (const dbName of dbNames) {
-    await importDocs(dbName);
+    const batchDocs = docsCopy.splice(0, batchSize);
+    docsByDb[dbName] = new Set(batchDocs.map(doc => doc._id));
+    await importDocs(dbName, batchDocs);
   }
 };
 
 export const dataRecords = () => docs.filter(doc => doc.type === 'data_record');
 export const persons = () => docs.filter(doc => doc.type === 'person');
+const contactTypes = ['contact', 'clinic', 'district_hospital', 'health_center', 'person'];
+export const contacts = () => docs.filter(doc => contactTypes.includes(doc.type));
+
+const getDbByDoc = (id) => Object.keys(docsByDb).filter(dnName => docsByDb[dnName].has(id));
+
+export const editDoc = async (doc) => {
+  const dbName = getDbByDoc(doc._id);
+  const db = getDb(dbName);
+  const existentDoc = await db.get(doc._id);
+  await db.put({ ...doc, _rev: existentDoc._rev });
+};
+
+export const deleteDoc = async (doc) => {
+  const dbName = getDbByDoc(doc._id);
+  const db = getDb(dbName);
+  const existentDoc = await db.get(doc._id);
+  await db.delete(doc._id, existentDoc._rev);
+};

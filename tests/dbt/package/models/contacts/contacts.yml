@@ -1,0 +1,8 @@
+version: 2
+
+models:
+  - name: contacts
+    columns:
+      - name: doc
+        tests:
+          - not_null

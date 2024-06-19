@@ -14,7 +14,14 @@ const getSeqMatch = () => `SELECT seq FROM ${db.postgresProgressTable} WHERE sou
 const insertSeqMatch = () => `INSERT INTO ${db.postgresProgressTable}(seq, source) VALUES ($1, $2)`;
 const updateSeqMatch = () => `UPDATE ${db.postgresProgressTable} SET seq = $1 WHERE source = $2`;
 
-const insertDocsMatch = () => `INSERT INTO ${db.postgresTable} ("@timestamp", _id, _rev, doc) VALUES`;
+const insertDocsMatch = () => `INSERT INTO ${db.postgresTable} ("@timestamp", _id, _deleted, doc) VALUES`;
+
+const ON_CONFLICT_STMT = `
+ON CONFLICT (_id) DO UPDATE SET 
+  "@timestamp" = EXCLUDED."@timestamp", 
+  _deleted = EXCLUDED._deleted, 
+  doc = EXCLUDED.doc
+`;
 
 describe('importer', () => {
   beforeEach(async () => {
@@ -127,22 +134,22 @@ describe('importer', () => {
     expect(couchDb.allDocs.args).to.deep.equal([[{ include_docs: true, keys: ['doc1', 'doc2', 'doc3'] }]]);
 
     expect(pgClient.query.withArgs(sinon.match(insertDocsMatch())).args).to.deep.equal([[
-      'INSERT INTO v1.whatever ("@timestamp", _id, _rev, doc) VALUES ' +
-      '($1, $2, $3, $4),($5, $6, $7, $8),($9, $10, $11, $12) ON CONFLICT (_id, _rev) DO NOTHING',
+      'INSERT INTO v1.whatever ("@timestamp", _id, _deleted, doc) VALUES ' +
+      '($1, $2, $3, $4),($5, $6, $7, $8),($9, $10, $11, $12) ' + ON_CONFLICT_STMT,
       [
         now.toISOString(),
         'doc1',
-        '23',
+        false,
         JSON.stringify(docs[0].doc),
 
         now.toISOString(),
         'doc2',
-        '3',
+        false,
         JSON.stringify(docs[1].doc),
 
         now.toISOString(),
         'doc3',
-        '123',
+        false,
         JSON.stringify(docs[2].doc),
       ]
     ]]);
@@ -205,64 +212,64 @@ describe('importer', () => {
 
     expect(pgClient.query.withArgs(sinon.match(insertDocsMatch())).callCount).to.equal(3);
     expect(pgClient.query.withArgs(sinon.match(insertDocsMatch())).args[0]).to.deep.equal([
-      'INSERT INTO v1.whatever ("@timestamp", _id, _rev, doc) VALUES ' +
-      '($1, $2, $3, $4),($5, $6, $7, $8),($9, $10, $11, $12) ON CONFLICT (_id, _rev) DO NOTHING',
+      'INSERT INTO v1.whatever ("@timestamp", _id, _deleted, doc) VALUES ' +
+      '($1, $2, $3, $4),($5, $6, $7, $8),($9, $10, $11, $12) ' + ON_CONFLICT_STMT,
       [
         now.toISOString(),
         iterationOne.docs[0].id,
-        '1',
+        false,
         JSON.stringify(iterationOne.docs[0].doc),
 
         now.toISOString(),
         iterationOne.docs[1].id,
-        '1',
+        false,
         JSON.stringify(iterationOne.docs[1].doc),
 
         now.toISOString(),
         iterationOne.docs[2].id,
-        '1',
+        false,
         JSON.stringify(iterationOne.docs[2].doc),
       ]
     ]);
 
     expect(pgClient.query.withArgs(sinon.match(insertDocsMatch())).args[1]).to.deep.equal([
-      'INSERT INTO v1.whatever ("@timestamp", _id, _rev, doc) VALUES ' +
-      '($1, $2, $3, $4),($5, $6, $7, $8),($9, $10, $11, $12) ON CONFLICT (_id, _rev) DO NOTHING',
+      'INSERT INTO v1.whatever ("@timestamp", _id, _deleted, doc) VALUES ' +
+      '($1, $2, $3, $4),($5, $6, $7, $8),($9, $10, $11, $12) ' + ON_CONFLICT_STMT,
       [
         now.toISOString(),
         iterationTwo.docs[0].id,
-        '1',
+        false,
         JSON.stringify(iterationTwo.docs[0].doc),
 
         now.toISOString(),
         iterationTwo.docs[1].id,
-        '1',
+        false,
         JSON.stringify(iterationTwo.docs[1].doc),
 
         now.toISOString(),
         iterationTwo.docs[2].id,
-        '1',
+        false,
         JSON.stringify(iterationTwo.docs[2].doc),
       ]
     ]);
 
     expect(pgClient.query.withArgs(sinon.match(insertDocsMatch())).args[2]).to.deep.equal([
-      'INSERT INTO v1.whatever ("@timestamp", _id, _rev, doc) VALUES ' +
-      '($1, $2, $3, $4),($5, $6, $7, $8),($9, $10, $11, $12) ON CONFLICT (_id, _rev) DO NOTHING',
+      'INSERT INTO v1.whatever ("@timestamp", _id, _deleted, doc) VALUES ' +
+      '($1, $2, $3, $4),($5, $6, $7, $8),($9, $10, $11, $12) ' + ON_CONFLICT_STMT,
       [
         now.toISOString(),
         iterationThree.docs[0].id,
-        '1',
+        false,
         JSON.stringify(iterationThree.docs[0].doc),
 
         now.toISOString(),
         iterationThree.docs[1].id,
-        '1',
+        false,
         JSON.stringify(iterationThree.docs[1].doc),
 
         now.toISOString(),
         iterationThree.docs[2].id,
-        '1',
+        false,
         JSON.stringify(iterationThree.docs[2].doc),
       ]
     ]);
@@ -286,12 +293,12 @@ describe('importer', () => {
     await importer(couchDb);
 
     expect(pgClient.query.withArgs(sinon.match(insertDocsMatch())).args).to.deep.equal([[
-      'INSERT INTO v1.whatever ("@timestamp", _id, _rev, doc) VALUES ' +
-      '($1, $2, $3, $4) ON CONFLICT (_id, _rev) DO NOTHING',
+      'INSERT INTO v1.whatever ("@timestamp", _id, _deleted, doc) VALUES ' +
+      '($1, $2, $3, $4) ' + ON_CONFLICT_STMT,
       [
         new Date().toISOString(),
         'change',
-        '1',
+        false,
         JSON.stringify({
           _id: 'change',
           _rev: '1',
@@ -323,12 +330,12 @@ describe('importer', () => {
     await importer(couchDb);
 
     expect(pgClient.query.withArgs(sinon.match(insertDocsMatch())).args).to.deep.equal([[
-      'INSERT INTO v1.whatever ("@timestamp", _id, _rev, doc) VALUES ' +
-      '($1, $2, $3, $4) ON CONFLICT (_id, _rev) DO NOTHING',
+      'INSERT INTO v1.whatever ("@timestamp", _id, _deleted, doc) VALUES ' +
+      '($1, $2, $3, $4) ' + ON_CONFLICT_STMT,
       [
         new Date().toISOString(),
         'change',
-        '1',
+        false,
         JSON.stringify({
           _id: 'org.couchdb.user:paul',
           _rev: '1',
@@ -340,7 +347,7 @@ describe('importer', () => {
     ]]);
   });
 
-  it('should not insert deletes', async () => {
+  it('should insert deletes', async () => {
     const now = new Date('2024-01-01');
     clock.setSystemTime(now.valueOf());
     const changes = [{ id: 'doc1', deleted: true }, { id: 'doc2' }, { id: 'doc3', deleted: true }];
@@ -359,13 +366,23 @@ describe('importer', () => {
     expect(couchDb.allDocs.args).to.deep.equal([[{ include_docs: true, keys: ['doc2'] }]]);
 
     expect(pgClient.query.withArgs(sinon.match(insertDocsMatch())).args).to.deep.equal([[
-      'INSERT INTO v1.whatever ("@timestamp", _id, _rev, doc) VALUES ' +
-      '($1, $2, $3, $4) ON CONFLICT (_id, _rev) DO NOTHING',
+      'INSERT INTO v1.whatever ("@timestamp", _id, _deleted, doc) VALUES ' +
+      '($1, $2, $3, $4),($5, $6, $7, $8),($9, $10, $11, $12) ' + ON_CONFLICT_STMT,
       [
         now.toISOString(),
         'doc2',
-        '3',
+        false,
         JSON.stringify(docs[0].doc),
+
+        now.toISOString(),
+        'doc1',
+        true,
+        JSON.stringify(undefined),
+
+        now.toISOString(),
+        'doc3',
+        true,
+        JSON.stringify(undefined),
       ]
     ]]);
   });
@@ -439,4 +456,67 @@ describe('importer', () => {
     expect(seqQueries.get.called).to.equal(true);
     expect(insertQuery.called).to.equal(true);
   });
+  
+  it('should retry on deadlock', async () => {
+    const now = new Date('2023-01-01');
+    clock.setSystemTime(now.valueOf());
+    const changes = [{ id: 'doc1' }, { id: 'doc2' }, { id: 'doc3' }];
+    const docs = [
+      { id: 'doc1', doc: { _id: 'doc1', field: 'test1' } },
+      { id: 'doc2', doc: { _id: 'doc2', field: 'test2' } },
+      { id: 'doc3', doc: { _id: 'doc3', field: 'test3' } }
+    ];
+    couchDb.changes.onCall(0).resolves({ results: changes, last_seq: '23-ppp' });
+    couchDb.changes.onCall(1).resolves({ results: [], last_seq: '25-vvv' });
+    couchDb.allDocs.resolves({ rows: docs });
+
+    seqQueries.get
+      .onCall(0).resolves({ rows: [{ seq: '1-22' }] })
+      .onCall(1).resolves({ rows: [{ seq: '23-ppp' }] });
+    seqQueries.update.resolves();
+    pgClient.query
+      .withArgs(sinon.match(insertDocsMatch()))
+      .onCall(0).rejects({ code: '40P01' })
+      .onCall(1).resolves();
+
+    await importer(couchDb);
+
+    expect(couchDb.changes.calledTwice).to.equal(true);
+    expect(couchDb.changes.args[0]).to.deep.equal([{ limit: 1000, seq_interval: 1000, since: '1-22' }]);
+    expect(couchDb.changes.args[1]).to.deep.equal([{ limit: 1000, seq_interval: 1000, since: '23-ppp' }]);
+
+    expect(seqQueries.update.calledTwice).to.equal(true);
+    expect(seqQueries.update.args).to.deep.equal([
+      [updateSeqMatch(), ['23-ppp', 'thehost/medic']],
+      [updateSeqMatch(), ['25-vvv', 'thehost/medic']],
+    ]);
+
+    expect(couchDb.allDocs.calledOnce).to.equal(true);
+    expect(couchDb.allDocs.args).to.deep.equal([[{ include_docs: true, keys: ['doc1', 'doc2', 'doc3'] }]]);
+
+    const queryArgs = [
+      'INSERT INTO v1.whatever ("@timestamp", _id, _deleted, doc) VALUES ' +
+      '($1, $2, $3, $4),($5, $6, $7, $8),($9, $10, $11, $12) ' + ON_CONFLICT_STMT,
+      [
+        now.toISOString(),
+        'doc1',
+        false,
+        JSON.stringify(docs[0].doc),
+
+        now.toISOString(),
+        'doc2',
+        false,
+        JSON.stringify(docs[1].doc),
+
+        now.toISOString(),
+        'doc3',
+        false,
+        JSON.stringify(docs[2].doc),
+      ]
+    ];
+
+    expect(db.getPgClient.callCount).to.equal(6);
+    expect(pgClient.query.withArgs(sinon.match(insertDocsMatch())).args).to.deep.equal([queryArgs, queryArgs]);
+    expect(db.getPgClient.callCount).to.equal(pgClient.end.callCount);
+  }); 
 });
