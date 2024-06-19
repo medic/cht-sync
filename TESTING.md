@@ -1,5 +1,10 @@
 # Testing 
-End-to-end tests for CHT Sync can be found under `tests/`. In order to run these end-to-end tests locally, follow the steps below:
+End-to-end tests for CHT Sync can be found under `tests/`. 
+
+Pre-requisites:
+* `Node.js` version > 20
+
+In order to run these end-to-end tests locally, follow the steps below:
 
 1. Create an `.env` file with the placeholder values from `env.template`.
 
