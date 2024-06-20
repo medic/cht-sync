@@ -70,9 +70,7 @@ describe('End-to-End Tests for CouchDB to Postgres Sync', () => {
       expect(personTableResult.rows[0].reported_date).to.equal(person.reported_date);
       expect(personTableResult.rows[0].patient_id).to.equal(person.patient_id);
       expect(personTableResult.rows[0].type).to.equal(person.type);
-      person._id = 'medic-' + person._id;
-      person._rev = personTableResult.rows[0].doc._rev;
-      expect(personTableResult.rows[0].doc).to.deep.equal(person);
+      expect(personTableResult.rows[0].doc).excluding(['_rev', '_id']).to.deep.equal(person);
     });
 
     it('should have the expected data in a record in postgres data_record table', async () => {
@@ -84,9 +82,7 @@ describe('End-to-End Tests for CouchDB to Postgres Sync', () => {
       expect(dataRecordTableResult.rows[0].reported_date).to.equal(data_record.reported_date);
       expect(dataRecordTableResult.rows[0].patient_id).to.equal(data_record.patient_id);
       expect(dataRecordTableResult.rows[0].type).to.equal(data_record.type);
-      data_record._id = 'medic-' + data_record._id;
-      data_record._rev = dataRecordTableResult.rows[0].doc._rev;
-      expect(dataRecordTableResult.rows[0].doc).to.deep.equal(data_record);
+      expect(dataRecordTableResult.rows[0].doc).excluding(['_rev', '_id']).to.deep.equal(data_record);
     });
   });
 
