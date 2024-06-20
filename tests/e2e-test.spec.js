@@ -1,8 +1,8 @@
 import { rootConnect } from './utils/postgres-utils.js';
-import { importAllDocs, docs, dataRecords, contacts, editDoc } from './utils/couchdb-utils.js';
+import { importAllDocs, docs, reports, contacts, editDoc, deleteDoc } from './utils/couchdb-utils.js';
 const {
   POSTGRES_SCHEMA,
-  DBT_POSTGRES_SCHEMA,
+  DBT_POSTGRES_SCHEMA: pgSchema,
   POSTGRES_TABLE,
 } = process.env;
 
@@ -16,20 +16,16 @@ const waitForDbt = async (pgClient, retry = 30) => {
   }
 
   try {
-    const dbtDataRecords = await pgClient.query(`SELECT * FROM ${DBT_POSTGRES_SCHEMA}.reports`);
-    const expectedDataRecords = dataRecords().length;
-
-    const dbtPersons = await pgClient.query(`SELECT * FROM ${DBT_POSTGRES_SCHEMA}.contacts`);
-    const expectedContacts = contacts().length;
-
-    if (dbtDataRecords.rows.length === expectedDataRecords && dbtPersons.rows.length === expectedContacts) {
+    const dbtReports = await pgClient.query(`SELECT * FROM ${pgSchema}.reports`);
+    const dbtPersons = await pgClient.query(`SELECT * FROM ${pgSchema}.contacts`);
+    if (dbtReports.rows.length === reports().length && dbtPersons.rows.length === contacts().length) {
       return;
     }
   } catch {
     // not done yet
   }
 
-  await new Promise(r => setTimeout(r, 1000));
+  await delay(1);
   return waitForDbt(pgClient, --retry);
 };
 
@@ -52,26 +48,64 @@ describe('Main workflow Test Suite', () => {
   });
 
   it('should have data in postgres person table', async () => {
-    const personTableResult = await client.query(`SELECT * FROM ${DBT_POSTGRES_SCHEMA}.contacts`);
+    const personTableResult = await client.query(`SELECT * FROM ${pgSchema}.contacts`);
     expect(personTableResult.rows.length).to.equal(contacts().length);
   });
 
   it('should have data in postgres data_record table', async () => {
-    const dataRecordTableResult = await client.query(`SELECT * FROM ${DBT_POSTGRES_SCHEMA}.reports`);
-    expect(dataRecordTableResult.rows.length).to.equal(dataRecords().length);
+    const reportsTableResult = await client.query(`SELECT * FROM ${pgSchema}.reports`);
+    expect(reportsTableResult.rows.length).to.equal(reports().length);
   });
 
   it('should process document edits', async () => {
-    await editDoc({ ...docs[0], edited: 1 });
-    await editDoc({ ...docs[2], edited: 1 });
+    const report = reports()[0];
+    const contact = contacts()[0];
+    await editDoc({ ...report, edited: 1 });
+    await editDoc({ ...contact, edited: 1 });
 
-    await delay(6);
+    await delay(6); // wait for CHT-Sync
 
-    const doc0result = await client.query(`SELECT * from ${PGTABLE} where _id = $1`, [docs[0]._id]);
-    expect(doc0result.rows[0].doc.edited).to.equal(1);
+    const pgTableDataRecord = await client.query(`SELECT * from ${PGTABLE} where _id = $1`, [report._id]);
+    expect(pgTableDataRecord.rows[0].doc.edited).to.equal(1);
+
+    const pgTableContact = await client.query(`SELECT * from ${PGTABLE} where _id = $1`, [contact._id]);
+    expect(pgTableContact.rows[0].doc.edited).to.equal(1);
+
+    await delay(6); // wait for DBT
+
+    const modelReportResult = await client.query(`SELECT * FROM ${pgSchema}.reports where _id = $1`, [report._id]);
+    expect(modelReportResult.rows[0].doc.edited).to.equal(1);
+
+    const modelContactResult = await client.query(`SELECT * FROM ${pgSchema}.contacts where _id = $1`, [contact._id]);
+    expect(modelContactResult.rows[0].doc.edited).to.equal(1);
+
+    const personTableResult = await client.query(`SELECT * FROM ${pgSchema}.contacts`);
+    expect(personTableResult.rows.length).to.equal(contacts().length);
+
+    const reportsTableResult = await client.query(`SELECT * FROM ${pgSchema}.reports`);
+    expect(reportsTableResult.rows.length).to.equal(reports().length);
   });
 
-  it('should process document deletes', async () => {
+  it('should process contact deletes', async () => {
+    const contact = contacts()[0];
+    await deleteDoc(contact);
+    await delay(6); // wait for CHT-Sync
+    const pgTableContact = await client.query(`SELECT * from ${PGTABLE} where _id = $1`, [contact._id]);
+    expect(pgTableContact.rows[0]._deleted).to.equal(true);
+    await delay(6); // wait for DBT
+    const modelContactResult = await client.query(`SELECT * FROM ${pgSchema}.contacts where _id = $1`, [contact._id]);
+    expect(modelContactResult.rows.length).to.equal(0);
+  });
 
+  it('should process report deletes', async () => {
+    const report = reports()[0];
+    await deleteDoc(report);
+    await delay(6); // wait for CHT-Sync
+    const pgTableReport = await client.query(`SELECT * from ${PGTABLE} where _id = $1`, [report._id]);
+    expect(pgTableReport.rows[0]._deleted).to.equal(true);
+    await delay(6); // wait for DBT
+    const modelReportResult = await client.query(`SELECT * FROM ${pgSchema}.reports where _id = $1`, [report._id]);
+    expect(modelReportResult.rows.length).to.equal(1);
+    expect(modelReportResult.rows[0]._deleted).to.equal(true);
   });
 });

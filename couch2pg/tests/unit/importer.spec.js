@@ -350,7 +350,11 @@ describe('importer', () => {
   it('should insert deletes', async () => {
     const now = new Date('2024-01-01');
     clock.setSystemTime(now.valueOf());
-    const changes = [{ id: 'doc1', deleted: true }, { id: 'doc2' }, { id: 'doc3', deleted: true }];
+    const changes = [
+      { id: 'doc1', deleted: true, changes: [{ rev: 1 }] },
+      { id: 'doc2' },
+      { id: 'doc3', deleted: true }
+    ];
     const docs = [
       { id: 'doc2', doc: { _id: 'doc2', _rev: '3-fdsfs', field: 'test2' } },
     ];
@@ -377,12 +381,12 @@ describe('importer', () => {
         now.toISOString(),
         'doc1',
         true,
-        JSON.stringify(undefined),
+        JSON.stringify({ _id: 'doc1', _rev: 1, _deleted: true }),
 
         now.toISOString(),
         'doc3',
         true,
-        JSON.stringify(undefined),
+        JSON.stringify({ _id: 'doc3', _rev: undefined, _deleted: true }),
       ]
     ]]);
   });

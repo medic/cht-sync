@@ -52,7 +52,7 @@ export const importAllDocs = async () => {
   }
 };
 
-export const dataRecords = () => docs.filter(doc => doc.type === 'data_record');
+export const reports = () => docs.filter(doc => doc.type === 'data_record');
 export const persons = () => docs.filter(doc => doc.type === 'person');
 const contactTypes = ['contact', 'clinic', 'district_hospital', 'health_center', 'person'];
 export const contacts = () => docs.filter(doc => contactTypes.includes(doc.type));
@@ -70,5 +70,5 @@ export const deleteDoc = async (doc) => {
   const dbName = getDbByDoc(doc._id);
   const db = getDb(dbName);
   const existentDoc = await db.get(doc._id);
-  await db.delete(doc._id, existentDoc._rev);
+  await db.remove(doc._id, existentDoc._rev);
 };

@@ -72,6 +72,17 @@ const buildBulkInsertQuery = (allDocs) => {
   };
 };
 
+const addDeletesToResult = (deletedDocs, allDocs) => {
+  const deleteStub = (change) => ({
+    id: change.id,
+    key: change.id,
+    deleted: true,
+    doc: { _id: change.id, _rev: change.changes?.[0]?.rev, _deleted: true },
+  });
+  deletedDocs.forEach(change => allDocs.rows.push(deleteStub(change)));
+  return allDocs;
+};
+
 /*
  Downloads all given documents from couchdb and stores them in Postgres, in batches.
  We presume if a document is on this list it has changed, and thus needs updating.
@@ -86,9 +97,9 @@ const loadAndStoreDocs = async (couchdb, docsToDownload) => {
   const allDocsResult = await couchdb.allDocs({ keys: docIds, include_docs: true });
   console.info('Pulled ' + allDocsResult.rows.length + ' results from couchdb');
 
-  deletedDocs.forEach(change => allDocsResult.rows.push({ ...change, key: change.id }));
+  const docsToStore = addDeletesToResult(deletedDocs, allDocsResult);
 
-  await storeDocs(allDocsResult);
+  await storeDocs(docsToStore);
 };
 
 const storeDocs = async (allDocsResult) => {

@@ -14,7 +14,9 @@
 SELECT
   _id,
   "@timestamp",
+  doc,
   doc->>'form' as form,
+  _deleted,
 
   COALESCE(
       doc->>'patient_id',
@@ -27,11 +29,16 @@ SELECT
       doc->'fields'->>'place_id'
   ) AS place_id,
 
-  doc->'contact'->>'_id' as contact_uuid,
+  doc->'contact'->>'_id' as contact_id,
   doc->'fields' as fields
+
 FROM {{ env_var('ROOT_POSTGRES_SCHEMA') }}.{{ env_var('POSTGRES_TABLE') }}
-WHERE
-  doc->>'type' = 'data_record'
+WHERE (
+    doc->>'type' = 'data_record'
 {% if is_incremental() %}
+    or _deleted = true
+  )
   and "@timestamp" >= (select coalesce(max("@timestamp"), '1900-01-01') from {{ this }})
+{% else %}
+  )
 {% endif %}
