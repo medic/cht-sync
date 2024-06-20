@@ -17,8 +17,8 @@ const waitForDbt = async (pgClient, retry = 30) => {
 
   try {
     const dbtReports = await pgClient.query(`SELECT * FROM ${pgSchema}.reports`);
-    const dbtPersons = await pgClient.query(`SELECT * FROM ${pgSchema}.contacts`);
-    if (dbtReports.rows.length === reports().length && dbtPersons.rows.length === contacts().length) {
+    const dbtContacts = await pgClient.query(`SELECT * FROM ${pgSchema}.contacts`);
+    if (dbtReports.rows.length === reports().length && dbtContacts.rows.length === contacts().length) {
       return;
     }
   } catch {
@@ -47,9 +47,9 @@ describe('Main workflow Test Suite', () => {
     expect(couchdbTableResult.rows.length).to.equal(docs.length);
   });
 
-  it('should have data in postgres person table', async () => {
-    const personTableResult = await client.query(`SELECT * FROM ${pgSchema}.contacts`);
-    expect(personTableResult.rows.length).to.equal(contacts().length);
+  it('should have data in postgres contacts table', async () => {
+    const contactsTableResult = await client.query(`SELECT * FROM ${pgSchema}.contacts`);
+    expect(contactsTableResult.rows.length).to.equal(contacts().length);
   });
 
   it('should have data in postgres data_record table', async () => {
@@ -79,8 +79,8 @@ describe('Main workflow Test Suite', () => {
     const modelContactResult = await client.query(`SELECT * FROM ${pgSchema}.contacts where _id = $1`, [contact._id]);
     expect(modelContactResult.rows[0].doc.edited).to.equal(1);
 
-    const personTableResult = await client.query(`SELECT * FROM ${pgSchema}.contacts`);
-    expect(personTableResult.rows.length).to.equal(contacts().length);
+    const contactsTableResult = await client.query(`SELECT * FROM ${pgSchema}.contacts`);
+    expect(contactsTableResult.rows.length).to.equal(contacts().length);
 
     const reportsTableResult = await client.query(`SELECT * FROM ${pgSchema}.reports`);
     expect(reportsTableResult.rows.length).to.equal(reports().length);
