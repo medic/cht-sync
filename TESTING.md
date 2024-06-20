@@ -11,10 +11,14 @@ In order to run these end-to-end tests locally, follow the steps below:
 ```sh
 npm ci
 ```
-
-2. Run the end-to-end tests:
+2. Run the `couch2pg` unit tests:
 
 ```sh
-# runs tests/e2e-test.spec.ts
 npm test
+```
+
+3. Run the end-to-end tests:
+
+```sh
+npm run test:e2e
 ```
