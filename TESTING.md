@@ -9,13 +9,13 @@ In order to run these end-to-end tests locally, follow the steps below:
 1. Install the dependencies via:
 
 ```sh
-npm install
+npm ci
 ```
 
 2. Install the `couch2pg` dependencies via:
 
 ```sh
-cd couch2pg && npm install
+cd couch2pg && npm ci
 ```
 
 3. Run the end-to-end tests:
