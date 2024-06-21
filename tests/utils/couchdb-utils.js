@@ -21,10 +21,10 @@ const loadDocs = async () => {
 };
 
 const importDocs = async (dbName) => {
-  const opts =  { auth: { username: env.COUCHDB_USER, password: env.COUCHDB_PASSWORD, skip_setup: false } };
+  const opts = { auth: { username: env.COUCHDB_USER, password: env.COUCHDB_PASSWORD, skip_setup: false } };
   const db = new PouchDb(dbUrl(dbName), opts);
 
-  const dbDocs = docs.map(doc => ({  ...doc, _id: `${dbName}-${doc._id}` }));
+  const dbDocs = docs.map(doc => ({ ...doc, _id: `${dbName}-${doc._id}` }));
   while (dbDocs.length) {
     const batch = dbDocs.splice(0, 1000);
     await db.bulkDocs(batch);
@@ -36,6 +36,13 @@ export const importAllDocs = async () => {
   for (const dbName of dbNames) {
     await importDocs(dbName);
   }
+};
+
+export const addDoc = async (doc, dbName) => {
+  const opts = { auth: { username: env.COUCHDB_USER, password: env.COUCHDB_PASSWORD, skip_setup: false } };
+  const db = new PouchDb(dbUrl(dbName), opts);
+
+  await db.post({ ...doc });
 };
 
 export const dataRecords = () => docs.filter(doc => doc.type === 'data_record');
