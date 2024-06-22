@@ -1,3 +1,5 @@
+import 'dotenv/config';
+
 import * as setup from './setup.js';
 import watcher from './watcher.js';
 import * as db from './db.js';

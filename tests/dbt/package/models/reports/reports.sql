@@ -35,10 +35,8 @@ SELECT
 FROM {{ env_var('ROOT_POSTGRES_SCHEMA') }}.{{ env_var('POSTGRES_TABLE') }}
 WHERE (
     doc->>'type' = 'data_record'
-{% if is_incremental() %}
     or _deleted = true
   )
+{% if is_incremental() %}
   and "@timestamp" >= (select coalesce(max("@timestamp"), '1900-01-01') from {{ this }})
-{% else %}
-  )
 {% endif %}

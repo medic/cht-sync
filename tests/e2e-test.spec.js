@@ -94,7 +94,26 @@ describe('Main workflow Test Suite', () => {
     expect(pgTableContact.rows[0]._deleted).to.equal(true);
     await delay(6); // wait for DBT
     const modelContactResult = await client.query(`SELECT * FROM ${pgSchema}.contacts where _id = $1`, [contact._id]);
-    expect(modelContactResult.rows.length).to.equal(0);
+    expect(modelContactResult.rows.length).to.equal(1);
+    expect(modelContactResult.rows[0]._deleted).to.equal(true);
+  });
+
+  it('should process person deletes', async () => {
+    const person = contacts().find(contact => contact.type === 'person' && !contact._deleted);
+
+    const preDelete = await client.query(`SELECT * FROM ${pgSchema}.persons where _id = $1`, [person._id]);
+    expect(preDelete.rows.length).to.equal(1);
+
+    await deleteDoc(person);
+    await delay(6); // wait for CHT-Sync
+    await delay(6); // wait for DBT
+    await delay(6); // wait for DBT
+
+    const modelContactResult = await client.query(`SELECT * FROM ${pgSchema}.contacts where _id = $1`, [person._id]);
+    expect(modelContactResult.rows[0]._deleted).to.equal(true);
+
+    const postDelete = await client.query(`SELECT * FROM ${pgSchema}.persons where _id = $1`, [person._id]);
+    expect(postDelete.rows[0]._deleted).to.equal(true);
   });
 
   it('should process report deletes', async () => {

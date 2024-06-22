@@ -3,6 +3,12 @@ version: 2
 models:
   - name: contacts
     columns:
-      - name: doc
+      - name: _id
+        tests:
+          - not_null
+
+  - name: persons
+    columns:
+      - name: _id
         tests:
           - not_null

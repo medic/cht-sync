@@ -67,6 +67,7 @@ export const editDoc = async (doc) => {
 };
 
 export const deleteDoc = async (doc) => {
+  doc._deleted = true;
   const dbName = getDbByDoc(doc._id);
   const db = getDb(dbName);
   const existentDoc = await db.get(doc._id);

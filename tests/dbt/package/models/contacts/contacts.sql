@@ -2,7 +2,6 @@
   config(
     materialized = 'incremental',
     unique_key='_id',
-    post_hook='delete from {{this}} where _deleted=true',
     indexes=[
       {'columns': ['"_id"'], 'type': 'hash'},
       {'columns': ['"@timestamp"']},
@@ -24,10 +23,8 @@ FROM {{ env_var('ROOT_POSTGRES_SCHEMA') }}.{{ env_var('POSTGRES_TABLE') }}
 WHERE
   (
     doc->>'type' IN ('contact', 'clinic', 'district_hospital', 'health_center', 'person')
-{% if is_incremental() %}
     or _deleted = true
   )
+{% if is_incremental() %}
   and "@timestamp" >= (select coalesce(max("@timestamp"), '1900-01-01') from {{ this }})
-{% else %}
-  )
 {% endif %}
