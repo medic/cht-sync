@@ -1,0 +1,13 @@
+{{- if .Values.postgres.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+spec:
+  selector:
+    inner.service: postgres
+  ports:
+    - protocol: TCP
+      port: {{ .Values.postgres.port | default "5432" }}
+      targetPort: 5432
+{{- end }}

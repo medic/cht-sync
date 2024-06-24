@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cht-sync-dbt
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cht-sync
+  template:
+    metadata:
+      labels:
+        app: cht-sync
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: dbt
+          image: medicmobile/dataemon:{{ .Values.image_tag | default "latest" }}
+          resources:
+            limits:
+              cpu: {{ (.Values.dbt).cpu_limit | default "500m" }}
+              memory: {{ (.Values.dbt).memory_limit | default "1Gi" }}
+          env:
+            - name: POSTGRES_HOST
+              value: {{ .Values.postgres.host | default "postgres" }}
+            - name: POSTGRES_USER
+              value: {{ .Values.postgres.user }}
+            - name: POSTGRES_PORT
+              value: {{ .Values.postgres.port | default "5432" | quote }}
+            - name: POSTGRES_PASSWORD
+              value: {{ .Values.postgres.password }}
+            - name: POSTGRES_DB
+              value: {{ .Values.postgres.db }}
+            - name: POSTGRES_TABLE
+              value: {{ .Values.postgres.table }}
+            - name: POSTGRES_SCHEMA
+              value: {{ .Values.postgres.schema }}
+            - name: ROOT_POSTGRES_SCHEMA
+              value: {{ .Values.postgres.schema }}
+            - name: CHT_PIPELINE_BRANCH_URL
+              value: {{ .Values.cht_pipeline_branch_url }}
+
