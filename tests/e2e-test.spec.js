@@ -18,11 +18,13 @@ const waitForDbt = async (pgClient, retry = 50) => {
     const dbtPersons = await pgClient.query(`SELECT * FROM ${DBT_POSTGRES_SCHEMA}.person`);
     const expectedPersons = persons().length * dbNames.length;
 
+    console.log(`Data records: ${dbtDataRecords.rows.length}/${expectedDataRecords}`);
+    console.log(`Persons: ${dbtPersons.rows.length}/${expectedPersons}`);
     if (dbtDataRecords.rows.length === expectedDataRecords && dbtPersons.rows.length === expectedPersons) {
       return;
     }
-  } catch {
-    // not done yet
+  } catch (error) {
+    console.log(error);
   }
 
   await new Promise(r => setTimeout(r, 1000));
