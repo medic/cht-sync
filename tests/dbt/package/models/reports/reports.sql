@@ -2,18 +2,19 @@
   config(
     materialized = 'incremental',
     unique_key='_id',
+    post_hook='delete from {{this}} where _deleted=true',
     indexes=[
-      {'columns': ['"_id"'], 'type': 'hash'},
-      {'columns': ['"@timestamp"']},
-      {'columns': ['"form"']},
-      {'columns': ['"patient_id"']},
+      {'columns': ['_id'], 'type': 'hash'},
+      {'columns': ['savedTimestamp']},
+      {'columns': ['form']},
+      {'columns': ['patient_id']},
     ]
   )
 }}
 
 SELECT
   _id,
-  "@timestamp",
+  savedTimestamp,
   doc,
   doc->>'form' as form,
   _deleted,
@@ -38,5 +39,5 @@ WHERE (
     or _deleted = true
   )
 {% if is_incremental() %}
-  and "@timestamp" >= (select coalesce(max("@timestamp"), '1900-01-01') from {{ this }})
+  and savedTimestamp >= (select coalesce(max(savedTimestamp), '1900-01-01') from {{ this }})
 {% endif %}
