@@ -78,7 +78,7 @@ describe('Main workflow Test Suite', () => {
     expect(modelReportResult.rows[0].doc.edited).to.equal(1);
 
     const modelContactResult = await client.query(`SELECT * FROM ${pgSchema}.contacts where uuid = $1`, [contact._id]);
-    expect(modelContactResult.rows[0].doc.edited).to.equal(1);
+    expect(modelContactResult.rows[0].edited).to.equal('1');
 
     const contactsTableResult = await client.query(`SELECT * FROM ${pgSchema}.contacts`);
     expect(contactsTableResult.rows.length).to.equal(contacts().length);

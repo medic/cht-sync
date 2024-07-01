@@ -16,6 +16,7 @@ SELECT
   _id as uuid,
   savedTimestamp,
   _deleted,
+  doc->>'edited' AS edited,
   to_timestamp((NULLIF(doc ->> 'reported_date'::text, ''::text)::bigint / 1000)::double precision) AS reported,
   doc->'parent'->>'_id' AS parent_uuid,
   doc->>'name' AS name,
