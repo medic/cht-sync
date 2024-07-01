@@ -72,11 +72,12 @@ describe('Main workflow Test Suite', () => {
     expect(pgTableContact.rows[0].doc.edited).to.equal(1);
 
     await delay(6); // wait for DBT
+    await delay(6); // wait for DBT
 
     const modelReportResult = await client.query(`SELECT * FROM ${pgSchema}.reports where _id = $1`, [report._id]);
     expect(modelReportResult.rows[0].doc.edited).to.equal(1);
 
-    const modelContactResult = await client.query(`SELECT * FROM ${pgSchema}.contacts where _id = $1`, [contact._id]);
+    const modelContactResult = await client.query(`SELECT * FROM ${pgSchema}.contacts where uuid = $1`, [contact._id]);
     expect(modelContactResult.rows[0].doc.edited).to.equal(1);
 
     const contactsTableResult = await client.query(`SELECT * FROM ${pgSchema}.contacts`);
@@ -93,15 +94,14 @@ describe('Main workflow Test Suite', () => {
     const pgTableContact = await client.query(`SELECT * from ${PGTABLE} where _id = $1`, [contact._id]);
     expect(pgTableContact.rows[0]._deleted).to.equal(true);
     await delay(6); // wait for DBT
-    const modelContactResult = await client.query(`SELECT * FROM ${pgSchema}.contacts where _id = $1`, [contact._id]);
-    expect(modelContactResult.rows.length).to.equal(1);
-    expect(modelContactResult.rows[0]._deleted).to.equal(true);
+    const modelContactResult = await client.query(`SELECT * FROM ${pgSchema}.contacts where uuid = $1`, [contact._id]);
+    expect(modelContactResult.rows.length).to.equal(0);
   });
 
   it('should process person deletes', async () => {
     const person = contacts().find(contact => contact.type === 'person' && !contact._deleted);
 
-    const preDelete = await client.query(`SELECT * FROM ${pgSchema}.persons where _id = $1`, [person._id]);
+    const preDelete = await client.query(`SELECT * FROM ${pgSchema}.persons where uuid = $1`, [person._id]);
     expect(preDelete.rows.length).to.equal(1);
 
     await deleteDoc(person);
@@ -109,11 +109,11 @@ describe('Main workflow Test Suite', () => {
     await delay(6); // wait for DBT
     await delay(6); // wait for DBT
 
-    const modelContactResult = await client.query(`SELECT * FROM ${pgSchema}.contacts where _id = $1`, [person._id]);
-    expect(modelContactResult.rows[0]._deleted).to.equal(true);
+    const modelContactResult = await client.query(`SELECT * FROM ${pgSchema}.contacts where uuid = $1`, [person._id]);
+    expect(modelContactResult.rows.length).to.equal(0);
 
-    const postDelete = await client.query(`SELECT * FROM ${pgSchema}.persons where _id = $1`, [person._id]);
-    expect(postDelete.rows[0]._deleted).to.equal(true);
+    const postDelete = await client.query(`SELECT * FROM ${pgSchema}.persons where uuid = $1`, [person._id]);
+    expect(postDelete.rows.length).to.equal(0);
   });
 
   it('should process report deletes', async () => {
@@ -124,7 +124,6 @@ describe('Main workflow Test Suite', () => {
     expect(pgTableReport.rows[0]._deleted).to.equal(true);
     await delay(6); // wait for DBT
     const modelReportResult = await client.query(`SELECT * FROM ${pgSchema}.reports where _id = $1`, [report._id]);
-    expect(modelReportResult.rows.length).to.equal(1);
-    expect(modelReportResult.rows[0]._deleted).to.equal(true);
+    expect(modelReportResult.rows.length).to.equal(0);
   });
 });

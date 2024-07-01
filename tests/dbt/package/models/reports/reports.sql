@@ -2,6 +2,7 @@
   config(
     materialized = 'incremental',
     unique_key='_id',
+    post_hook='delete from {{this}} where _deleted=true',
     indexes=[
       {'columns': ['_id'], 'type': 'hash'},
       {'columns': ['savedTimestamp']},

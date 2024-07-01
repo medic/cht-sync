@@ -2,13 +2,54 @@ version: 2
 
 models:
   - name: contacts
+    config:
+      contract:
+        enforced: true
     columns:
-      - name: _id
+      - name: uuid
+        data_type: string
+        constraints:
+          - type: unique
         tests:
           - not_null
+      - name: savedTimestamp
+        data_type: timestamp
+      - name: _deleted
+        data_type: boolean
+      - name: reported
+        data_type: timestamp with time zone
+      - name: parent_uuid
+        data_type: string
+      - name: name
+        data_type: string
+      - name: contact_type
+        data_type: string
+      - name: phone
+        data_type: string
+      - name: phone2
+        data_type: string
+      - name: active
+        data_type: string
+      - name: notes
+        data_type: string
+      - name: contact_id
+        data_type: string
 
   - name: persons
+    config:
+      contract:
+        enforced: true
     columns:
-      - name: _id
+      - name: uuid
+        data_type: string
+        constraints:
+          - type: foreign_key
+            expression: "{{ env_var('POSTGRES_SCHEMA') }}.contacts (uuid) ON DELETE CASCADE"
         tests:
           - not_null
+      - name: savedTimestamp
+        data_type: timestamp
+      - name: date_of_birth
+        data_type: string
+      - name: sex
+        data_type: string
