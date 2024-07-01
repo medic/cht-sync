@@ -3,8 +3,8 @@
     materialized = 'incremental',
     unique_key='_id',
     indexes=[
-      {'columns': ['"_id"'], 'type': 'hash'},
-      {'columns': ['"@timestamp"']},
+      {'columns': ['_id'], 'type': 'hash'},
+      {'columns': ['savedTimestamp']},
       {'columns': ['contact_type']},
     ]
   )
@@ -12,7 +12,7 @@
 
 SELECT
   _id,
-  "@timestamp",
+  savedTimestamp,
   doc,
   _deleted,
   doc->'parent'->>'_id' AS parent_uuid,
@@ -26,5 +26,5 @@ WHERE
     or _deleted = true
   )
 {% if is_incremental() %}
-  and "@timestamp" >= (select coalesce(max("@timestamp"), '1900-01-01') from {{ this }})
+  and savedTimestamp >= (select coalesce(max(savedTimestamp), '1900-01-01') from {{ this }})
 {% endif %}

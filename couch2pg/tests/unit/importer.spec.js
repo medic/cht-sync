@@ -14,11 +14,11 @@ const getSeqMatch = () => `SELECT seq FROM ${db.postgresProgressTable} WHERE sou
 const insertSeqMatch = () => `INSERT INTO ${db.postgresProgressTable}(seq, source) VALUES ($1, $2)`;
 const updateSeqMatch = () => `UPDATE ${db.postgresProgressTable} SET seq = $1 WHERE source = $2`;
 
-const insertDocsMatch = () => `INSERT INTO ${db.postgresTable} ("@timestamp", _id, _deleted, doc) VALUES`;
+const insertDocsMatch = () => `INSERT INTO ${db.postgresTable} (savedTimestamp, _id, _deleted, doc) VALUES`;
 
 const ON_CONFLICT_STMT = `
 ON CONFLICT (_id) DO UPDATE SET 
-  "@timestamp" = EXCLUDED."@timestamp", 
+  savedTimestamp = EXCLUDED.savedTimestamp, 
   _deleted = EXCLUDED._deleted, 
   doc = EXCLUDED.doc
 `;
@@ -134,7 +134,7 @@ describe('importer', () => {
     expect(couchDb.allDocs.args).to.deep.equal([[{ include_docs: true, keys: ['doc1', 'doc2', 'doc3'] }]]);
 
     expect(pgClient.query.withArgs(sinon.match(insertDocsMatch())).args).to.deep.equal([[
-      'INSERT INTO v1.whatever ("@timestamp", _id, _deleted, doc) VALUES ' +
+      'INSERT INTO v1.whatever (savedTimestamp, _id, _deleted, doc) VALUES ' +
       '($1, $2, $3, $4),($5, $6, $7, $8),($9, $10, $11, $12) ' + ON_CONFLICT_STMT,
       [
         now.toISOString(),
@@ -212,7 +212,7 @@ describe('importer', () => {
 
     expect(pgClient.query.withArgs(sinon.match(insertDocsMatch())).callCount).to.equal(3);
     expect(pgClient.query.withArgs(sinon.match(insertDocsMatch())).args[0]).to.deep.equal([
-      'INSERT INTO v1.whatever ("@timestamp", _id, _deleted, doc) VALUES ' +
+      'INSERT INTO v1.whatever (savedTimestamp, _id, _deleted, doc) VALUES ' +
       '($1, $2, $3, $4),($5, $6, $7, $8),($9, $10, $11, $12) ' + ON_CONFLICT_STMT,
       [
         now.toISOString(),
@@ -233,7 +233,7 @@ describe('importer', () => {
     ]);
 
     expect(pgClient.query.withArgs(sinon.match(insertDocsMatch())).args[1]).to.deep.equal([
-      'INSERT INTO v1.whatever ("@timestamp", _id, _deleted, doc) VALUES ' +
+      'INSERT INTO v1.whatever (savedTimestamp, _id, _deleted, doc) VALUES ' +
       '($1, $2, $3, $4),($5, $6, $7, $8),($9, $10, $11, $12) ' + ON_CONFLICT_STMT,
       [
         now.toISOString(),
@@ -254,7 +254,7 @@ describe('importer', () => {
     ]);
 
     expect(pgClient.query.withArgs(sinon.match(insertDocsMatch())).args[2]).to.deep.equal([
-      'INSERT INTO v1.whatever ("@timestamp", _id, _deleted, doc) VALUES ' +
+      'INSERT INTO v1.whatever (savedTimestamp, _id, _deleted, doc) VALUES ' +
       '($1, $2, $3, $4),($5, $6, $7, $8),($9, $10, $11, $12) ' + ON_CONFLICT_STMT,
       [
         now.toISOString(),
@@ -293,7 +293,7 @@ describe('importer', () => {
     await importer(couchDb);
 
     expect(pgClient.query.withArgs(sinon.match(insertDocsMatch())).args).to.deep.equal([[
-      'INSERT INTO v1.whatever ("@timestamp", _id, _deleted, doc) VALUES ' +
+      'INSERT INTO v1.whatever (savedTimestamp, _id, _deleted, doc) VALUES ' +
       '($1, $2, $3, $4) ' + ON_CONFLICT_STMT,
       [
         new Date().toISOString(),
@@ -330,7 +330,7 @@ describe('importer', () => {
     await importer(couchDb);
 
     expect(pgClient.query.withArgs(sinon.match(insertDocsMatch())).args).to.deep.equal([[
-      'INSERT INTO v1.whatever ("@timestamp", _id, _deleted, doc) VALUES ' +
+      'INSERT INTO v1.whatever (savedTimestamp, _id, _deleted, doc) VALUES ' +
       '($1, $2, $3, $4) ' + ON_CONFLICT_STMT,
       [
         new Date().toISOString(),
@@ -370,7 +370,7 @@ describe('importer', () => {
     expect(couchDb.allDocs.args).to.deep.equal([[{ include_docs: true, keys: ['doc2'] }]]);
 
     expect(pgClient.query.withArgs(sinon.match(insertDocsMatch())).args).to.deep.equal([[
-      'INSERT INTO v1.whatever ("@timestamp", _id, _deleted, doc) VALUES ' +
+      'INSERT INTO v1.whatever (savedTimestamp, _id, _deleted, doc) VALUES ' +
       '($1, $2, $3, $4),($5, $6, $7, $8),($9, $10, $11, $12) ' + ON_CONFLICT_STMT,
       [
         now.toISOString(),
@@ -499,7 +499,7 @@ describe('importer', () => {
     expect(couchDb.allDocs.args).to.deep.equal([[{ include_docs: true, keys: ['doc1', 'doc2', 'doc3'] }]]);
 
     const queryArgs = [
-      'INSERT INTO v1.whatever ("@timestamp", _id, _deleted, doc) VALUES ' +
+      'INSERT INTO v1.whatever (savedTimestamp, _id, _deleted, doc) VALUES ' +
       '($1, $2, $3, $4),($5, $6, $7, $8),($9, $10, $11, $12) ' + ON_CONFLICT_STMT,
       [
         now.toISOString(),
