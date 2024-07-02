@@ -12,6 +12,7 @@
 SELECT
   contact._id,
   contact._deleted,
+  contact.doc,
   contact."@timestamp",
   couchdb.doc->>'date_of_birth' as date_of_birth,
   couchdb.doc->>'sex' as sex
