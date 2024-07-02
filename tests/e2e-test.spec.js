@@ -28,7 +28,7 @@ const waitForDbt = async (pgClient, retry = 50) => {
   }
 
   await new Promise(r => setTimeout(r, 1000));
-  return waitForDbt(pgClient, retry--);
+  return waitForDbt(pgClient, --retry);
 };
 
 describe('Main workflow Test Suite', () => {
