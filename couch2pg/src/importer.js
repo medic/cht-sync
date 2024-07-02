@@ -5,7 +5,7 @@ import * as db from './db.js';
 const SELECT_SEQ_STMT = `SELECT seq FROM ${db.postgresProgressTable} WHERE source = $1`;
 const INSERT_SEQ_STMT = `INSERT INTO ${db.postgresProgressTable}(seq, source) VALUES ($1, $2)`;
 const UPDATE_SEQ_STMT = `UPDATE ${db.postgresProgressTable} SET seq = $1 WHERE source = $2`;
-const INSERT_DOCS_STMT = `INSERT INTO ${db.postgresTable} ("@timestamp", _id, _rev, doc) VALUES`;
+const INSERT_DOCS_STMT = `INSERT INTO ${db.postgresTable} (savedTimestamp, _id, _rev, doc) VALUES`;
 const ON_CONFLICT_STMT = 'ON CONFLICT (_id, _rev) DO NOTHING';
 
 const sanitise = (string) => {
