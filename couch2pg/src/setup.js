@@ -3,7 +3,7 @@ import * as db from './db.js';
 const createSchema = `CREATE SCHEMA IF NOT EXISTS ${db.postgresSchema}`;
 const createTable = `
 CREATE TABLE IF NOT EXISTS ${db.postgresTable} (
-  "@timestamp" TIMESTAMP,
+  saved_timestamp TIMESTAMP,
   _id VARCHAR PRIMARY KEY,
   _deleted BOOLEAN,
   doc jsonb
