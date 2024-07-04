@@ -4,6 +4,7 @@
   "description": "",
   "main": "",
   "scripts": {
+    "postinstall": "cd couch2pg && npm ci",    
     "test:e2e": "npm run test:e2e-data && npm run test:e2e-stop-containers && npm run test:e2e-containers && mocha tests/**/*.spec.js --timeout 50000",
     "lint": "eslint --color --cache .",
     "test:e2e-stop-containers": "docker compose --env-file ./tests/.e2e-env -f docker-compose.yml -f docker-compose.couchdb.yml -f docker-compose.postgres.yml down -v",
