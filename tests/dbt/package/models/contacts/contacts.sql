@@ -6,7 +6,7 @@
     post_hook='delete from {{this}} where _deleted=true',
     indexes=[
       {'columns': ['uuid'], 'type': 'hash'},
-      {'columns': ['savedTimestamp']},
+      {'columns': ['saved_timestamp']},
       {'columns': ['contact_type']},
     ]
   )
@@ -14,7 +14,7 @@
 
 SELECT
   _id as uuid,
-  savedTimestamp,
+  saved_timestamp,
   _deleted,
   doc->>'edited' AS edited,
   to_timestamp((NULLIF(doc ->> 'reported_date'::text, ''::text)::bigint / 1000)::double precision) AS reported,
@@ -33,5 +33,5 @@ WHERE
     or _deleted = true
   )
 {% if is_incremental() %}
-  and savedTimestamp >= (select coalesce(max(savedTimestamp), '1900-01-01') from {{ this }})
+  and saved_timestamp >= (select coalesce(max(saved_timestamp), '1900-01-01') from {{ this }})
 {% endif %}

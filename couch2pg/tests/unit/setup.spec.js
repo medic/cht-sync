@@ -37,7 +37,7 @@ describe('setup', () => {
       expect(pgClient.query.args[0]).to.deep.equal(['CREATE SCHEMA IF NOT EXISTS v1']);
       expect(pgClient.query.args[1]).to.deep.equal([ `
 CREATE TABLE IF NOT EXISTS v1.whatever (
-  savedTimestamp TIMESTAMP,
+  saved_timestamp TIMESTAMP,
   _id VARCHAR PRIMARY KEY,
   _deleted BOOLEAN,
   doc jsonb
