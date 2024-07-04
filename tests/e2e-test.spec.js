@@ -81,14 +81,14 @@ describe('Main workflow Test Suite', () => {
 
     await delay(12); // wait for DBT
 
-    const modelReportResult = await client.query(`SELECT * FROM ${pgSchema}.reports where _id = $1`, [report._id]);
+    const modelReportResult = await client.query(`SELECT * FROM ${pgSchema}.reports where uuid = $1`, [report._id]);
     expect(modelReportResult.rows[0].doc.edited).to.equal(1);
 
     const modelContactResult = await client.query(`SELECT * FROM ${pgSchema}.contacts where uuid = $1`, [contact._id]);
     expect(modelContactResult.rows[0].edited).to.equal('1');
 
-    const modelPersonResult = await client.query(`SELECT * FROM ${pgSchema}.persons where _id = $1`, [contact._id]);
-    expect(modelPersonResult.rows[0].doc.edited).to.equal(1);
+    const modelPersonResult = await client.query(`SELECT * FROM ${pgSchema}.persons where uuid = $1`, [contact._id]);
+    expect(modelPersonResult.rows[0].edited).to.equal('1');
 
     const contactsTableResult = await client.query(`SELECT * FROM ${pgSchema}.contacts`);
     expect(contactsTableResult.rows.length).to.equal(contacts().length);
@@ -132,7 +132,7 @@ describe('Main workflow Test Suite', () => {
     const pgTableReport = await client.query(`SELECT * from ${PGTABLE} where _id = $1`, [report._id]);
     expect(pgTableReport.rows[0]._deleted).to.equal(true);
     await delay(6); // wait for DBT
-    const modelReportResult = await client.query(`SELECT * FROM ${pgSchema}.reports where _id = $1`, [report._id]);
+    const modelReportResult = await client.query(`SELECT * FROM ${pgSchema}.reports where uuid = $1`, [report._id]);
     expect(modelReportResult.rows.length).to.equal(0);
   });
 });

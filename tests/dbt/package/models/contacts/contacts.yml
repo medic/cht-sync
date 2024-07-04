@@ -55,3 +55,5 @@ models:
         data_type: string
       - name: sex
         data_type: string
+      - name: edited
+        data_type: string

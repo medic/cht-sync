@@ -1,10 +1,10 @@
 {{
   config(
     materialized = 'incremental',
-    unique_key='_id',
+    unique_key='uuid',
     post_hook='delete from {{this}} where _deleted=true',
     indexes=[
-      {'columns': ['_id'], 'type': 'hash'},
+      {'columns': ['uuid'], 'type': 'hash'},
       {'columns': ['saved_timestamp']},
       {'columns': ['form']},
       {'columns': ['patient_id']},
@@ -13,7 +13,7 @@
 }}
 
 SELECT
-  _id,
+  _id as uuid,
   saved_timestamp,
   doc,
   doc->>'form' as form,
