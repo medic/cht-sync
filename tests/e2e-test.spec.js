@@ -52,14 +52,22 @@ describe('Main workflow Test Suite', () => {
     expect(contactsTableResult.rows.length).to.equal(contacts().length);
   });
 
-  it('should have data in postgres data_record table', async () => {
+  it('should have data in postgres reports table', async () => {
     const reportsTableResult = await client.query(`SELECT * FROM ${pgSchema}.reports`);
     expect(reportsTableResult.rows.length).to.equal(reports().length);
+  });
+
+  it('should have data in postgres persons table', async () => {
+    const personsTableResult = await client.query(`SELECT * FROM ${pgSchema}.persons`);
+    expect(personsTableResult.rows.length).to.equal(contacts().filter(contact => contact.type === 'person').length);
   });
 
   it('should process document edits', async () => {
     const report = reports()[0];
     const contact = contacts()[0];
+
+    expect(contact.type).to.equal('person');
+
     await editDoc({ ...report, edited: 1 });
     await editDoc({ ...contact, edited: 1 });
 
@@ -78,6 +86,9 @@ describe('Main workflow Test Suite', () => {
 
     const modelContactResult = await client.query(`SELECT * FROM ${pgSchema}.contacts where uuid = $1`, [contact._id]);
     expect(modelContactResult.rows[0].edited).to.equal('1');
+
+    const modelPersonResult = await client.query(`SELECT * FROM ${pgSchema}.persons where _id = $1`, [contact._id]);
+    expect(modelPersonResult.rows[0].doc.edited).to.equal(1);
 
     const contactsTableResult = await client.query(`SELECT * FROM ${pgSchema}.contacts`);
     expect(contactsTableResult.rows.length).to.equal(contacts().length);
