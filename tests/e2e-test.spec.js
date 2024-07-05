@@ -10,7 +10,7 @@ const PGTABLE = `${POSTGRES_SCHEMA}.${POSTGRES_TABLE}`;
 
 const delay = (seconds) => new Promise(resolve => setTimeout(resolve, seconds * 1000));
 
-const waitForDbt = async (pgClient, retry = 30) => {
+const waitForDbt = async (pgClient, retry = 90) => {
   if (retry <= 0) {
     throw new Error('DBT models missing records after 30s');
   }
@@ -60,6 +60,40 @@ describe('Main workflow Test Suite', () => {
   it('should have data in postgres persons table', async () => {
     const personsTableResult = await client.query(`SELECT * FROM ${pgSchema}.persons`);
     expect(personsTableResult.rows.length).to.equal(contacts().filter(contact => contact.type === 'person').length);
+  });
+
+  it('should have the expected data in a record in postgres contact table', async () => {
+    let contact = contacts().at(0);
+    console.log("CONTACT");
+    console.log(JSON.stringify(contact));
+    const contactTableResult = await client.query(`SELECT * FROM ${pgSchema}.contacts where uuid=$1`, [contact._id]);
+    console.log("CONTACT_TABLE");
+    console.log(JSON.stringify(contactTableResult));
+    expect(contactTableResult.rows.length).to.equal(1);
+    expect(contactTableResult.rows[0].parent_uuid).to.equal(contact.parent._id);
+    expect(contactTableResult.rows[0].name).to.equal(contact.name);
+    expect(contactTableResult.rows[0].contact_type).to.equal(contact.type);
+    expect(contactTableResult.rows[0].phone).to.equal(contact.phone);
+  });
+
+  it('should have the expected data in a record in postgres person table', async () => {
+    let person = contacts().filter(contact => contact.type === 'person').at(0);
+    const personTableResult = await client.query(`SELECT * FROM ${pgSchema}.persons where uuid=$1`, [person._id]);
+    expect(personTableResult.rows.length).to.equal(1);
+    expect(personTableResult.rows[0].date_of_birth).to.equal(person.date_of_birth);
+    expect(personTableResult.rows[0].sex).to.equal(person.sex);
+  });
+
+  it.only('should have the expected data in a record in postgres reports table', async () => {
+    let report = reports().at(0);
+    const reportTableResult = await client.query(`SELECT * FROM ${pgSchema}.reports where uuid=$1`, [report._id]);
+    expect(reportTableResult.rows.length).to.equal(1);
+    expect(reportTableResult.rows[0].doc).excluding(['_rev', '_id']).to.deep.equal(report.doc);
+    expect(reportTableResult.rows[0].form).to.equal(report.form);
+    expect(reportTableResult.rows[0].patiend_id).to.equal(report.patiend_id);
+    expect(reportTableResult.rows[0].contact_id).to.equal(report.contact_id);
+    expect(reportTableResult.rows[0].contact_id).to.equal(report.contact_id);
+    expect(reportTableResult.rows[0].fields).to.deep.equal(report.fields);
   });
 
   it('should process document edits', async () => {

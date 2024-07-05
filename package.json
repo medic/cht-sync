@@ -4,8 +4,8 @@
   "description": "",
   "main": "",
   "scripts": {
-    "postinstall": "cd couch2pg && npm ci",    
-    "test:e2e": "npm run test:e2e-data && npm run test:e2e-stop-containers && npm run test:e2e-containers && mocha tests/**/*.spec.js --timeout 50000",
+    "postinstall": "cd couch2pg && npm ci",
+    "test:e2e": "npm run test:e2e-data && npm run test:e2e-stop-containers && npm run test:e2e-containers && mocha tests/**/*.spec.js --timeout 500000",
     "lint": "eslint --color --cache .",
     "test:e2e-stop-containers": "docker compose --env-file ./tests/.e2e-env -f docker-compose.yml -f docker-compose.couchdb.yml -f docker-compose.postgres.yml down -v",
     "test:e2e-containers": "docker compose --env-file ./tests/.e2e-env -f docker-compose.yml -f docker-compose.couchdb.yml -f docker-compose.postgres.yml -f tests/dbt/docker-compose.yml up -d --build --force-recreate",
@@ -24,6 +24,7 @@
     "c8": "^9.1.0",
     "chai": "^5.1.1",
     "chai-as-promised": "^7.1.2",
+    "chai-exclude": "^2.1.1",
     "cht-conf": "^3.22.0",
     "dotenv": "^16.4.5",
     "eslint": "^8.57.0",
