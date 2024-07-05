@@ -13,9 +13,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "dotenv": "^16.4.5",
     "pg": "^8.11.5",
     "pouchdb-adapter-http": "^8.0.1",
     "pouchdb-core": "^8.0.1",
-    "pouchdb-session-authentication": "^1.2.0"
+    "pouchdb-session-authentication": "^1.4.0"
   }
 }

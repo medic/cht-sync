@@ -44,15 +44,24 @@ with connection() as conn:
 
 package_json = '{}'
 
-init_package = urlparse(os.getenv("CHT_PIPELINE_BRANCH_URL"))
-if init_package.scheme in ["http", "https"]:
+if os.getenv("DBT_PACKAGE_TARBALL_URL"):
+    print(os.getenv("DBT_PACKAGE_TARBALL_URL"))
+    init_package = urlparse(os.getenv("DBT_PACKAGE_TARBALL_URL"))
     package_json = json.dumps({"packages": [{
-      "git": init_package._replace(fragment='').geturl(),
-      "revision": init_package.fragment
-    }]})
+          "tarball": init_package.geturl(),
+          "name": "packages"
+        }]})
 
-    with open("/dbt/packages.yml", "w") as f:
-        f.write(package_json)
+if os.getenv("CHT_PIPELINE_BRANCH_URL"):
+    init_package = urlparse(os.getenv("CHT_PIPELINE_BRANCH_URL"))
+    if init_package.scheme in ["http", "https"]:
+        package_json = json.dumps({"packages": [{
+            "git": init_package._replace(fragment='').geturl(),
+            "revision": init_package.fragment
+        }]})
+
+with open("/dbt/packages.yml", "w") as f:
+  f.write(package_json)
 
 subprocess.run(["dbt", "deps", "--profiles-dir", ".dbt"])
 
