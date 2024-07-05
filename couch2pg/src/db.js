@@ -40,6 +40,7 @@ export const getPgClient = async () => {
 export const getCouchDbClient = (dbName) => {
   dbName = dbName || COUCHDB_DBS;
   const url = `${COUCHDB_SECURE === 'true' ? 'https' : 'http'}://${COUCHDB_USER}:${COUCHDB_PASSWORD}@${COUCHDB_HOST}:${COUCHDB_PORT}/${dbName}`;
+  console.log(url);
   return new PouchDb(url, { skip_setup: true });
 };
 
