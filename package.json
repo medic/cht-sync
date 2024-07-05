@@ -22,7 +22,7 @@
   "devDependencies": {
     "@medic/eslint-config": "^1.1.0",
     "c8": "^9.1.0",
-    "chai": "^5.1.1",
+    "chai": "^4.4.1",
     "chai-as-promised": "^7.1.2",
     "chai-exclude": "^2.1.1",
     "cht-conf": "^3.22.0",

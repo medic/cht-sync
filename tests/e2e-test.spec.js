@@ -1,3 +1,8 @@
+import chai from 'chai';
+import { v4 as uuidv4 } from 'uuid';
+import chaiExclude from 'chai-exclude';
+chai.use(chaiExclude);
+chai.use(chaiExclude);
 import { rootConnect } from './utils/postgres-utils.js';
 import { importAllDocs, docs, reports, contacts, editDoc, deleteDoc } from './utils/couchdb-utils.js';
 const {
@@ -64,11 +69,7 @@ describe('Main workflow Test Suite', () => {
 
   it('should have the expected data in a record in postgres contact table', async () => {
     let contact = contacts().at(0);
-    console.log("CONTACT");
-    console.log(JSON.stringify(contact));
     const contactTableResult = await client.query(`SELECT * FROM ${pgSchema}.contacts where uuid=$1`, [contact._id]);
-    console.log("CONTACT_TABLE");
-    console.log(JSON.stringify(contactTableResult));
     expect(contactTableResult.rows.length).to.equal(1);
     expect(contactTableResult.rows[0].parent_uuid).to.equal(contact.parent._id);
     expect(contactTableResult.rows[0].name).to.equal(contact.name);
@@ -84,15 +85,18 @@ describe('Main workflow Test Suite', () => {
     expect(personTableResult.rows[0].sex).to.equal(person.sex);
   });
 
-  it.only('should have the expected data in a record in postgres reports table', async () => {
+  it('should have the expected data in a record in postgres reports table', async () => {
     let report = reports().at(0);
+    console.log("REPORT");
+    console.log(JSON.stringify(report));
     const reportTableResult = await client.query(`SELECT * FROM ${pgSchema}.reports where uuid=$1`, [report._id]);
+    console.log("REPORT_TABLE");
+    console.log(JSON.stringify(reportTableResult.rows[0].doc));
     expect(reportTableResult.rows.length).to.equal(1);
-    expect(reportTableResult.rows[0].doc).excluding(['_rev', '_id']).to.deep.equal(report.doc);
+    expect(reportTableResult.rows[0].doc).excluding(['_rev', '_id']).to.deep.equal(report);
     expect(reportTableResult.rows[0].form).to.equal(report.form);
     expect(reportTableResult.rows[0].patiend_id).to.equal(report.patiend_id);
-    expect(reportTableResult.rows[0].contact_id).to.equal(report.contact_id);
-    expect(reportTableResult.rows[0].contact_id).to.equal(report.contact_id);
+    expect(reportTableResult.rows[0].contact_id).to.equal(report.contact._id);
     expect(reportTableResult.rows[0].fields).to.deep.equal(report.fields);
   });
 
