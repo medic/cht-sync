@@ -13,8 +13,11 @@ cht_pipeline_branch_url: "https://github.com/medic/cht-pipeline.git#main"
 
 couchdb:
   user: ""
-  password: ""
   dbs: "medic" # space separated list of databases you want to sync e.g "medic medic-sentinel"
-  host: ""
   port: "5984"
   secure: "false"
+
+cht_instances:
+  - host: ""
+    password: ""
+  

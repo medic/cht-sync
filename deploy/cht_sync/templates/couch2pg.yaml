@@ -1,7 +1,10 @@
+{{- $cht_instances := .Values.cht_instances -}}
+{{- range $index, $service := $cht_instances }}
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cht-sync-couch2pg
+  name: cht-sync-couch2pg--{{ $service.host | replace "." "-" }}
 spec:
   replicas: 1
   selector:
@@ -15,35 +18,37 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: couch2pg
-          image: medicmobile/cht-sync-couch2pg:{{ .Values.image_tag | default "latest" }}
+          image: medicmobile/cht-sync-couch2pg:{{ $.Values.image_tag | default "latest" }}
           resources:
             limits:
-              cpu: {{ (.Values.couch2pg).cpu_limit | default "500m" }}
-              memory: {{ (.Values.couch2pg).memory_limit | default "1Gi" }}
+              cpu: {{ ($.Values.couch2pg).cpu_limit | default "500m" }}
+              memory: {{ ($.Values.couch2pg).memory_limit | default "1Gi" }}
           env:
             - name: POSTGRES_HOST
-              value: {{ .Values.postgres.host | default "postgres" }}
+              value: {{ $.Values.postgres.host | default "postgres" }}
             - name: POSTGRES_USER
-              value: {{ .Values.postgres.user }}
+              value: {{ $.Values.postgres.user }}
             - name: POSTGRES_PORT
-              value: {{ .Values.postgres.port | default "5432" | quote }}
+              value: {{ $.Values.postgres.port | default "5432" | quote }}
             - name: POSTGRES_PASSWORD
-              value: {{ .Values.postgres.password }}
+              value: {{ $.Values.postgres.password }}
             - name: POSTGRES_DB
-              value: {{ .Values.postgres.db }}
+              value: {{ $.Values.postgres.db }}
             - name: POSTGRES_TABLE
-              value: {{ .Values.postgres.table }}
+              value: {{ $.Values.postgres.table }}
             - name: POSTGRES_SCHEMA
-              value: {{ .Values.postgres.schema }}
+              value: {{ $.Values.postgres.schema }}
             - name: COUCHDB_USER
-              value: {{ .Values.couchdb.user }}
+              value: {{ $.Values.couchdb.user }}
             - name: COUCHDB_PASSWORD
-              value: {{ .Values.couchdb.password }}
+              value: {{ $service.password }}
             - name: COUCHDB_HOST
-              value: {{ .Values.couchdb.host }}
+              value: {{ $service.host }}
             - name: COUCHDB_DBS
-              value: {{ .Values.couchdb.dbs }}
+              value: {{ $.Values.couchdb.dbs }}
             - name: COUCHDB_PORT
-              value: {{ .Values.couchdb.port | quote }}
+              value: {{ $.Values.couchdb.port | quote }}
             - name: COUCHDB_SECURE
-              value: {{ .Values.couchdb.secure | quote }}
+              value: {{ $.Values.couchdb.secure | quote }}
+{{- end }}
+
