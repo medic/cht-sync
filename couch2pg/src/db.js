@@ -42,3 +42,5 @@ export const getCouchDbClient = (dbName) => {
   const url = `${COUCHDB_SECURE === 'true' ? 'https' : 'http'}://${COUCHDB_USER}:${COUCHDB_PASSWORD}@${COUCHDB_HOST}:${COUCHDB_PORT}/${dbName}`;
   return new PouchDb(url, { skip_setup: true });
 };
+
+export const couchDbs = COUCHDB_DBS.split(',').map(db => db.trim());

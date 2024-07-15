@@ -1,9 +1,11 @@
+import 'dotenv/config';
+
 import * as setup from './setup.js';
+import watcher from './watcher.js';
 import * as db from './db.js';
-import importer from './importer.js';
 
 (async() => {
   await setup.createDatabase();
 
-  await importer(db.getCouchDbClient());
+  db.couchDbs.forEach(db => watcher(db));
 })();
