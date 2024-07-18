@@ -21,12 +21,15 @@ couchdb:
 
 # values for each couchdb instance
 # host and password are required
-# other values can be ommitted if common to all couchdb instances and specified above
-couchdbs: # values for in
-  - host: "" # required for all couchdbs
+# other values can be omitted if they are common to all couchdb instances and specified above
+couchdbs:
+  - host: "host1" # required for all couchdb instances
+    password: "" # required for all couchdb instances
+  - host: "host2"
     password: ""
-    user: ""
-    dbs: "medic" # space separated list of databases you want to sync e.g "medic medic-sentinel"
-    port: "5984"
-    secure: "true"
-  
+  - host: "host3"
+    password: ""
+    user: "user2" # required if different than above
+    dbs: "medic medic_sentinel" # required if different than above
+    port: "5984" # required if different than above
+    secure: "true" # required if different than above
