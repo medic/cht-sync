@@ -1,5 +1,5 @@
-{{- $cht_instances := .Values.cht_instances -}}
-{{- range $index, $service := $cht_instances }}
+{{- $couchdbs := .Values.couchdbs -}}
+{{- range $index, $service := $couchdbs }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -39,16 +39,16 @@ spec:
             - name: POSTGRES_SCHEMA
               value: {{ $.Values.postgres.schema }}
             - name: COUCHDB_USER
-              value: {{ $.Values.couchdb.user }}
+              value: {{ $service.user | default $.Values.couchdb.user }}
             - name: COUCHDB_PASSWORD
               value: {{ $service.password }}
             - name: COUCHDB_HOST
               value: {{ $service.host }}
             - name: COUCHDB_DBS
-              value: {{ $.Values.couchdb.dbs }}
+              value: {{ $service.dbs | default $.Values.couchdb.dbs }}
             - name: COUCHDB_PORT
-              value: {{ $.Values.couchdb.port | quote }}
+              value: {{ ($service.port | default $.Values.couchdb.port) | quote }}
             - name: COUCHDB_SECURE
-              value: {{ $.Values.couchdb.secure | quote }}
+              value: {{ ($service.secure | default $.Values.couchdb.secure) | quote }}
 {{- end }}
 

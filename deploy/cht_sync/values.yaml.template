@@ -11,13 +11,22 @@ postgres:
 
 cht_pipeline_branch_url: "https://github.com/medic/cht-pipeline.git#main"
 
+# values shared by all couchdb instances
+# can be omitted if couchdb instances do not share any values
 couchdb:
   user: ""
   dbs: "medic" # space separated list of databases you want to sync e.g "medic medic-sentinel"
   port: "5984"
-  secure: "false"
+  secure: "true" # "true" if SSL is required
 
-cht_instances:
-  - host: ""
+# values for each couchdb instance
+# host and password are required
+# other values can be ommitted if common to all couchdb instances and specified above
+couchdbs: # values for in
+  - host: "" # required for all couchdbs
     password: ""
+    user: ""
+    dbs: "medic" # space separated list of databases you want to sync e.g "medic medic-sentinel"
+    port: "5984"
+    secure: "true"
   
