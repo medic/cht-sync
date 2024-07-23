@@ -11,7 +11,7 @@ export const dbNames = env.COUCHDB_DBS.split(',');
 const dbUrl = name => `http://127.0.0.1:${env.COUCHDB_PORT}/${name}`;
 
 export const docs = [];
-const docsByDb = { };
+const docsByDb = {};
 
 const dbs = {};
 
@@ -27,7 +27,7 @@ const getDb = (dbName) => {
   if (dbs[dbName]) {
     return dbs[dbName];
   }
-  const opts =  { auth: { username: env.COUCHDB_USER, password: env.COUCHDB_PASSWORD, skip_setup: false } };
+  const opts = { auth: { username: env.COUCHDB_USER, password: env.COUCHDB_PASSWORD, skip_setup: false } };
   dbs[dbName] = new PouchDb(dbUrl(dbName), opts);
   return dbs[dbName];
 };
@@ -58,6 +58,11 @@ const contactTypes = ['contact', 'clinic', 'district_hospital', 'health_center',
 export const contacts = () => docs.filter(doc => contactTypes.includes(doc.type));
 
 const getDbByDoc = (id) => Object.keys(docsByDb).filter(dnName => docsByDb[dnName].has(id));
+
+export const insertDoc = async (doc) => {
+  const db = getDb(dbNames[0]);
+  await db.bulkDocs(doc);
+};
 
 export const editDoc = async (doc) => {
   const dbName = getDbByDoc(doc._id);
