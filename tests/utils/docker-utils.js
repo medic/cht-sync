@@ -10,7 +10,7 @@ const execDockerCommand = (command) => {
 };
 
 export const stopService = (serviceName) => {
-  execSync(`docker compose --env-file ./tests/.e2e-env -f docker-compose.yml -f docker-compose.couchdb.yml -f docker-compose.postgres.yml stop ${serviceName}`);
+  execSync(`docker compose --env-file ./tests/.e2e-env -f docker-compose.yml -f docker-compose.couchdb.yml -f docker-compose.postgres.yml stop ${serviceName}`, { stdio: [] });
 };
 
 export const isServiceRunning = (serviceName) => {
@@ -19,5 +19,5 @@ export const isServiceRunning = (serviceName) => {
 };
 
 export const startService = (serviceName) => {
-  execSync(`docker compose --env-file ./tests/.e2e-env -f docker-compose.yml -f docker-compose.couchdb.yml -f docker-compose.postgres.yml start ${serviceName}`);
+  execSync(`docker compose --env-file ./tests/.e2e-env -f docker-compose.yml -f docker-compose.couchdb.yml -f docker-compose.postgres.yml start ${serviceName}`, { stdio: [] });
 };

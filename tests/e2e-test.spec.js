@@ -137,7 +137,6 @@ describe('Main workflow Test Suite', () => {
       };
 
       await insertDoc([newDoc]);
-
       startService('postgres');
       await delay(15); // Wait for Postgres
       const isRunning = isServiceRunning('postgres');
@@ -181,6 +180,7 @@ describe('Main workflow Test Suite', () => {
       expect(modelPersonResult.rows[0].edited).to.equal('1');
 
       const contactsTableResult = await client.query(`SELECT * FROM ${pgSchema}.contacts`);
+      let contactSize = contacts().length++;
       expect(contactsTableResult.rows.length).to.equal(contacts().length);
 
       const reportsTableResult = await client.query(`SELECT * FROM ${pgSchema}.reports`);
@@ -249,7 +249,7 @@ describe('Main workflow Test Suite', () => {
 
   describe('Conflict resolution', () => {
     it('should handle update conflicts', async () => {
-      const contact = contacts()[1];
+      const contact = contacts()[2];
 
       const editedContactA = { ...contact, edited: 'A' };
       const editedContactB = { ...contact, edited: 'B' };
