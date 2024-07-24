@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import chaiExclude from 'chai-exclude';
 chai.use(chaiExclude);
 chai.use(chaiExclude);
-import { rootConnect } from './utils/postgres-utils.js';
+import { rootConnect, isPostgresConnectionAlive } from './utils/postgres-utils.js';
 import { importAllDocs, docs, reports, contacts, insertDoc, editDoc, deleteDoc } from './utils/couchdb-utils.js';
 import { stopService, isServiceRunning, startService } from './utils/docker-utils.js';
 
@@ -38,6 +38,7 @@ const waitForDbt = async (pgClient, retry = 30) => {
 
 describe('Main workflow Test Suite', () => {
   let client;
+  let modifiedContactSize;
 
   before(async () => {
     console.log('Importing docs');
@@ -45,6 +46,7 @@ describe('Main workflow Test Suite', () => {
     client = await rootConnect();
     console.log('Waiting for DBT');
     await waitForDbt(client);
+    modifiedContactSize = contacts().length;
   });
 
   after(async () => await client?.end());
@@ -101,6 +103,13 @@ describe('Main workflow Test Suite', () => {
   });
 
   describe('Downtime handles', () => {
+    after(async () => {
+      const isAlive = await isPostgresConnectionAlive(client);
+      if (!isAlive) {
+        client = await rootConnect();
+      }
+    });
+
     it('should handle CouchDB downtime gracefully', async () => {
       stopService('couchdb');
       await delay(5);
@@ -137,6 +146,7 @@ describe('Main workflow Test Suite', () => {
       };
 
       await insertDoc([newDoc]);
+      modifiedContactSize++;
       startService('postgres');
       await delay(15); // Wait for Postgres
       const isRunning = isServiceRunning('postgres');
@@ -180,8 +190,7 @@ describe('Main workflow Test Suite', () => {
       expect(modelPersonResult.rows[0].edited).to.equal('1');
 
       const contactsTableResult = await client.query(`SELECT * FROM ${pgSchema}.contacts`);
-      const contactSize = contacts().length + 1;
-      expect(contactsTableResult.rows.length).to.equal(contactSize);
+      expect(contactsTableResult.rows.length).to.equal(modifiedContactSize);
 
       const reportsTableResult = await client.query(`SELECT * FROM ${pgSchema}.reports`);
       expect(reportsTableResult.rows.length).to.equal(reports().length);
