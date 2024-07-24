@@ -32,6 +32,7 @@ export const isPostgresConnectionAlive = async (client) => {
     await client.query('SELECT 1');
     return true;
   } catch (error) {
+    console.error('Postgres connection check failed:', error);
     return false;
   }
 };
