@@ -1,5 +1,11 @@
 import { execSync } from 'child_process';
 
+const composeFiles = [
+  'docker-compose.yml',
+  'docker-compose.couchdb.yml',
+  'docker-compose.postgres.yml'
+].join(' -f ');
+
 const execDockerCommand = (command) => {
   try {
     return execSync(command).toString().trim();
@@ -10,7 +16,7 @@ const execDockerCommand = (command) => {
 };
 
 export const stopService = (serviceName) => {
-  execSync(`docker compose --env-file ./tests/.e2e-env -f docker-compose.yml -f docker-compose.couchdb.yml -f docker-compose.postgres.yml stop ${serviceName}`, { stdio: [] });
+  execSync(`docker compose --env-file ./tests/.e2e-env -f ${composeFiles} stop ${serviceName}`, { stdio: [] });
 };
 
 export const isServiceRunning = (serviceName) => {
@@ -19,5 +25,5 @@ export const isServiceRunning = (serviceName) => {
 };
 
 export const startService = (serviceName) => {
-  execSync(`docker compose --env-file ./tests/.e2e-env -f docker-compose.yml -f docker-compose.couchdb.yml -f docker-compose.postgres.yml start ${serviceName}`, { stdio: [] });
+  execSync(`docker compose --env-file ./tests/.e2e-env -f ${composeFiles} start ${serviceName}`, { stdio: [] });
 };

@@ -5,7 +5,7 @@
   "main": "",
   "scripts": {
     "postinstall": "cd couch2pg && npm ci",
-    "test:e2e": "npm run test:e2e-data && npm run test:e2e-stop-containers && npm run test:e2e-containers && mocha tests/**/*.spec.js --timeout 500000",
+    "test:e2e": "npm run test:e2e-data && npm run test:e2e-stop-containers && npm run test:e2e-containers && mocha tests/**/*.spec.js --timeout 50000",
     "lint": "eslint --color --cache .",
     "test:e2e-stop-containers": "docker compose --env-file ./tests/.e2e-env -f docker-compose.yml -f docker-compose.couchdb.yml -f docker-compose.postgres.yml down -v",
     "test:e2e-containers": "docker compose --env-file ./tests/.e2e-env -f docker-compose.yml -f docker-compose.couchdb.yml -f docker-compose.postgres.yml -f tests/dbt/docker-compose.yml up -d --build --force-recreate",
@@ -34,6 +34,7 @@
     "pg": "^8.12.0",
     "pouchdb-adapter-http": "^8.0.1",
     "pouchdb-core": "^8.0.1",
-    "sinon": "^18.0.0"
+    "sinon": "^18.0.0",
+    "uuid": "^9.0.1"
   }
 }
