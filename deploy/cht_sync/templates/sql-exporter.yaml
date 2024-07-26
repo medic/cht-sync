@@ -1,0 +1,35 @@
+{{- if (.Values.metrics_exporter).enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cht-sync-sql-exporter
+  labels:
+    app: metrics-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cht-sync-metrics
+  template:
+    metadata:
+      labels:
+        app: cht-sync-metrics
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: dbt
+          image: burningalchemist/sql_exporter:latest
+          command: ["sql_exporter", "--config.file=/etc/sql_exporter/sql_exporter.yml"]
+          resources:
+            limits:
+              cpu: {{ (.Values.dbt).cpu_limit | default "500m" }}
+              memory: {{ (.Values.dbt).memory_limit | default "1Gi" }}
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/sql_exporter/sql_exporter.yml
+              subPath: sql_exporter.yml
+      volumes:
+        - name: config-volume
+          configMap:
+            name:  cht-sync-sql-exporter-config
+{{- end }}

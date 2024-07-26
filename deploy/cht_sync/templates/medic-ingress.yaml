@@ -1,0 +1,32 @@
+{{- if (.Values.medic_ingress).enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cht-sync-metric-ingress
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/tags: {{ .Values.medic_ingress.annotations.tags }}
+    alb.ingress.kubernetes.io/group.name: {{ .Values.medic_ingress.annotations.groupname }}
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/healthcheck-port: traffic-port
+{{- if and (hasKey .Values.medic_ingress.annotations "certificate") .Values.medic_ingress.annotations.certificate }}
+    alb.ingress.kubernetes.io/certificate-arn: {{ .Values.medic_ingress.annotations.certificate }}
+{{- end }}
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+spec:
+  ingressClassName: alb
+  rules:
+    - host: {{ .Values.medic_ingress.host }}
+      http:
+        paths:
+          {{- if (.Values.metrics_exporter).enabled }}
+          - path: /metrics
+            pathType: Prefix
+            backend:
+              service:
+                name: metrics
+                port:
+                  number: 9399
+          {{- end }}
+{{- end }}

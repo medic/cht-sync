@@ -1,0 +1,48 @@
+{{- if (.Values.metrics_exporter).enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cht-sync-sql-exporter-config
+data:
+  sql_exporter.yml: |
+    global:
+      scrape_timeout_offset: 500ms
+      min_interval: 60s
+      max_connections: 3
+      max_idle_connections: 3
+      max_connection_lifetime: 10m
+
+    collectors:
+      - collector_name: couch2pg
+        queries:
+          - query_name: couch2pg-query
+            query: |
+              SELECT
+                split_part(seq,'-',1) as sequence,
+                split_part(source,'/',2) as db,
+                split_part(source,'/',1) as cht_instance
+              FROM
+                v1.couchdb_progress
+              WHERE
+                source like '%/%' and
+                seq like '%-%'
+              ORDER BY
+                cht_instance, db
+        metrics:
+          - metric_name: couch2pg_progress_sequence
+            type: counter
+            help: 'couch2pg backlog.'
+            key_labels:
+              - db
+              - cht_instance
+            values: [sequence]
+            query_ref: couch2pg-query
+
+    jobs:
+      - job_name: db_targets
+        collectors: [couch2pg]
+        enable_ping: true
+        static_configs:
+          - targets: 
+              "couch2pg": {{ include "cht_sync.postgres_connection_string" . }}
+{{- end }}
