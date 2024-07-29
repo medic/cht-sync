@@ -98,7 +98,7 @@ expect(contactTableResult.rows[0]).to.deep.include({
       expect(reportTableResult.rows.length).to.equal(1);
       expect(reportTableResult.rows[0].doc).excluding(['_rev', '_id']).to.deep.equal(report);
       expect(reportTableResult.rows[0].form).to.equal(report.form);
-      expect(reportTableResult.rows[0].patiend_id).to.equal(report.patiend_id);
+      expect(reportTableResult.rows[0].patient_id).to.equal(report.patient_id);
       expect(reportTableResult.rows[0].contact_id).to.equal(report.contact._id);
       expect(reportTableResult.rows[0].fields).to.deep.equal(report.fields);
     });
