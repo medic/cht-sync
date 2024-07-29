@@ -3,8 +3,8 @@ const BATCH_SIZE = process.env.BATCH_SIZE || 1000;
 import * as db from './db.js';
 
 const SELECT_SEQ_STMT = `SELECT seq FROM ${db.postgresProgressTable} WHERE source = $1`;
-const INSERT_SEQ_STMT = `INSERT INTO ${db.postgresProgressTable}(seq, source) VALUES ($1, $2)`;
-const UPDATE_SEQ_STMT = `UPDATE ${db.postgresProgressTable} SET seq = $1 WHERE source = $2`;
+const INSERT_SEQ_STMT = `INSERT INTO ${db.postgresProgressTable}(seq, pending, source, updated_at) VALUES ($1, $2, $3, CURRENT_TIMESTAMP)`;
+const UPDATE_SEQ_STMT = `UPDATE ${db.postgresProgressTable} SET seq = $1, pending = $2, updated_at = CURRENT_TIMESTAMP WHERE source = $3`;
 const INSERT_DOCS_STMT = `INSERT INTO ${db.postgresTable} (saved_timestamp, _id, _deleted, doc) VALUES`;
 const ON_CONFLICT_STMT = `
 ON CONFLICT (_id) DO UPDATE SET 
@@ -32,13 +32,17 @@ const removeSecurityDetails = (doc) => {
   }
 };
 
+const getNumberFromSeq = (seq) => {
+  return Number(seq.split('-')[0]);
+};
+
 const getSeq = async (source) => {
   const client = await db.getPgClient();
   const result = await client.query(SELECT_SEQ_STMT, [source]);
   let seq;
   if (!result.rows.length) {
     seq = 0;
-    await client.query(INSERT_SEQ_STMT, [seq, source]);
+    await client.query(INSERT_SEQ_STMT, [seq, null, source]);
   } else {
     seq = result.rows[0].seq;
   }
@@ -47,9 +51,9 @@ const getSeq = async (source) => {
   return seq;
 };
 
-const storeSeq = async (seq, source) => {
+const storeSeq = async (seq, pending, source) => {
   const client = await db.getPgClient();
-  await client.query(UPDATE_SEQ_STMT, [seq, source]);
+  await client.query(UPDATE_SEQ_STMT, [seq, pending, source]);
   await client.end();
 };
 
@@ -124,6 +128,8 @@ const importChangesBatch = async (couchDb, source) => {
   const seq = await getSeq(source);
   console.info('Downloading CouchDB changes feed from ' + seq);
 
+  const pending = await(getPending(couchDb, seq));
+
   const changes = await couchDb.changes({ limit: BATCH_SIZE, since: seq, seq_interval: BATCH_SIZE });
   console.log('There are ' + changes.results.length + ' changes to process');
 
@@ -135,10 +141,16 @@ const importChangesBatch = async (couchDb, source) => {
             docsToDelete.length + ' deletions and ' +
             docsToDownload.length + ' new / changed documents');
 
+  console.log('There are approximately ' + pending + ' changes left');
   await loadAndStoreDocs(couchDb, changes.results);
-  await storeSeq(changes.last_seq, source);
+  await storeSeq(changes.last_seq, pending, source);
 
   return changes.results.length;
+};
+
+const getPending = async (couchDb, seq) => {
+  const info = await couchDb.info();
+  return getNumberFromSeq(info.update_seq) - getNumberFromSeq(seq);
 };
 
 export default async (couchdb) => {

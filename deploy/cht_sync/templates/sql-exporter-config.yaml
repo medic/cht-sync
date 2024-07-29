@@ -19,6 +19,11 @@ data:
             query: |
               SELECT
                 split_part(seq,'-',1) as sequence,
+                pending as pending,
+                CASE 
+                  WHEN updated_at < NOW() - INTERVAL '1 minute' THEN 0
+                  ELSE 1
+                END AS liveness,
                 split_part(source,'/',2) as db,
                 split_part(source,'/',1) as cht_instance
               FROM
@@ -31,11 +36,27 @@ data:
         metrics:
           - metric_name: couch2pg_progress_sequence
             type: counter
-            help: 'couch2pg backlog.'
+            help: 'current sequence number for couch2pg'
             key_labels:
               - db
               - cht_instance
             values: [sequence]
+            query_ref: couch2pg-query
+          - metric_name: couch2pg_progress_pending
+            type: gauge
+            help: 'approximate number of changes left to sync from couch to postgres'
+            key_labels:
+              - db
+              - cht_instance
+            values: [pending]
+            query_ref: couch2pg-query
+          - metric_name: couch2pg_up
+            type: gauge
+            help: '1 if couch2pg is running and has updated in the last minute, 0 if not'
+            key_labels:
+              - db
+              - cht_instance
+            values: [updated_at]
             query_ref: couch2pg-query
 
     jobs:
