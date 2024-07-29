@@ -4,7 +4,16 @@ import chaiExclude from 'chai-exclude';
 chai.use(chaiExclude);
 chai.use(chaiExclude);
 import { rootConnect, isPostgresConnectionAlive } from './utils/postgres-utils.js';
-import { importAllDocs, docs, reports, contacts, persons, insertDoc, editDoc, deleteDoc } from './utils/couchdb-utils.js';
+import {
+  importAllDocs,
+  docs,
+  reports,
+  contacts,
+  persons,
+  insertDocs,
+  editDoc,
+  deleteDoc
+} from './utils/couchdb-utils.js';
 import { stopService, isServiceRunning, startService } from './utils/docker-utils.js';
 
 const {
@@ -74,12 +83,12 @@ describe('Main workflow Test Suite', () => {
       const contact = contacts().at(0);
       const contactTableResult = await client.query(`SELECT * FROM ${pgSchema}.contacts where uuid=$1`, [contact._id]);
       expect(contactTableResult.rows.length).to.equal(1);
-expect(contactTableResult.rows[0]).to.deep.include({
-  parent_uuid: contact.parent._id,
-  name: contact.name,
-  contact_type: contact.type,
-  phone: contact.phone
-});
+      expect(contactTableResult.rows[0]).to.deep.include({
+        parent_uuid: contact.parent._id,
+        name: contact.name,
+        contact_type: contact.type,
+        phone: contact.phone
+      });
     });
 
     it('should have the expected data in a record in person table', async () => {
@@ -145,7 +154,7 @@ expect(contactTableResult.rows[0]).to.deep.include({
         parent: { _id: uuidv4() },
       };
 
-      await insertDoc([newDoc]);
+      await insertDocs([newDoc]);
       startService('postgres');
       await delay(15); // Wait for Postgres
       const isRunning = isServiceRunning('postgres');
@@ -243,7 +252,7 @@ expect(contactTableResult.rows[0]).to.deep.include({
         parent: { _id: uuidv4() },
       };
 
-      await insertDoc([newDoc]);
+      await insertDocs([newDoc]);
       await delay(6); // wait for CHT-Sync
       await delay(12); // wait for DBT
 
