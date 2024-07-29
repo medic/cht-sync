@@ -38,7 +38,6 @@ const waitForDbt = async (pgClient, retry = 30) => {
 
 describe('Main workflow Test Suite', () => {
   let client;
-  let modifiedContactSize;
 
   before(async () => {
     console.log('Importing docs');
@@ -46,7 +45,6 @@ describe('Main workflow Test Suite', () => {
     client = await rootConnect();
     console.log('Waiting for DBT');
     await waitForDbt(client);
-    modifiedContactSize = contacts().length;
   });
 
   after(async () => await client?.end());
@@ -148,7 +146,6 @@ expect(contactTableResult.rows[0]).to.deep.include({
       };
 
       await insertDoc([newDoc]);
-      modifiedContactSize++;
       startService('postgres');
       await delay(15); // Wait for Postgres
       const isRunning = isServiceRunning('postgres');
@@ -192,7 +189,7 @@ expect(contactTableResult.rows[0]).to.deep.include({
       expect(modelPersonResult.rows[0].edited).to.equal('1');
 
       const contactsTableResult = await client.query(`SELECT * FROM ${pgSchema}.contacts`);
-      expect(contactsTableResult.rows.length).to.equal(modifiedContactSize);
+      expect(contactsTableResult.rows.length).to.equal(contacts().length);
 
       const reportsTableResult = await client.query(`SELECT * FROM ${pgSchema}.reports`);
       expect(reportsTableResult.rows.length).to.equal(reports().length);
