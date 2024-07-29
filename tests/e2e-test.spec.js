@@ -76,10 +76,12 @@ describe('Main workflow Test Suite', () => {
       const contact = contacts().at(0);
       const contactTableResult = await client.query(`SELECT * FROM ${pgSchema}.contacts where uuid=$1`, [contact._id]);
       expect(contactTableResult.rows.length).to.equal(1);
-      expect(contactTableResult.rows[0].parent_uuid).to.equal(contact.parent._id);
-      expect(contactTableResult.rows[0].name).to.equal(contact.name);
-      expect(contactTableResult.rows[0].contact_type).to.equal(contact.type);
-      expect(contactTableResult.rows[0].phone).to.equal(contact.phone);
+expect(contactTableResult.rows[0]).to.deep.include({
+  parent_uuid: contact.parent._id,
+  name: contact.name,
+  contact_type: contact.type,
+  phone: contact.phone
+});
     });
 
     it('should have the expected data in a record in person table', async () => {
