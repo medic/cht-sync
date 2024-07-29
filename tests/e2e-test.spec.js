@@ -4,7 +4,7 @@ import chaiExclude from 'chai-exclude';
 chai.use(chaiExclude);
 chai.use(chaiExclude);
 import { rootConnect, isPostgresConnectionAlive } from './utils/postgres-utils.js';
-import { importAllDocs, docs, reports, contacts, insertDoc, editDoc, deleteDoc } from './utils/couchdb-utils.js';
+import { importAllDocs, docs, reports, contacts, persons, insertDoc, editDoc, deleteDoc } from './utils/couchdb-utils.js';
 import { stopService, isServiceRunning, startService } from './utils/docker-utils.js';
 
 const {
@@ -69,7 +69,7 @@ describe('Main workflow Test Suite', () => {
 
     it('should have data in postgres persons table', async () => {
       const personsTableResult = await client.query(`SELECT * FROM ${pgSchema}.persons`);
-      expect(personsTableResult.rows.length).to.equal(contacts().filter(contact => contact.type === 'person').length);
+      expect(personsTableResult.rows.length).to.equal(persons().length);
     });
 
     it('should have the expected data in a record in contact table', async () => {
@@ -85,7 +85,7 @@ expect(contactTableResult.rows[0]).to.deep.include({
     });
 
     it('should have the expected data in a record in person table', async () => {
-      const person = contacts().filter(contact => contact.type === 'person').at(0);
+      const person = persons().at(0);
       const personTableResult = await client.query(`SELECT * FROM ${pgSchema}.persons where uuid=$1`, [person._id]);
       expect(personTableResult.rows.length).to.equal(1);
       expect(personTableResult.rows[0].date_of_birth).to.equal(person.date_of_birth);
@@ -129,7 +129,7 @@ expect(contactTableResult.rows[0]).to.deep.include({
       const reportsTableResult = await client.query(`SELECT * FROM ${pgSchema}.reports`);
       expect(reportsTableResult.rows.length).to.equal(reports().length);
       const personsTableResult = await client.query(`SELECT * FROM ${pgSchema}.persons`);
-      expect(personsTableResult.rows.length).to.equal(contacts().filter(contact => contact.type === 'person').length);
+      expect(personsTableResult.rows.length).to.equal(persons().length);
     });
 
     it('should handle PostgreSQL downtime gracefully', async () => {
@@ -210,7 +210,7 @@ expect(contactTableResult.rows[0]).to.deep.include({
     });
 
     it('should process person deletes', async () => {
-      const person = contacts().find(contact => contact.type === 'person' && !contact._deleted);
+      const person = persons().find(person => !person._deleted);
 
       const preDelete = await client.query(`SELECT * FROM ${pgSchema}.persons where uuid = $1`, [person._id]);
       expect(preDelete.rows.length).to.equal(1);
