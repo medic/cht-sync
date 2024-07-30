@@ -64,17 +64,32 @@ export const insertDocs = async (documents) => {
   const db = getDb(dbNames[0]);
   await db.bulkDocs(documents);
 };
-export const editDoc = async (doc) => {
+export const editDoc = async (doc, useOldRev = false) => {
   const dbName = getDbByDoc(doc._id);
   const db = getDb(dbName);
-  const existentDoc = await db.get(doc._id);
-  await db.put({ ...doc, _rev: existentDoc._rev });
+  let existentDoc;
+  if (useOldRev) {
+    existentDoc = await db.get(doc._id);
+    doc._rev = existentDoc._rev;
+  } else {
+    existentDoc = await db.get(doc._id);
+    doc._rev = existentDoc._rev;
+  }
+
+  await db.put(doc, { new_edits: true });
 };
 
-export const deleteDoc = async (doc) => {
+export const deleteDoc = async (doc, useOldRev = false) => {
   doc._deleted = true;
   const dbName = getDbByDoc(doc._id);
   const db = getDb(dbName);
-  const existentDoc = await db.get(doc._id);
-  await db.remove(doc._id, existentDoc._rev);
+  let existentDoc;
+  if (useOldRev) {
+    existentDoc = await db.get(doc._id);
+    doc._rev = existentDoc._rev;
+  } else {
+    existentDoc = await db.get(doc._id);
+    doc._rev = existentDoc._rev;
+  }
+  await db.remove(doc._id, doc._rev, { new_edits: true });
 };

@@ -273,7 +273,7 @@ describe('Main workflow Test Suite', () => {
 
       await editDoc(editedContactA);
       await delay(1);
-      await editDoc(editedContactB);
+      await editDoc(editedContactB, true);
 
       await delay(6); // wait for CHT-Sync
 
@@ -293,7 +293,8 @@ describe('Main workflow Test Suite', () => {
       const editedContact = { ...contact, edited: 'edited' };
 
       await editDoc(editedContact);
-      await deleteDoc(contact);
+      await delay(1);
+      await deleteDoc(contact, true);
 
       await delay(6); // wait for CHT-Sync
 
