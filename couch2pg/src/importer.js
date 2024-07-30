@@ -3,13 +3,22 @@ const BATCH_SIZE = process.env.BATCH_SIZE || 1000;
 import * as db from './db.js';
 
 const SELECT_SEQ_STMT = `SELECT seq FROM ${db.postgresProgressTable} WHERE source = $1`;
-const INSERT_SEQ_STMT = `INSERT INTO ${db.postgresProgressTable}(seq, pending, source, updated_at) VALUES ($1, $2, $3, CURRENT_TIMESTAMP)`;
-const UPDATE_SEQ_STMT = `UPDATE ${db.postgresProgressTable} SET seq = $1, pending = $2, updated_at = CURRENT_TIMESTAMP WHERE source = $3`;
+const INSERT_SEQ_STMT = `
+  INSERT INTO ${db.postgresProgressTable}
+    (seq, pending, source, updated_at)
+  VALUES
+    ($1, $2, $3, CURRENT_TIMESTAMP)
+`;
+const UPDATE_SEQ_STMT = `
+  UPDATE ${db.postgresProgressTable}
+    SET seq = $1, pending = $2, updated_at = CURRENT_TIMESTAMP
+  WHERE source = $3
+`;
 const INSERT_DOCS_STMT = `INSERT INTO ${db.postgresTable} (saved_timestamp, _id, _deleted, doc) VALUES`;
 const ON_CONFLICT_STMT = `
-ON CONFLICT (_id) DO UPDATE SET 
-  saved_timestamp = EXCLUDED.saved_timestamp, 
-  _deleted = EXCLUDED._deleted, 
+ON CONFLICT (_id) DO UPDATE SET
+  saved_timestamp = EXCLUDED.saved_timestamp,
+  _deleted = EXCLUDED._deleted,
   doc = EXCLUDED.doc
 `;
 
@@ -128,7 +137,13 @@ const importChangesBatch = async (couchDb, source) => {
   const seq = await getSeq(source);
   console.info('Downloading CouchDB changes feed from ' + seq);
 
-  const pending = await(getPending(couchDb, seq));
+  let pending;
+  try {
+    pending = await getPending(couchDb, seq);
+  } catch (error) {
+    console.error('Error getting pending:', error);
+    pending = 0;
+  }
 
   const changes = await couchDb.changes({ limit: BATCH_SIZE, since: seq, seq_interval: BATCH_SIZE });
   console.log('There are ' + changes.results.length + ' changes to process');

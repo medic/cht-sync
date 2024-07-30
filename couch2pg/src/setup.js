@@ -11,10 +11,10 @@ CREATE TABLE IF NOT EXISTS ${db.postgresTable} (
 
 const createProgressTable = `
 CREATE TABLE IF NOT EXISTS ${db.postgresProgressTable} (
-  seq varchar, 
+  seq varchar,
   pending integer,
   updated_at timestamptz,
-  source varchar PRIMARY KEY  
+  source varchar PRIMARY KEY
 );`;
 
 const createDeleteIndex = `
@@ -23,7 +23,7 @@ CREATE INDEX IF NOT EXISTS _deleted ON ${db.postgresTable}(_deleted);
 
 const createTimestampIndex = `
 CREATE INDEX IF NOT EXISTS saved_timestamp ON ${db.postgresTable}(saved_timestamp);
-`
+`;
 
 export const createDatabase = async () => {
   const client = await db.getPgClient();
