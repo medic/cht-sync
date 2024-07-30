@@ -16,7 +16,6 @@ const execDockerCommand = (command) => {
 };
 
 export const stopService = (serviceName) => {
-  //execSync(`docker compose --env-file ./tests/.e2e-env -f ${composeFiles} stop ${serviceName}`, { stdio: [] });
   execDockerCommand(`docker compose --env-file ./tests/.e2e-env -f ${composeFiles} stop ${serviceName}`);
 };
 
@@ -27,5 +26,4 @@ export const isServiceRunning = (serviceName) => {
 
 export const startService = (serviceName) => {
   execDockerCommand(`docker compose --env-file ./tests/.e2e-env -f ${composeFiles} start ${serviceName}`);
-  //execSync(`docker compose --env-file ./tests/.e2e-env -f ${composeFiles} start ${serviceName}`, { stdio: [] });
 };
