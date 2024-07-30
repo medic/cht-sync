@@ -27,7 +27,7 @@ data:
                 split_part(source,'/',2) as db,
                 split_part(source,'/',1) as cht_instance
               FROM
-                v1.couchdb_progress
+                {{ .Values.postgres.schema }}.couchdb_progress
               WHERE
                 source like '%/%' and
                 seq like '%-%'
@@ -56,12 +56,41 @@ data:
             key_labels:
               - db
               - cht_instance
-            values: [updated_at]
+            values: [liveness]
             query_ref: couch2pg-query
+      - collector_name: dbt
+        queries:
+          - query_name: dbt-latency
+            query: |
+              SELECT
+                EXTRACT(EPOCH FROM(CURRENT_TIMESTAMP) - MAX(saved_timestamp)) AS dbt_latency
+              FROM
+                {{ .Values.postgres.schema }}.document_metadata
+          - query_name: dbt-run-stats
+            query: |
+              SELECT
+                status,
+                execution_time,
+                name as table_name
+              FROM
+                {{ .Values.postgres.schema }}.dbt_results
+        metrics:
+          - metric_name: dbt_latency
+            type: gauge
+            help: 'difference between last timestamp in dbt models and current time (seconds)'
+            values: [dbt_latency]
+            query_ref: dbt-latency
+          - metric_name: dbt_execution_time
+            type: gauge
+            help: 'dbt run last execution time (ms)'
+            key_labels:
+              - table_name
+            values: [execution_time]
+            query_ref: dbt-run-stats
 
     jobs:
       - job_name: db_targets
-        collectors: [couch2pg]
+        collectors: [couch2pg, dbt]
         enable_ping: true
         static_configs:
           - targets: 
