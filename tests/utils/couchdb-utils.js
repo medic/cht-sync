@@ -60,7 +60,7 @@ export const contacts = () => docs.filter(doc => contactTypes.includes(doc.type)
 const getDbByDoc = (id) => Object.keys(docsByDb).filter(dnName => docsByDb[dnName].has(id));
 
 export const insertDocs = async (documents) => {
-  docs.push(documents);
+  docs.push(...documents);
   const db = getDb(dbNames[0]);
   await db.bulkDocs(documents);
 };
