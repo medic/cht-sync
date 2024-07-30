@@ -11,15 +11,24 @@ let seqQueries;
 let insertQuery;
 
 const getSeqMatch = () => `SELECT seq FROM ${db.postgresProgressTable} WHERE source = $1`;
-const insertSeqMatch = () => `INSERT INTO ${db.postgresProgressTable}(seq, source) VALUES ($1, $2)`;
-const updateSeqMatch = () => `UPDATE ${db.postgresProgressTable} SET seq = $1 WHERE source = $2`;
+const insertSeqMatch = () => `
+  INSERT INTO ${db.postgresProgressTable}
+    (seq, pending, source, updated_at)
+  VALUES
+    ($1, $2, $3, CURRENT_TIMESTAMP)
+`;
+const updateSeqMatch = () => `
+  UPDATE ${db.postgresProgressTable}
+    SET seq = $1, pending = $2, updated_at = CURRENT_TIMESTAMP
+  WHERE source = $3
+`;
 
 const insertDocsMatch = () => `INSERT INTO ${db.postgresTable} (saved_timestamp, _id, _deleted, doc) VALUES`;
 
 const ON_CONFLICT_STMT = `
-ON CONFLICT (_id) DO UPDATE SET 
-  saved_timestamp = EXCLUDED.saved_timestamp, 
-  _deleted = EXCLUDED._deleted, 
+ON CONFLICT (_id) DO UPDATE SET
+  saved_timestamp = EXCLUDED.saved_timestamp,
+  _deleted = EXCLUDED._deleted,
   doc = EXCLUDED.doc
 `;
 
@@ -68,7 +77,7 @@ describe('importer', () => {
 
     expect(pgClient.query.calledTwice).to.equal(true);
     expect(pgClient.query.args[0]).to.deep.equal([getSeqMatch(), ['thehost/medic']]);
-    expect(pgClient.query.args[1]).to.deep.equal([updateSeqMatch(), ['21-vvv', 'thehost/medic']]);
+    expect(pgClient.query.args[1]).to.deep.equal([updateSeqMatch(), ['21-vvv', 0, 'thehost/medic']]);
   });
   
   it('should start with 0 seq if no checkpointer is found', async () => {
@@ -84,8 +93,8 @@ describe('importer', () => {
     expect(couchDb.changes.args).to.deep.equal([[{ limit: 1000, seq_interval: 1000, since: 0 }]]);
     expect(pgClient.query.calledThrice).to.equal(true);
     expect(pgClient.query.args[0]).to.deep.equal([getSeqMatch(), ['host/db']]);
-    expect(pgClient.query.args[1]).to.deep.equal([insertSeqMatch(), [0, 'host/db']]);
-    expect(pgClient.query.args[2]).to.deep.equal([updateSeqMatch(), ['73-1', 'host/db']]);
+    expect(pgClient.query.args[1]).to.deep.equal([insertSeqMatch(), [0, null, 'host/db']]);
+    expect(pgClient.query.args[2]).to.deep.equal([updateSeqMatch(), ['73-1', 0, 'host/db']]);
   });
   
   it('should start with checkpointer seq when found', async () => {
@@ -126,8 +135,8 @@ describe('importer', () => {
 
     expect(seqQueries.update.calledTwice).to.equal(true);
     expect(seqQueries.update.args).to.deep.equal([
-      [updateSeqMatch(), ['23-ppp', 'thehost/medic']],
-      [updateSeqMatch(), ['25-vvv', 'thehost/medic']],
+      [updateSeqMatch(), ['23-ppp', 0, 'thehost/medic']],
+      [updateSeqMatch(), ['25-vvv', 0, 'thehost/medic']],
     ]);
 
     expect(couchDb.allDocs.calledOnce).to.equal(true);
@@ -197,10 +206,10 @@ describe('importer', () => {
 
     expect(seqQueries.update.callCount).to.equal(4);
     expect(seqQueries.update.args).to.deep.equal([
-      [updateSeqMatch(), ['3-seq', 'thehost/medic']],
-      [updateSeqMatch(), ['6-seq', 'thehost/medic']],
-      [updateSeqMatch(), ['9-seq', 'thehost/medic']],
-      [updateSeqMatch(), ['9-seq', 'thehost/medic']],
+      [updateSeqMatch(), ['3-seq', 0, 'thehost/medic']],
+      [updateSeqMatch(), ['6-seq', 0, 'thehost/medic']],
+      [updateSeqMatch(), ['9-seq', 0, 'thehost/medic']],
+      [updateSeqMatch(), ['9-seq', 0, 'thehost/medic']],
     ]);
 
     expect(couchDb.allDocs.callCount).to.equal(3);
@@ -491,8 +500,8 @@ describe('importer', () => {
 
     expect(seqQueries.update.calledTwice).to.equal(true);
     expect(seqQueries.update.args).to.deep.equal([
-      [updateSeqMatch(), ['23-ppp', 'thehost/medic']],
-      [updateSeqMatch(), ['25-vvv', 'thehost/medic']],
+      [updateSeqMatch(), ['23-ppp', 0, 'thehost/medic']],
+      [updateSeqMatch(), ['25-vvv', 0, 'thehost/medic']],
     ]);
 
     expect(couchDb.allDocs.calledOnce).to.equal(true);
