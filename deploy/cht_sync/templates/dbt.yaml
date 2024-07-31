@@ -6,11 +6,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: cht-sync
+      app: cht-sync-dbt
   template:
     metadata:
       labels:
-        app: cht-sync
+        app: cht-sync-dbt
     spec:
       automountServiceAccountToken: false
       containers:

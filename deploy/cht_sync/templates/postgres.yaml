@@ -10,13 +10,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: cht-sync
-      inner.service: postgres
+      app: cht-sync-postgres
   template:
     metadata:
       labels:
-        app: cht-sync
-        inner.service: postgres
+        app: cht-sync-postgres
     spec:
       automountServiceAccountToken: false
       containers:
