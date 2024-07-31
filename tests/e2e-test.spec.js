@@ -279,7 +279,7 @@ describe('Main workflow Test Suite', () => {
 
       const pgTableContact = await client.query(`SELECT * from ${PGTABLE} where _id = $1`, [contact._id]);
       const resolvedValue = pgTableContact.rows[0].doc.edited;
-      expect(resolvedValue).to.equal('B');
+      expect(resolvedValue).to.equal('A');
 
       await delay(12); // wait for DBT
 
@@ -299,12 +299,12 @@ describe('Main workflow Test Suite', () => {
       await delay(6); // wait for CHT-Sync
 
       const pgTableContact = await client.query(`SELECT * from ${PGTABLE} where _id = $1`, [contact._id]);
-      expect(pgTableContact.rows[0]._deleted).to.equal(true);
+      expect(pgTableContact.rows[0]._deleted).to.equal(false);
 
       await delay(12); // wait for DBT
 
       const modelContactResult = await client.query(`SELECT * FROM ${pgSchema}.contacts where uuid= $1`, [contact._id]);
-      expect(modelContactResult.rows.length).to.equal(0);
+      expect(modelContactResult.rows.length).to.equal(1);
     });
   });
 });

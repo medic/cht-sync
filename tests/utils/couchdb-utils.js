@@ -59,37 +59,50 @@ export const contacts = () => docs.filter(doc => contactTypes.includes(doc.type)
 
 const getDbByDoc = (id) => Object.keys(docsByDb).filter(dnName => docsByDb[dnName].has(id));
 
+const getOldRevision = async (db, docId) => {
+  const doc = await db.get(docId, { revs: true });
+  const revisions = doc._revisions;
+  if (revisions && revisions.ids.length > 1) {
+    return `${revisions.start - 1}-${revisions.ids[1]}`;
+  }
+  throw new Error('No old revision available');
+};
+
 export const insertDocs = async (documents) => {
   docs.push(...documents);
   const db = getDb(dbNames[0]);
   await db.bulkDocs(documents);
 };
+
 export const editDoc = async (doc, useOldRev = false) => {
   const dbName = getDbByDoc(doc._id);
   const db = getDb(dbName);
-  let existentDoc;
+
   if (useOldRev) {
-    existentDoc = await db.get(doc._id);
-    doc._rev = existentDoc._rev;
+    // Simulate conflict by using an old revision
+    doc._rev = await getOldRevision(db, doc._id);
   } else {
-    existentDoc = await db.get(doc._id);
+    // Get the latest revision
+    const existentDoc = await db.get(doc._id);
     doc._rev = existentDoc._rev;
   }
 
-  await db.put(doc, { new_edits: true });
+  await db.bulkDocs([doc], { new_edits: true });
 };
 
 export const deleteDoc = async (doc, useOldRev = false) => {
   doc._deleted = true;
   const dbName = getDbByDoc(doc._id);
   const db = getDb(dbName);
-  let existentDoc;
+
   if (useOldRev) {
-    existentDoc = await db.get(doc._id);
-    doc._rev = existentDoc._rev;
+    // Simulate conflict by using an old revision
+    doc._rev = await getOldRevision(db, doc._id);
   } else {
-    existentDoc = await db.get(doc._id);
+    // Use the latest revision to prevent conflict
+    const existentDoc = await db.get(doc._id);
     doc._rev = existentDoc._rev;
   }
-  await db.remove(doc._id, doc._rev, { new_edits: true });
+
+  await db.bulkDocs([{ _id: doc._id, _rev: doc._rev, _deleted: true }], { new_edits: true });
 };
