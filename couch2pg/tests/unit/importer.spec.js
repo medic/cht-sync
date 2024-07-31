@@ -77,7 +77,7 @@ describe('importer', () => {
 
     expect(pgClient.query.calledTwice).to.equal(true);
     expect(pgClient.query.args[0]).to.deep.equal([getSeqMatch(), ['thehost/medic']]);
-    expect(pgClient.query.args[1]).to.deep.equal([updateSeqMatch(), ['21-vvv', 0, 'thehost/medic']]);
+    expect(pgClient.query.args[1]).to.deep.equal([updateSeqMatch(), ['21-vvv', null, 'thehost/medic']]);
   });
   
   it('should start with 0 seq if no checkpointer is found', async () => {
@@ -94,7 +94,7 @@ describe('importer', () => {
     expect(pgClient.query.calledThrice).to.equal(true);
     expect(pgClient.query.args[0]).to.deep.equal([getSeqMatch(), ['host/db']]);
     expect(pgClient.query.args[1]).to.deep.equal([insertSeqMatch(), [0, null, 'host/db']]);
-    expect(pgClient.query.args[2]).to.deep.equal([updateSeqMatch(), ['73-1', 0, 'host/db']]);
+    expect(pgClient.query.args[2]).to.deep.equal([updateSeqMatch(), ['73-1', null, 'host/db']]);
   });
   
   it('should start with checkpointer seq when found', async () => {
@@ -135,8 +135,8 @@ describe('importer', () => {
 
     expect(seqQueries.update.calledTwice).to.equal(true);
     expect(seqQueries.update.args).to.deep.equal([
-      [updateSeqMatch(), ['23-ppp', 0, 'thehost/medic']],
-      [updateSeqMatch(), ['25-vvv', 0, 'thehost/medic']],
+      [updateSeqMatch(), ['23-ppp', null, 'thehost/medic']],
+      [updateSeqMatch(), ['25-vvv', null, 'thehost/medic']],
     ]);
 
     expect(couchDb.allDocs.calledOnce).to.equal(true);
@@ -206,10 +206,10 @@ describe('importer', () => {
 
     expect(seqQueries.update.callCount).to.equal(4);
     expect(seqQueries.update.args).to.deep.equal([
-      [updateSeqMatch(), ['3-seq', 0, 'thehost/medic']],
-      [updateSeqMatch(), ['6-seq', 0, 'thehost/medic']],
-      [updateSeqMatch(), ['9-seq', 0, 'thehost/medic']],
-      [updateSeqMatch(), ['9-seq', 0, 'thehost/medic']],
+      [updateSeqMatch(), ['3-seq', null, 'thehost/medic']],
+      [updateSeqMatch(), ['6-seq', null, 'thehost/medic']],
+      [updateSeqMatch(), ['9-seq', null, 'thehost/medic']],
+      [updateSeqMatch(), ['9-seq', null, 'thehost/medic']],
     ]);
 
     expect(couchDb.allDocs.callCount).to.equal(3);
@@ -500,8 +500,8 @@ describe('importer', () => {
 
     expect(seqQueries.update.calledTwice).to.equal(true);
     expect(seqQueries.update.args).to.deep.equal([
-      [updateSeqMatch(), ['23-ppp', 0, 'thehost/medic']],
-      [updateSeqMatch(), ['25-vvv', 0, 'thehost/medic']],
+      [updateSeqMatch(), ['23-ppp', null, 'thehost/medic']],
+      [updateSeqMatch(), ['25-vvv', null, 'thehost/medic']],
     ]);
 
     expect(couchDb.allDocs.calledOnce).to.equal(true);

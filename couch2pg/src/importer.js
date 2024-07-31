@@ -1,6 +1,7 @@
 const BATCH_SIZE = process.env.BATCH_SIZE || 1000;
 
 import * as db from './db.js';
+import axios from 'axios';
 
 const SELECT_SEQ_STMT = `SELECT seq FROM ${db.postgresProgressTable} WHERE source = $1`;
 const INSERT_SEQ_STMT = `
@@ -39,10 +40,6 @@ const removeSecurityDetails = (doc) => {
     delete doc.derived_key;
     delete doc.salt;
   }
-};
-
-const getNumberFromSeq = (seq) => {
-  return Number(seq.split('-')[0]);
 };
 
 const getSeq = async (source) => {
@@ -142,7 +139,7 @@ const importChangesBatch = async (couchDb, source) => {
     pending = await getPending(couchDb, seq);
   } catch (error) {
     console.error('Error getting pending:', error);
-    pending = 0;
+    pending = null;
   }
 
   const changes = await couchDb.changes({ limit: BATCH_SIZE, since: seq, seq_interval: BATCH_SIZE });
@@ -164,8 +161,11 @@ const importChangesBatch = async (couchDb, source) => {
 };
 
 const getPending = async (couchDb, seq) => {
-  const info = await couchDb.info();
-  return getNumberFromSeq(info.update_seq) - getNumberFromSeq(seq);
+  const res = await axios.get(`${couchDb.name}/_changes?limit=0&since=${seq}`);
+  if (res.status === 200 && res.data?.pending) {
+    return res.data.pending;
+  }
+  return null;
 };
 
 export default async (couchdb) => {
