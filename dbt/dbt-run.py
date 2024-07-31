@@ -92,7 +92,7 @@ def get_manifest():
 
           return new_manifest;
 
-def update_status(package_json, manifest_json):
+def save_package_manifest(package_json, manifest_json):
   with connection() as conn:
     with conn.cursor() as cur:
       # because manifest is large, delete old entries
@@ -108,7 +108,7 @@ def update_status(package_json, manifest_json):
       conn.commit()
 
 
-def run_dbt():
+def update_models():
   # install the cht pipeline package
   package_json = get_package()
   subprocess.run(["dbt", "deps", "--profiles-dir", ".dbt", "--upgrade"])
@@ -117,7 +117,7 @@ def run_dbt():
   manifest_json = get_manifest()
 
   # save the new manifest and package for the next run
-  update_status(package_json, manifest_json)
+  save_package_manifest(package_json, manifest_json)
 
   # anything that changed, run a full refresh
   subprocess.run(["dbt", "run",
@@ -129,6 +129,7 @@ def run_dbt():
       "--state",
       "./old_manifest"])
 
+def run_incremental_models():
   # update incremental models (and tables if there are any)
   subprocess.run(["dbt", "run",  "--profiles-dir", ".dbt", "--exclude", "config.materialized:view"])
 
@@ -136,5 +137,6 @@ def run_dbt():
 if __name__ == "__main__":
   setup()
   while True:
-    run_dbt()
+    update_models()
+    run_incremental_models()
     time.sleep(int(os.getenv("DATAEMON_INTERVAL") or 5))
