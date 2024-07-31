@@ -4,7 +4,7 @@ const composeFiles = [
   'docker-compose.yml',
   'docker-compose.couchdb.yml',
   'docker-compose.postgres.yml'
-].join(' -f ');
+].map(file => `-f ${file}`).join(' ');
 
 const execDockerCommand = (command) => {
   try {
@@ -16,7 +16,7 @@ const execDockerCommand = (command) => {
 };
 
 export const stopService = (serviceName) => {
-  execDockerCommand(`docker compose --env-file ./tests/.e2e-env -f ${composeFiles} stop ${serviceName}`);
+  execDockerCommand(`docker compose --env-file ./tests/.e2e-env ${composeFiles} stop ${serviceName}`);
 };
 
 export const isServiceRunning = (serviceName) => {
@@ -25,5 +25,5 @@ export const isServiceRunning = (serviceName) => {
 };
 
 export const startService = (serviceName) => {
-  execDockerCommand(`docker compose --env-file ./tests/.e2e-env -f ${composeFiles} start ${serviceName}`);
+  execDockerCommand(`docker compose --env-file ./tests/.e2e-env ${composeFiles} start ${serviceName}`);
 };
