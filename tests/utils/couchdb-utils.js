@@ -74,35 +74,46 @@ export const insertDocs = async (documents) => {
   await db.bulkDocs(documents);
 };
 
-export const editDoc = async (doc, useOldRev = false) => {
+export const editDoc = async (doc) => {
+  const dbName = getDbByDoc(doc._id);
+  const db = getDb(dbName);
+  const existentDoc = await db.get(doc._id);
+  await db.put({ ...doc, _rev: existentDoc._rev });
+};
+
+export const deleteDoc = async (doc) => {
+  doc._deleted = true;
+  const dbName = getDbByDoc(doc._id);
+  const db = getDb(dbName);
+  const existentDoc = await db.get(doc._id);
+  await db.remove(doc._id, existentDoc._rev);
+};
+
+export const conflictEditDoc = async (doc) => {
   const dbName = getDbByDoc(doc._id);
   const db = getDb(dbName);
 
-  if (useOldRev) {
-    // Simulate conflict by using an old revision
-    doc._rev = await getOldRevision(db, doc._id);
-  } else {
-    // Get the latest revision
-    const existentDoc = await db.get(doc._id);
-    doc._rev = existentDoc._rev;
-  }
+  delete doc._rev;
+  const result = await db.bulkDocs([doc], { new_edits: true });
 
-  await db.bulkDocs([doc], { new_edits: true });
+  result.forEach((res) => {
+    if (res.error) {
+      console.log(`Failed to edit document with id ${doc._id}: ${res.reason}`);
+    }
+  });
 };
 
-export const deleteDoc = async (doc, useOldRev = false) => {
+export const conflictDeleteDoc = async (doc) => {
   doc._deleted = true;
   const dbName = getDbByDoc(doc._id);
   const db = getDb(dbName);
 
-  if (useOldRev) {
-    // Simulate conflict by using an old revision
-    doc._rev = await getOldRevision(db, doc._id);
-  } else {
-    // Use the latest revision to prevent conflict
-    const existentDoc = await db.get(doc._id);
-    doc._rev = existentDoc._rev;
-  }
+  delete doc._rev;
+  const result = await db.bulkDocs([doc], { new_edits: true });
 
-  await db.bulkDocs([{ _id: doc._id, _rev: doc._rev, _deleted: true }], { new_edits: true });
+  result.forEach((res) => {
+    if (res.error) {
+      console.log(`Failed to delete document with id ${doc._id}: ${res.reason}`);
+    }
+  });
 };

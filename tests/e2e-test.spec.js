@@ -12,7 +12,9 @@ import {
   persons,
   insertDocs,
   editDoc,
-  deleteDoc
+  deleteDoc,
+  conflictEditDoc,
+  conflictDeleteDoc
 } from './utils/couchdb-utils.js';
 import { stopService, isServiceRunning, startService } from './utils/docker-utils.js';
 
@@ -128,7 +130,7 @@ describe('Main workflow Test Suite', () => {
       await delay(15); // Wait for CouchDB
       const isRunning = isServiceRunning('couchdb');
       expect(isRunning).to.be.true;
-      await delay(6); // Wait for DBT
+      await delay(15); // Wait for DBT
       const couchdbTableResult = await client.query(`SELECT * FROM ${PGTABLE}`);
       expect(couchdbTableResult.rows.length).to.equal(docs.length);
       const contactsTableResult = await client.query(`SELECT * FROM ${pgSchema}.contacts`);
@@ -273,7 +275,7 @@ describe('Main workflow Test Suite', () => {
 
       await editDoc(editedContactA);
       await delay(1);
-      await editDoc(editedContactB, true);
+      await conflictEditDoc(editedContactB);
 
       await delay(6); // wait for CHT-Sync
 
@@ -294,7 +296,7 @@ describe('Main workflow Test Suite', () => {
 
       await editDoc(editedContact);
       await delay(1);
-      await deleteDoc(contact, true);
+      await conflictDeleteDoc(contact);
 
       await delay(6); // wait for CHT-Sync
 
