@@ -59,15 +59,6 @@ export const contacts = () => docs.filter(doc => contactTypes.includes(doc.type)
 
 const getDbByDoc = (id) => Object.keys(docsByDb).filter(dnName => docsByDb[dnName].has(id));
 
-const getOldRevision = async (db, docId) => {
-  const doc = await db.get(docId, { revs: true });
-  const revisions = doc._revisions;
-  if (revisions && revisions.ids.length > 1) {
-    return `${revisions.start - 1}-${revisions.ids[1]}`;
-  }
-  throw new Error('No old revision available');
-};
-
 export const insertDocs = async (documents) => {
   docs.push(...documents);
   const db = getDb(dbNames[0]);
