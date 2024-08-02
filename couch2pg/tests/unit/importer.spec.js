@@ -420,7 +420,7 @@ describe('importer', () => {
         pending: 2134
       }
     };
-    axios.get = sinon.stub().resolves(pendingResponse)
+    axios.get = sinon.stub().resolves(pendingResponse);
 
     couchDb.name = 'http://host/db';
     couchDb.changes.resolves({ results: [], last_seq: '73-1' });
