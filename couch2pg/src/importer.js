@@ -162,7 +162,7 @@ const importChangesBatch = async (couchDb, source) => {
 
 const getPending = async (couchDb, seq) => {
   const res = await axios.get(`${couchDb.name}/_changes?limit=0&since=${seq}`);
-  if (res.status === 200 && res.data?.pending) {
+  if (res.status === 200 && res.data?.pending != null) {
     return res.data.pending;
   }
   return null;

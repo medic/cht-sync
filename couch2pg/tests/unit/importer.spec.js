@@ -9,6 +9,7 @@ let pgClient;
 let importer;
 let seqQueries;
 let insertQuery;
+let axios;
 
 const getSeqMatch = () => `SELECT seq FROM ${db.postgresProgressTable} WHERE source = $1`;
 const insertSeqMatch = () => `
@@ -52,6 +53,18 @@ describe('importer', () => {
       postgresTable: 'v1.whatever',
     };
 
+    // axios is used to get pending count from couchdb
+    // so stub any call to axios with response including pending count
+    const pendingResponse = {
+      status: 200,
+      data: {
+        pending: 0
+      }
+    };
+    axios = {
+      get: sinon.stub().resolves(pendingResponse)
+    };
+
     seqQueries = {
       get: pgClient.query.withArgs(sinon.match(`SELECT seq FROM ${db.postgresProgressTable}`)),
       update: pgClient.query.withArgs(sinon.match(`UPDATE ${db.postgresProgressTable}`)),
@@ -59,7 +72,7 @@ describe('importer', () => {
     };
     insertQuery = pgClient.query.withArgs(sinon.match(`INSERT INTO ${db.postgresTable}`));
 
-    importer = await esmock('../../src/importer', { '../../src/db': db });
+    importer = await esmock('../../src/importer', { '../../src/db': db, 'axios': axios });
   });
   
   afterEach(() => {
@@ -77,7 +90,7 @@ describe('importer', () => {
 
     expect(pgClient.query.calledTwice).to.equal(true);
     expect(pgClient.query.args[0]).to.deep.equal([getSeqMatch(), ['thehost/medic']]);
-    expect(pgClient.query.args[1]).to.deep.equal([updateSeqMatch(), ['21-vvv', null, 'thehost/medic']]);
+    expect(pgClient.query.args[1]).to.deep.equal([updateSeqMatch(), ['21-vvv', 0, 'thehost/medic']]);
   });
   
   it('should start with 0 seq if no checkpointer is found', async () => {
@@ -94,7 +107,7 @@ describe('importer', () => {
     expect(pgClient.query.calledThrice).to.equal(true);
     expect(pgClient.query.args[0]).to.deep.equal([getSeqMatch(), ['host/db']]);
     expect(pgClient.query.args[1]).to.deep.equal([insertSeqMatch(), [0, null, 'host/db']]);
-    expect(pgClient.query.args[2]).to.deep.equal([updateSeqMatch(), ['73-1', null, 'host/db']]);
+    expect(pgClient.query.args[2]).to.deep.equal([updateSeqMatch(), ['73-1', 0, 'host/db']]);
   });
   
   it('should start with checkpointer seq when found', async () => {
@@ -135,8 +148,8 @@ describe('importer', () => {
 
     expect(seqQueries.update.calledTwice).to.equal(true);
     expect(seqQueries.update.args).to.deep.equal([
-      [updateSeqMatch(), ['23-ppp', null, 'thehost/medic']],
-      [updateSeqMatch(), ['25-vvv', null, 'thehost/medic']],
+      [updateSeqMatch(), ['23-ppp', 0, 'thehost/medic']],
+      [updateSeqMatch(), ['25-vvv', 0, 'thehost/medic']],
     ]);
 
     expect(couchDb.allDocs.calledOnce).to.equal(true);
@@ -206,10 +219,10 @@ describe('importer', () => {
 
     expect(seqQueries.update.callCount).to.equal(4);
     expect(seqQueries.update.args).to.deep.equal([
-      [updateSeqMatch(), ['3-seq', null, 'thehost/medic']],
-      [updateSeqMatch(), ['6-seq', null, 'thehost/medic']],
-      [updateSeqMatch(), ['9-seq', null, 'thehost/medic']],
-      [updateSeqMatch(), ['9-seq', null, 'thehost/medic']],
+      [updateSeqMatch(), ['3-seq', 0, 'thehost/medic']],
+      [updateSeqMatch(), ['6-seq', 0, 'thehost/medic']],
+      [updateSeqMatch(), ['9-seq', 0, 'thehost/medic']],
+      [updateSeqMatch(), ['9-seq', 0, 'thehost/medic']],
     ]);
 
     expect(couchDb.allDocs.callCount).to.equal(3);
@@ -400,6 +413,29 @@ describe('importer', () => {
     ]]);
   });
 
+  it('should save the correct pending count', async () => {
+    const pendingResponse = {
+      status: 200,
+      data: {
+        pending: 2134
+      }
+    };
+    axios.get = sinon.stub().resolves(pendingResponse)
+
+    couchDb.name = 'http://host/db';
+    couchDb.changes.resolves({ results: [], last_seq: '73-1' });
+    seqQueries.get.resolves({ rows: [] });
+    seqQueries.set.resolves();
+    seqQueries.update.resolves();
+
+    await importer(couchDb);
+
+    expect(pgClient.query.calledThrice).to.equal(true);
+    expect(pgClient.query.args[0]).to.deep.equal([getSeqMatch(), ['host/db']]);
+    expect(pgClient.query.args[1]).to.deep.equal([insertSeqMatch(), [0, null, 'host/db']]);
+    expect(pgClient.query.args[2]).to.deep.equal([updateSeqMatch(), ['73-1', 2134, 'host/db']]);
+  });
+
   it('should throw error when getting seq fails', async () => {
     seqQueries.get.rejects(new Error('omg'));
 
@@ -469,6 +505,27 @@ describe('importer', () => {
     expect(seqQueries.get.called).to.equal(true);
     expect(insertQuery.called).to.equal(true);
   });
+
+  it('should not throw error when getting pending fails', async () => {
+    const pendingResponse = {
+      status: 504,
+    };
+    axios.get = sinon.stub().resolves(pendingResponse);
+
+    seqQueries.get.resolves({ rows: [] });
+    couchDb.changes.onCall(0).resolves({ results: [{ id: 'doc1' }], last_seq: '23-ppp' });
+    couchDb.changes.onCall(1).resolves({ results: [], last_seq: '25-vvv' });
+    couchDb.allDocs.resolves({ rows: [{ id: 3, doc: { _id: 3, _rev: '3-fdsfs' }}] });
+    insertQuery.resolves();
+
+    await importer(couchDb);
+
+    expect(couchDb.changes.called).to.equal(true);
+    expect(couchDb.allDocs.called).to.equal(true);
+    expect(seqQueries.update.called).to.equal(true);
+    expect(seqQueries.get.called).to.equal(true);
+    expect(insertQuery.called).to.equal(true);
+  });
   
   it('should retry on deadlock', async () => {
     const now = new Date('2023-01-01');
@@ -500,8 +557,8 @@ describe('importer', () => {
 
     expect(seqQueries.update.calledTwice).to.equal(true);
     expect(seqQueries.update.args).to.deep.equal([
-      [updateSeqMatch(), ['23-ppp', null, 'thehost/medic']],
-      [updateSeqMatch(), ['25-vvv', null, 'thehost/medic']],
+      [updateSeqMatch(), ['23-ppp', 0, 'thehost/medic']],
+      [updateSeqMatch(), ['25-vvv', 0, 'thehost/medic']],
     ]);
 
     expect(couchDb.allDocs.calledOnce).to.equal(true);
