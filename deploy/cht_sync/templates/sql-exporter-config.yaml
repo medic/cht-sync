@@ -63,9 +63,10 @@ data:
           - query_name: dbt-latency
             query: |
               SELECT
-                EXTRACT(EPOCH FROM(CURRENT_TIMESTAMP) - MAX(saved_timestamp)) AS dbt_latency
+                EXTRACT(EPOCH FROM(couchdb.latest - dbt_root.latest)) AS dbt_latency
               FROM
-                {{ .Values.postgres.schema }}.document_metadata
+                (SELECT MAX(saved_timestamp) as latest FROM {{ .Values.postgres.schema }}.document_metadata) dbt_root,
+                (SELECT MAX(saved_timestamp) as latest FROM {{ .Values.postgres.schema }}.{{ .Values.postgres.table }}) couchdb
           - query_name: dbt-run-stats
             query: |
               SELECT
