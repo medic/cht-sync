@@ -32,7 +32,7 @@ describe('setup', () => {
       await setup.createDatabase();
 
       expect(db.getPgClient.calledOnce).to.equal(true);
-      expect(pgClient.query.callCount).to.equal(4);
+      expect(pgClient.query.callCount).to.equal(5);
       expect(pgClient.end.calledOnce).to.equal(true);
       expect(pgClient.query.args[0]).to.deep.equal(['CREATE SCHEMA IF NOT EXISTS v1']);
       expect(pgClient.query.args[1]).to.deep.equal([ `
@@ -46,9 +46,14 @@ CREATE TABLE IF NOT EXISTS v1.whatever (
 CREATE INDEX IF NOT EXISTS _deleted ON v1.whatever(_deleted);
 `]);
       expect(pgClient.query.args[3]).to.deep.equal([`
+CREATE INDEX IF NOT EXISTS saved_timestamp ON v1.whatever(saved_timestamp);
+`]);
+      expect(pgClient.query.args[4]).to.deep.equal([`
 CREATE TABLE IF NOT EXISTS v1.couchdb_progress (
-  seq varchar, 
-  source varchar PRIMARY KEY  
+  seq varchar,
+  pending integer,
+  updated_at timestamptz,
+  source varchar PRIMARY KEY
 );`]);
     }); 
   });

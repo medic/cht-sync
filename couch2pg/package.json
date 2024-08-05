@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^1.7.2",
     "dotenv": "^16.4.5",
     "pg": "^8.11.5",
     "pouchdb-adapter-http": "^8.0.1",

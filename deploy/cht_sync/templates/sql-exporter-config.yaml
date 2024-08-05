@@ -1,0 +1,99 @@
+{{- if (.Values.metrics_exporter).enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cht-sync-sql-exporter-config
+data:
+  sql_exporter.yml: |
+    global:
+      scrape_timeout_offset: 500ms
+      min_interval: 60s
+      max_connections: 3
+      max_idle_connections: 3
+      max_connection_lifetime: 10m
+
+    collectors:
+      - collector_name: couch2pg
+        queries:
+          - query_name: couch2pg-query
+            query: |
+              SELECT
+                split_part(seq,'-',1) as sequence,
+                pending as pending,
+                CASE 
+                  WHEN updated_at < NOW() - INTERVAL '1 minute' THEN 0
+                  ELSE 1
+                END AS liveness,
+                split_part(source,'/',2) as db,
+                split_part(source,'/',1) as cht_instance
+              FROM
+                {{ .Values.postgres.schema }}.couchdb_progress
+              WHERE
+                source like '%/%' and
+                seq like '%-%'
+              ORDER BY
+                cht_instance, db
+        metrics:
+          - metric_name: couch2pg_progress_sequence
+            type: counter
+            help: 'current sequence number for couch2pg'
+            key_labels:
+              - db
+              - cht_instance
+            values: [sequence]
+            query_ref: couch2pg-query
+          - metric_name: couch2pg_progress_pending
+            type: gauge
+            help: 'approximate number of changes left to sync from couch to postgres'
+            key_labels:
+              - db
+              - cht_instance
+            values: [pending]
+            query_ref: couch2pg-query
+          - metric_name: couch2pg_up
+            type: gauge
+            help: '1 if couch2pg is running and has updated in the last minute, 0 if not'
+            key_labels:
+              - db
+              - cht_instance
+            values: [liveness]
+            query_ref: couch2pg-query
+      - collector_name: dbt
+        queries:
+          - query_name: dbt-latency
+            query: |
+              SELECT
+                EXTRACT(EPOCH FROM(couchdb.latest - dbt_root.latest)) AS dbt_latency
+              FROM
+                (SELECT MAX(saved_timestamp) as latest FROM {{ .Values.postgres.schema }}.document_metadata) dbt_root,
+                (SELECT MAX(saved_timestamp) as latest FROM {{ .Values.postgres.schema }}.{{ .Values.postgres.table }}) couchdb
+          - query_name: dbt-run-stats
+            query: |
+              SELECT
+                status,
+                execution_time,
+                name as table_name
+              FROM
+                {{ .Values.postgres.schema }}.dbt_results
+        metrics:
+          - metric_name: dbt_latency
+            type: gauge
+            help: 'difference between last timestamp in dbt models and current time (seconds)'
+            values: [dbt_latency]
+            query_ref: dbt-latency
+          - metric_name: dbt_execution_time
+            type: gauge
+            help: 'dbt run last execution time (ms)'
+            key_labels:
+              - table_name
+            values: [execution_time]
+            query_ref: dbt-run-stats
+
+    jobs:
+      - job_name: db_targets
+        collectors: [couch2pg, dbt]
+        enable_ping: true
+        static_configs:
+          - targets: 
+              "couch2pg": {{ include "cht_sync.postgres_connection_string" . }}
+{{- end }}

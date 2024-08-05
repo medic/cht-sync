@@ -11,12 +11,18 @@ CREATE TABLE IF NOT EXISTS ${db.postgresTable} (
 
 const createProgressTable = `
 CREATE TABLE IF NOT EXISTS ${db.postgresProgressTable} (
-  seq varchar, 
-  source varchar PRIMARY KEY  
+  seq varchar,
+  pending integer,
+  updated_at timestamptz,
+  source varchar PRIMARY KEY
 );`;
 
 const createDeleteIndex = `
 CREATE INDEX IF NOT EXISTS _deleted ON ${db.postgresTable}(_deleted);
+`;
+
+const createTimestampIndex = `
+CREATE INDEX IF NOT EXISTS saved_timestamp ON ${db.postgresTable}(saved_timestamp);
 `;
 
 export const createDatabase = async () => {
@@ -24,6 +30,7 @@ export const createDatabase = async () => {
   await client.query(createSchema);
   await client.query(createTable);
   await client.query(createDeleteIndex);
+  await client.query(createTimestampIndex);
   await client.query(createProgressTable);
   await client.end();
 };
