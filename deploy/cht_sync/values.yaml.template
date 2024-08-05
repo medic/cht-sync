@@ -1,6 +1,6 @@
 
 postgres:
-  enabled: true  # if true a postgres service will not be created in this cluster
+  enabled: true  # if true a postgres service will be created in this cluster
   user: ""
   password: ""
   db: ""
@@ -33,3 +33,22 @@ couchdbs:
     dbs: "medic medic_sentinel" # required if different than above
     port: "5984" # required if different than above
     secure: "true" # required if different than above
+
+# if using the medic EKS cluster these values will create an ingress
+# using a shared ALB
+# if not using medic EKS cluser, omit
+#medic_ingress:
+#  enabled: true
+#  annotations:
+#    groupname: "dev-cht-alb"
+#    tags: "Environment=dev,Team=QA"
+#    certificate: ""
+#  host: ""
+#  hosted_zone_id: ""
+#  load_balancer: ""
+
+# if set to true, will create a sql exporter sidecar
+# and service "metrics"
+# to export metrics from postgres via http (prometheus format)
+#metrics_exporter:
+#  enabled: true

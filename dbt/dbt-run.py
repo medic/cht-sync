@@ -22,91 +22,121 @@ def connection():
             print(f"Unable to connect! (Attempt {attempt})", e)
     raise psycopg2.OperationalError("Could not connect to postgres")
 
+def setup():
+  # Create schema
+  with connection() as conn:
+      with conn.cursor() as cur:
+          cur.execute(f"""
+              CREATE SCHEMA IF NOT EXISTS {os.getenv('POSTGRES_SCHEMA')};
+          """)
+      conn.commit()
 
-# Create schema
-with connection() as conn:
+  with connection() as conn:
+      with conn.cursor() as cur:
+          cur.execute(f"""
+              CREATE TABLE IF NOT EXISTS
+              {os.getenv('POSTGRES_SCHEMA')}._dataemon (
+                  inserted_on TIMESTAMP DEFAULT NOW(),
+                  packages jsonb, manifest jsonb
+              )
+          """)
+      conn.commit()
+
+def get_package():
+  package_json = '{}'
+
+  if os.getenv("DBT_PACKAGE_TARBALL_URL"):
+      print(os.getenv("DBT_PACKAGE_TARBALL_URL"))
+      init_package = urlparse(os.getenv("DBT_PACKAGE_TARBALL_URL"))
+      package_json = json.dumps({"packages": [{
+            "tarball": init_package.geturl(),
+            "name": "packages"
+          }]})
+
+  if os.getenv("CHT_PIPELINE_BRANCH_URL"):
+      init_package = urlparse(os.getenv("CHT_PIPELINE_BRANCH_URL"))
+      if init_package.scheme in ["http", "https"]:
+          package_json = json.dumps({"packages": [{
+              "git": init_package._replace(fragment='').geturl(),
+              "revision": init_package.fragment
+          }]})
+
+  with open("/dbt/packages.yml", "w") as f:
+    f.write(package_json)
+
+  return package_json
+
+
+def get_manifest():
+  # load old manifest from db
+  with connection() as conn:
+      with conn.cursor() as cur:
+          cur.execute(f"""
+              SELECT manifest
+              FROM {os.getenv('POSTGRES_SCHEMA')}._dataemon
+              ORDER BY inserted_on DESC
+          """)
+          manifest = cur.fetchone()
+
+          # save to file if found
+          if manifest and len(manifest) > 0:
+            with open("/dbt/old_manifest/manifest.json", "w") as f:
+                f.write(json.dumps(manifest[0]));
+
+          # run dbt ls to make sure current manifest is generated
+          subprocess.run(["dbt", "ls",  "--profiles-dir", ".dbt"])
+
+          new_manifest = '{}'
+          with open("/dbt/target/manifest.json", "r") as f:
+            new_manifest = f.read()
+
+          return new_manifest;
+
+def save_package_manifest(package_json, manifest_json):
+  with connection() as conn:
     with conn.cursor() as cur:
-        cur.execute(f"""
-            CREATE SCHEMA IF NOT EXISTS {os.getenv('POSTGRES_SCHEMA')};
-        """)
-    conn.commit()
+      # because manifest is large, delete old entries
+      # we only want the current/latest data
+      cur.execute(
+        f"DELETE FROM {os.getenv('POSTGRES_SCHEMA')}._dataemon "
+      )
+      cur.execute(
+        f"INSERT INTO {os.getenv('POSTGRES_SCHEMA')}._dataemon "
+        "(packages, manifest) VALUES (%s, %s);",
+        [package_json, manifest_json]
+      )
+      conn.commit()
 
-with connection() as conn:
-    with conn.cursor() as cur:
-        cur.execute(f"""
-            CREATE TABLE IF NOT EXISTS
-            {os.getenv('POSTGRES_SCHEMA')}._dataemon (
-                inserted_on TIMESTAMP DEFAULT NOW(),
-                packages jsonb, manifest jsonb
-            )
-        """)
-    conn.commit()
 
-package_json = '{}'
+def update_models():
+  # install the cht pipeline package
+  package_json = get_package()
+  subprocess.run(["dbt", "deps", "--profiles-dir", ".dbt", "--upgrade"])
 
-if os.getenv("DBT_PACKAGE_TARBALL_URL"):
-    print(os.getenv("DBT_PACKAGE_TARBALL_URL"))
-    init_package = urlparse(os.getenv("DBT_PACKAGE_TARBALL_URL"))
-    package_json = json.dumps({"packages": [{
-          "tarball": init_package.geturl(),
-          "name": "packages"
-        }]})
+  # check for new changes using the manifest
+  manifest_json = get_manifest()
 
-if os.getenv("CHT_PIPELINE_BRANCH_URL"):
-    init_package = urlparse(os.getenv("CHT_PIPELINE_BRANCH_URL"))
-    if init_package.scheme in ["http", "https"]:
-        package_json = json.dumps({"packages": [{
-            "git": init_package._replace(fragment='').geturl(),
-            "revision": init_package.fragment
-        }]})
+  # save the new manifest and package for the next run
+  save_package_manifest(package_json, manifest_json)
 
-with open("/dbt/packages.yml", "w") as f:
-  f.write(package_json)
+  # anything that changed, run a full refresh
+  subprocess.run(["dbt", "run",
+    "--profiles-dir",
+     ".dbt",
+     "--select",
+     "state:modified",
+      "--full-refresh",
+      "--state",
+      "./old_manifest"])
 
-subprocess.run(["dbt", "deps", "--profiles-dir", ".dbt"])
+def run_incremental_models():
+  # update incremental models (and tables if there are any)
+  subprocess.run(["dbt", "run",  "--profiles-dir", ".dbt", "--exclude", "config.materialized:view"])
 
-# load old manifest from db
-with connection() as conn:
-    with conn.cursor() as cur:
-        cur.execute(f"""
-            SELECT manifest
-            FROM {os.getenv('POSTGRES_SCHEMA')}._dataemon
-            ORDER BY inserted_on DESC
-        """)
-        manifest = cur.fetchone()
 
-        # save to file if found
-        if manifest and len(manifest) > 0:
-          with open("/dbt/old_manifest/manifest.json", "w") as f:
-              f.write(json.dumps(manifest[0]));
-
-        # run dbt ls to make sure current manifest is generated
-        subprocess.run(["dbt", "ls",  "--profiles-dir", ".dbt"])
-
-        new_manifest = '{}'
-        with open("/dbt/target/manifest.json", "r") as f:
-          new_manifest = f.read()
-
-        cur.execute(
-            f"INSERT INTO {os.getenv('POSTGRES_SCHEMA')}._dataemon "
-            "(packages, manifest) VALUES (%s, %s);",
-            [package_json, new_manifest]
-        )
-        conn.commit()
-
-# anything that changed, run a full refresh
-subprocess.run(["dbt", "run",
-  "--profiles-dir",
-   ".dbt",
-   "--select",
-   "state:modified",
-    "--full-refresh",
-    "--state",
-    "./old_manifest"])
-
-# run views (which may not have changed but need to be created)
-subprocess.run(["dbt", "run",  "--profiles-dir", ".dbt", "--select", "config.materialized:view"])
-
-while True:
-    subprocess.run(["dbt", "run",  "--profiles-dir", ".dbt", "--exclude", "config.materialized:view"])
+if __name__ == "__main__":
+  setup()
+  while True:
+    update_models()
+    run_incremental_models()
     time.sleep(int(os.getenv("DATAEMON_INTERVAL") or 5))

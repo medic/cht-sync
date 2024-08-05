@@ -1,0 +1,13 @@
+{{- if (.Values.metrics_exporter).enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: metrics
+spec:
+  selector:
+    app: cht-sync-metrics
+  ports:
+    - protocol: TCP
+      port: 9399
+      targetPort: 9399
+{{- end }}
