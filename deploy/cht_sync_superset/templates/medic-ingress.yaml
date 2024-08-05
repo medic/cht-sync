@@ -1,8 +1,8 @@
-{{- if and (.Values.medic_ingress).enabled (.Values.metrics_exporter).enabled -}}
+{{- if (.Values.medic_ingress).enabled -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: cht-sync-metric-ingress
+  name: cht-sync-superset-ingress
   annotations:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/tags: {{ .Values.medic_ingress.annotations.tags }}
@@ -20,13 +20,11 @@ spec:
     - host: {{ .Values.medic_ingress.host }}
       http:
         paths:
-          {{- if (.Values.metrics_exporter).enabled }}
-          - path: /metrics
+          - path: /
             pathType: Prefix
             backend:
               service:
-                name: metrics
+                name: cht-sync-superset
                 port:
-                  number: 9399
-          {{- end }}
+                  number: 8088
 {{- end }}

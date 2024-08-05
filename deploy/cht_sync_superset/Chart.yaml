@@ -1,0 +1,13 @@
+apiVersion: v2
+name: cht_sync_superst
+description: helm chart for cht_sync together with superset
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+dependencies:
+  - name: cht_sync
+    version: "0.1.0"
+    repository: "file://../cht_sync"
+  - name: superset
+    version: "0.12.11"
+    repository: "https://apache.github.io/superset"
