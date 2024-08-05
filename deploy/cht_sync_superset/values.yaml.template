@@ -1,0 +1,73 @@
+cht_sync: # see ../cht_sync/values.yaml.template for more details
+  postgres:
+    enabled: true  # if true a postgres service will be created in this cluster
+    user: ""
+    password: ""
+    db: ""
+    schema: "v1"
+    table: "medic"  
+    host: "postgres" # if postgres is outside the cluster
+    port: 5432 # if postgres is outside the cluster
+
+  cht_pipeline_branch_url: "https://github.com/medic/cht-pipeline.git#main"
+
+  # values shared by all couchdb instances
+  # can be omitted if couchdb instances do not share any values
+  couchdb:
+    user: ""
+    dbs: "medic" # space separated list of databases you want to sync e.g "medic medic-sentinel"
+    port: "5984"
+    secure: "true" # "true" if SSL is required
+
+  # values for each couchdb instance
+  # host and password are required
+  # other values can be omitted if they are common to all couchdb instances and specified above
+  couchdbs:
+    - host: "host1" # required for all couchdb instances
+      password: "" # required for all couchdb instances
+    - host: "host2"
+      password: ""
+    - host: "host3"
+      password: ""
+      user: "user2" # required if different than above
+      dbs: "medic medic_sentinel" # required if different than above
+      port: "5984" # required if different than above
+      secure: "true" # required if different than above
+
+superset:
+  extraSecretEnv: 
+    SUPERSET_SECRET_KEY: ''
+  postgresql:
+    enabled: false # must be fals
+  supersetNode:
+    connections:
+      db_host: ""
+      db_port: ""
+      db_user: ""
+      db_pass: ""
+      db_name: ""
+    initContainers: null
+  init:
+    adminUser:
+      username: ""
+      firstname: ""
+      lastname: ""
+      email: ""
+      password: ""
+    initContainers: null
+  supersetWorker:
+    initContainers: null
+
+# if using the medic EKS cluster these values will create an ingress
+# using a shared ALB
+# if not using medic EKS cluser, omit
+#medic_ingress:
+#  enabled: true
+#  annotations:
+#    groupname: "dev-cht-alb"
+#    tags: "Environment=dev,Team=QA"
+#    certificate: ""
+#  host: ""
+#  hosted_zone_id: ""
+#  load_balancer: ""
+
