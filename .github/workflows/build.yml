@@ -3,7 +3,7 @@ name: Build cht-sync containers
 on:
   push:
     branches:
-      - 'main'
+      - 'moh_ke'
 
 jobs:
   build:
@@ -24,7 +24,7 @@ jobs:
           context: ./couch2pg
           file: ./couch2pg/Dockerfile
           push: true
-          tags: medicmobile/cht-sync-couch2pg:latest
+          tags: medicmobile/cht-sync-couch2pg:moh_ke
 
       - name: Build and push dataemon
         uses: docker/build-push-action@v4
