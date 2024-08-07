@@ -11,7 +11,7 @@ export const dbNames = env.COUCHDB_DBS.split(',');
 const dbUrl = name => `http://127.0.0.1:${env.COUCHDB_PORT}/${name}`;
 
 export const docs = [];
-const docsByDb = { };
+const docsByDb = {};
 
 const dbs = {};
 
@@ -27,7 +27,7 @@ const getDb = (dbName) => {
   if (dbs[dbName]) {
     return dbs[dbName];
   }
-  const opts =  { auth: { username: env.COUCHDB_USER, password: env.COUCHDB_PASSWORD, skip_setup: false } };
+  const opts = { auth: { username: env.COUCHDB_USER, password: env.COUCHDB_PASSWORD, skip_setup: false } };
   dbs[dbName] = new PouchDb(dbUrl(dbName), opts);
   return dbs[dbName];
 };
@@ -59,6 +59,12 @@ export const contacts = () => docs.filter(doc => contactTypes.includes(doc.type)
 
 const getDbByDoc = (id) => Object.keys(docsByDb).filter(dnName => docsByDb[dnName].has(id));
 
+export const insertDocs = async (documents) => {
+  docs.push(...documents);
+  const db = getDb(dbNames[0]);
+  await db.bulkDocs(documents);
+};
+
 export const editDoc = async (doc) => {
   const dbName = getDbByDoc(doc._id);
   const db = getDb(dbName);
@@ -72,4 +78,33 @@ export const deleteDoc = async (doc) => {
   const db = getDb(dbName);
   const existentDoc = await db.get(doc._id);
   await db.remove(doc._id, existentDoc._rev);
+};
+
+export const conflictEditDoc = async (doc) => {
+  const dbName = getDbByDoc(doc._id);
+  const db = getDb(dbName);
+
+  delete doc._rev;
+  const result = await db.bulkDocs([doc], { new_edits: true });
+
+  result.forEach((res) => {
+    if (res.error) {
+      console.log(`Failed to edit document with id ${doc._id}: ${res.reason}`);
+    }
+  });
+};
+
+export const conflictDeleteDoc = async (doc) => {
+  doc._deleted = true;
+  const dbName = getDbByDoc(doc._id);
+  const db = getDb(dbName);
+
+  delete doc._rev;
+  const result = await db.bulkDocs([doc], { new_edits: true });
+
+  result.forEach((res) => {
+    if (res.error) {
+      console.log(`Failed to delete document with id ${doc._id}: ${res.reason}`);
+    }
+  });
 };

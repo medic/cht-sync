@@ -26,3 +26,13 @@ const connectToDatabase = async (database) => {
   await client.connect();
   return client;
 };
+
+export const isPostgresConnectionAlive = async (client) => {
+  try {
+    await client.query('SELECT 1');
+    return true;
+  } catch (error) {
+    console.error('Postgres connection check failed:', error);
+    return false;
+  }
+};
