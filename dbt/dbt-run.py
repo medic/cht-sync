@@ -130,12 +130,15 @@ def update_models():
       "./old_manifest"])
 
 def run_incremental_models():
-  # update incremental models (and tables if there are any)
-  subprocess.run(["dbt", "run",  "--profiles-dir", ".dbt", "--exclude", "config.materialized:view"])
+  # update incremental models and materialized views
+  subprocess.run(["dbt", "run",  "--profiles-dir", ".dbt", "--exclude", "config.materialized:view", "--exclude", "config.materialized:table"])
 
 
 if __name__ == "__main__":
   setup()
+  update_models()
+  # run dbt once at startup to make sure tables and unmaterialized views are created
+  subprocess.run(["dbt", "run",  "--profiles-dir", ".dbt"])
   while True:
     update_models()
     run_incremental_models()
