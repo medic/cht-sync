@@ -1,3 +1,5 @@
-
-// eslint-disable-next-line no-undef
-module.exports = { extends: ['@commitlint/config-conventional'] };
+export default {
+  extends: [
+    '@commitlint/config-conventional'
+  ]
+};
