@@ -36,5 +36,6 @@
     "pouchdb-core": "^8.0.1",
     "sinon": "^18.0.0",
     "uuid": "^9.0.1"
-  }
+  },
+  "private": true
 }
