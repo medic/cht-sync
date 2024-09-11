@@ -21,8 +21,22 @@ jobs:
       - name: Get the latest release tag
         id: get_latest_release
         run: |
-          LATEST_TAG=$(curl -sL https://api.github.com/repos/medic/cht-sync/releases/latest | jq -r '.tag_name')
-          echo "RELEASE_TAG=$LATEST_TAG" >> $GITHUB_ENV
+          API_RESPONSE=$(curl -sL https://api.github.com/repos/${{ github.repository }}/releases/latest)
+          echo "API Response: $API_RESPONSE"
+          
+          if [ "$(echo "$API_RESPONSE" | jq -r .message)" = "Not Found" ]; then
+            echo "No releases found. Using 'latest' as the tag."
+            LATEST_TAG="latest"
+          else
+            LATEST_TAG=$(echo "$API_RESPONSE" | jq -r .tag_name)
+            if [ -z "$LATEST_TAG" ] || [ "$LATEST_TAG" = "null" ]; then
+              echo "Failed to extract tag. Using 'latest' as the tag."
+              LATEST_TAG="latest"
+            fi
+          fi
+          
+          echo "Extracted tag: $LATEST_TAG"
+          echo "RELEASE_TAG=$LATEST_TAG" >> $GITHUB_OUTPUT
 
       - name: Build and push couch2pg
         uses: docker/build-push-action@v4
