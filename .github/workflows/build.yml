@@ -37,7 +37,9 @@ jobs:
           context: ./couch2pg
           file: ./couch2pg/Dockerfile
           push: true
-          tags: medicmobile/cht-sync-couch2pg:${{ steps.get_latest_release.outputs.RELEASE_TAG }}
+          tags: |
+            medicmobile/cht-sync-couch2pg:${{ steps.get_latest_release.outputs.RELEASE_TAG }}
+            medicmobile/cht-sync-couch2pg:latest
 
       - name: Build and push dataemon
         uses: docker/build-push-action@v4
@@ -45,4 +47,6 @@ jobs:
           context: ./dbt
           file: ./dbt/Dockerfile
           push: true
-          tags: medicmobile/dataemon:${{ steps.get_latest_release.outputs.RELEASE_TAG }}
+          tags: |
+            medicmobile/dataemon:${{ steps.get_latest_release.outputs.RELEASE_TAG }}
+            medicmobile/dataemon:latest
