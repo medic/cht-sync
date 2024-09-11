@@ -20,18 +20,7 @@ jobs:
 
       - name: Get the latest release tag
         id: get_latest_release
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const { data: latestRelease } = await github.rest.repos.getLatestRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-            });
-            if (!latestRelease || !latestRelease.tag_name) {
-              core.setFailed('Failed to get the latest release tag');
-            } else {
-              core.setOutput('result', latestRelease.tag_name);
-            }
+        run: echo ::set-output name=result::${GITHUB_REF#refs/tags/}
 
       - name: Build and push couch2pg
         uses: docker/build-push-action@v4
