@@ -27,7 +27,11 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
             });
-            core.setOutput('result', latestRelease.tag_name);
+            if (!latestRelease || !latestRelease.tag_name) {
+              core.setFailed('Failed to get the latest release tag');
+            } else {
+              core.setOutput('result', latestRelease.tag_name);
+            }
 
       - name: Build and push couch2pg
         uses: docker/build-push-action@v4
