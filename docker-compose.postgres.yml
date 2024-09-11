@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:13
+    image: postgres:16
     restart: always
     ports:
       - 5432:5432
@@ -9,9 +9,6 @@ services:
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - DBT_POSTGRES_USER=${DBT_POSTGRES_USER}
-      - DBT_POSTGRES_PASSWORD=${DBT_POSTGRES_PASSWORD}
-      - DBT_POSTGRES_SCHEMA=${DBT_POSTGRES_SCHEMA}
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_TABLES=${COUCHDB_DBS}
       - POSTGRES_SCHEMA=${POSTGRES_SCHEMA}

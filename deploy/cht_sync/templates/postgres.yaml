@@ -21,7 +21,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: postgres-c
-          image: postgres:13
+          image: postgres:16
           resources:
             limits:
               cpu: {{ (.Values.postgres).cpu_limit | default "1000m" }}
