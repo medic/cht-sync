@@ -20,7 +20,9 @@ jobs:
 
       - name: Get the latest release tag
         id: get_latest_release
-        run: echo ::set-output name=result::${GITHUB_REF#refs/tags/}
+        run: |
+          LATEST_TAG=$(curl -sL https://api.github.com/repos/medic/cht-sync/releases/latest | jq -r '.tag_name')
+          echo "RELEASE_TAG=$LATEST_TAG" >> $GITHUB_ENV
 
       - name: Build and push couch2pg
         uses: docker/build-push-action@v4
@@ -28,7 +30,7 @@ jobs:
           context: ./couch2pg
           file: ./couch2pg/Dockerfile
           push: true
-          tags: medicmobile/cht-sync-couch2pg:${{ steps.get_latest_release.outputs.result }}
+          tags: medicmobile/cht-sync-couch2pg:${{ steps.get_latest_release.outputs.RELEASE_TAG }}
 
       - name: Build and push dataemon
         uses: docker/build-push-action@v4
@@ -36,4 +38,4 @@ jobs:
           context: ./dbt
           file: ./dbt/Dockerfile
           push: true
-          tags: medicmobile/dataemon:${{ steps.get_latest_release.outputs.result }}
+          tags: medicmobile/dataemon:${{ steps.get_latest_release.outputs.RELEASE_TAG }}
