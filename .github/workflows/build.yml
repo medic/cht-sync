@@ -1,9 +1,10 @@
 name: Build cht-sync containers
 
 on:
-  push:
-    branches:
-      - fix-docker-hub-ci-upload
+  workflow_run:
+    workflows: ["release"]
+    types:
+      - completed
 
 jobs:
   build:
