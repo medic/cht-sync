@@ -5,3 +5,4 @@ node_modules
 /couch2pg/.nyc_output/
 /.eslintcache
 /tests/data/json_docs
+/deploy/cht_sync/values.yaml
