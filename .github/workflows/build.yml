@@ -21,14 +21,15 @@ jobs:
 
       - name: Get the latest release tag
         id: get_latest_release
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const latestRelease = await github.repos.getLatestRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-            });
-            return latestRelease.data.tag_name;
+        run: |
+          API_RESPONSE=$(curl -sL https://api.github.com/repos/${{ github.repository }}/releases/latest)
+          
+          LATEST_TAG=$(echo "$API_RESPONSE" | jq -r .tag_name)
+          if [ -z "$LATEST_TAG" ] || [ "$LATEST_TAG" = "null" ]; then
+            LATEST_TAG="latest"
+          fi
+          
+          echo "RELEASE_TAG=$LATEST_TAG" >> $GITHUB_OUTPUT
 
       - name: Build and push couch2pg
         uses: docker/build-push-action@v4
@@ -36,7 +37,9 @@ jobs:
           context: ./couch2pg
           file: ./couch2pg/Dockerfile
           push: true
-          tags: medicmobile/cht-sync-couch2pg:${{ steps.get_latest_release.outputs.result }}
+          tags: |
+            medicmobile/cht-sync-couch2pg:${{ steps.get_latest_release.outputs.RELEASE_TAG }}
+            medicmobile/cht-sync-couch2pg:latest
 
       - name: Build and push dataemon
         uses: docker/build-push-action@v4
@@ -44,4 +47,6 @@ jobs:
           context: ./dbt
           file: ./dbt/Dockerfile
           push: true
-          tags: medicmobile/dataemon:${{ steps.get_latest_release.outputs.result }}
+          tags: |
+            medicmobile/dataemon:${{ steps.get_latest_release.outputs.RELEASE_TAG }}
+            medicmobile/dataemon:latest
