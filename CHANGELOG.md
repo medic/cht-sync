@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/medic/cht-sync/compare/v1.0.0...v1.0.1) (2024-09-13)
+
+
+### Bug Fixes
+
+* **#151:** failing build github action ([452f6f8](https://github.com/medic/cht-sync/commit/452f6f8d62ae21d8ef45804f236af4e0520b6628)), closes [#151](https://github.com/medic/cht-sync/issues/151)
+
 # 1.0.0 (2024-09-10)
 
 
