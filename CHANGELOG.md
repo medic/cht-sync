@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/medic/cht-sync/compare/v1.0.1...v1.0.2) (2024-09-13)
+
+
+### Bug Fixes
+
+* **#145:** adds volume mount for postgres ([a128f71](https://github.com/medic/cht-sync/commit/a128f71d9354929aa633e1ab75e3a5be814ee09c)), closes [#145](https://github.com/medic/cht-sync/issues/145)
+
 ## [1.0.1](https://github.com/medic/cht-sync/compare/v1.0.0...v1.0.1) (2024-09-13)
 
 
