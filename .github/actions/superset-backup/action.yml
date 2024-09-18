@@ -32,5 +32,5 @@ runs:
       uses: actions-js/push@master
       with:
         github_token: ${{ inputs.gh_token }}
-        message: 'chore: autobackup'
+        message: 'chore: Superset autobackup'
 
