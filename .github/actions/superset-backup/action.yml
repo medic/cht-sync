@@ -1,0 +1,36 @@
+name: 'superset-backup'
+description: 'Download and save Superset dashboard export in a GH repository'
+inputs:
+  gh_token:
+    description: 'The token to use to access the GitHub API'
+    required: true
+  superset_link:
+    description: 'The link to the superset server'
+    required: true
+  superset_user:
+    description: 'The user to use to access the Superset API'
+    required: true
+  superset_password:
+    description: 'The password to use to access the Superset API'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/checkout@master
+    - name: Download superset export
+      shell: bash
+      run: |
+        NOW=$(date +%Y%m%d%H%M%S)
+        mkdir -p ./superset/backups        
+        LOGIN=$(curl -X POST -d '{"username":"${{ inputs.superset_user }}","password":"${{ inputs.superset_password }}","provider":"db"}' -H "Content-Type: application/json" ${{ inputs.superset_link }}/api/v1/security/login)
+        ACCESS_TOKEN=$(echo $LOGIN | sed "s/{.*\"access_token\":\"\([^\"]*\).*}/\1/g") 
+        CSRF=$(curl "${{ inputs.superset_link }}/api/v1/security/csrf_token/" -H "Authorization: Bearer $ACCESS_TOKEN") 
+        CSRF_TOKEN=$(echo $CSRF | sed "s/{.*\"result\":\"\([^\"]*\).*}/\1/g") 
+        curl -X GET -0 ${{ inputs.superset_link }}/api/v1/assets/export/ -H "Authorization: Bearer $ACCESS_TOKEN" -H "X-CSRFToken: $CSRF_TOKEN" -o ./superset/backups/$NOW.zip
+    - name: Upload superset export
+      uses: actions-js/push@master
+      with:
+        github_token: ${{ inputs.gh_token }}
+        message: 'chore: Superset autobackup'
+
