@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/medic/cht-sync/compare/v1.0.2...v1.1.0) (2024-09-23)
+
+
+### Features
+
+* **#142:** adds reusable github action that creates backup of superset dashboard export ([#154](https://github.com/medic/cht-sync/issues/154)) ([b0045d4](https://github.com/medic/cht-sync/commit/b0045d4717c4f287b2111a670b7730532b18e610)), closes [#142](https://github.com/medic/cht-sync/issues/142) [#142](https://github.com/medic/cht-sync/issues/142)
+
 ## [1.0.2](https://github.com/medic/cht-sync/compare/v1.0.1...v1.0.2) (2024-09-13)
 
 
