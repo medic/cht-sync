@@ -133,10 +133,52 @@ def run_incremental_models():
   # update incremental models (and tables if there are any)
   subprocess.run(["dbt", "run",  "--profiles-dir", ".dbt", "--exclude", "config.materialized:view"])
 
+def get_pending_doc_count():
+  with connection() as conn:
+      with conn.cursor() as cur:
+          cur.execute(f"""
+              SELECT COUNT(pending)
+              FROM {os.getenv('POSTGRES_SCHEMA')}.couchdb_progress
+          """)
+          return cur.fetchone()[0]
+
+def get_batch_ranges():
+  with connection() as conn:
+      with conn.cursor() as cur:
+          cur.execute(f"""
+              SELECT
+                  MIN(saved_timestamp) as start_timestamp,
+                  MAX(saved_timestamp) as end_timestamp
+              FROM {os.getenv('POSTGRES_SCHEMA')}.{os.getenv('POSTGRES_TABLE')}
+          """)
+          start_timestamp, end_timestamp = cur.fetchone()
+          batch_size = int(os.getenv("DBT_BATCH_SIZE") or 100000)
+          return [(start, min(start + batch_size, end_timestamp)) for start in range(start_timestamp, end_timestamp, batch_size)]
+
+def run_dbt_for_batch(start_timestamp, end_timestamp):
+   subprocess.run([
+      "dbt", "run",
+      "--profiles-dir",
+      ".dbt",
+      "--exclude",
+      "config.materialized:view",
+      "--vars",
+      f"start_timestamp={start_timestamp} end_timestamp={end_timestamp}"
+    ])
+   
+def run_dbt_in_batches():
+  for start_timestamp, end_timestamp in get_batch_ranges():
+    print(f"Running dbt for batch {start_timestamp} - {end_timestamp}")
+    run_dbt_for_batch(start_timestamp, end_timestamp)
 
 if __name__ == "__main__":
   setup()
-  while True:
-    update_models()
-    run_incremental_models()
-    time.sleep(int(os.getenv("DATAEMON_INTERVAL") or 5))
+  pending_doc_count = get_pending_doc_count()
+  process_in_batch = pending_doc_count > int(os.getenv("DBT_BATCH_PROCESS_LIMIT") or 100000)
+  if process_in_batch:
+    run_dbt_in_batches()
+  else:
+    while True:
+      update_models()
+      run_incremental_models()
+      time.sleep(int(os.getenv("DATAEMON_INTERVAL") or 5))
