@@ -42,6 +42,18 @@ def setup():
           """)
       conn.commit()
 
+  with connection() as conn:
+      with conn.cursor() as cur:
+          cur.execute(f"""
+              CREATE TABLE IF NOT EXISTS
+              {os.getenv('POSTGRES_SCHEMA')}.dbt_batch_status (
+                  id SERIAL PRIMARY KEY,
+                  timestamp TIMESTAMP,
+                  status TEXT
+              )
+          """)
+      conn.commit()
+
 def get_package():
   package_json = '{}'
 
@@ -137,7 +149,7 @@ def get_pending_doc_count():
   with connection() as conn:
       with conn.cursor() as cur:
           cur.execute(f"""
-              SELECT COUNT(pending)
+              SELECT SUM(pending)
               FROM {os.getenv('POSTGRES_SCHEMA')}.couchdb_progress
           """)
           return cur.fetchone()[0]
@@ -151,33 +163,79 @@ def get_batch_ranges():
                   MAX(saved_timestamp) as end_timestamp
               FROM {os.getenv('POSTGRES_SCHEMA')}.{os.getenv('POSTGRES_TABLE')}
           """)
-          start_timestamp, end_timestamp = cur.fetchone()
-          batch_size = int(os.getenv("DBT_BATCH_SIZE") or 100000)
+          result = cur.fetchone()
+          if result is None or len(result) == 0:
+            return []
+          
+          start_timestamp, end_timestamp = result
+          start_timestamp = int(start_timestamp.timestamp())
+          end_timestamp = int(end_timestamp.timestamp())
+          batch_size = int(os.getenv("DBT_BATCH_SIZE") or 10000)
           return [(start, min(start + batch_size, end_timestamp)) for start in range(start_timestamp, end_timestamp, batch_size)]
 
-def run_dbt_for_batch(start_timestamp, end_timestamp):
-   subprocess.run([
-      "dbt", "run",
-      "--profiles-dir",
-      ".dbt",
-      "--exclude",
-      "config.materialized:view",
-      "--vars",
-      f"start_timestamp={start_timestamp} end_timestamp={end_timestamp}"
-    ])
+def update_batch_status(timestamp, status):
+  with connection() as conn:
+    with conn.cursor() as cur:
+      # insert new entry
+      cur.execute(
+        f"INSERT INTO {os.getenv('POSTGRES_SCHEMA')}.dbt_batch_status (timestamp, status) VALUES (%s, %s);", [timestamp, status]
+      )
+      conn.commit()
+
+def get_last_processed_timestamp():
+  with connection() as conn:
+    with conn.cursor() as cur:
+      cur.execute(f"""
+          SELECT MAX(timestamp)
+          FROM {os.getenv('POSTGRES_SCHEMA')}.dbt_batch_status
+          WHERE status = 'success'
+      """)
+      result = cur.fetchone()
+      if result and result[0]:
+        return result[0]
+      return '1970-01-01 00:00:00'
    
 def run_dbt_in_batches():
-  for start_timestamp, end_timestamp in get_batch_ranges():
-    print(f"Running dbt for batch {start_timestamp} - {end_timestamp}")
-    run_dbt_for_batch(start_timestamp, end_timestamp)
+  print("Running dbt in batches")
+  last_processed_timestamp = get_last_processed_timestamp()
+  batch_size = int(os.getenv("DBT_BATCH_SIZE") or 10000)
+  print(f"Starting new batch with timestamp: {last_processed_timestamp}")
+
+  while True:
+     print(f"Starting new batch with timestamp: {last_processed_timestamp}")
+     result = subprocess.run([
+        "dbt", "run",
+        "--profiles-dir", ".dbt",
+        "--vars", f'{{start_timestamp: "{last_processed_timestamp}", batch_size: {batch_size}}}'
+      ])
+
+     if result != 0:
+       print("Error running dbt")
+       update_batch_status(last_processed_timestamp, "error")
+       time.sleep(int(os.getenv("DATAEMON_INTERVAL") or 5))
+       continue
+     
+     update_batch_status(last_processed_timestamp, "success")
+     max_timestamp = get_max_timestamp()
+
+     if max_timestamp == last_processed_timestamp:
+       print("Finished processing all batches")
+       break
+     
+     last_processed_timestamp = max_timestamp
 
 if __name__ == "__main__":
+  print("Starting dbt run")
   setup()
+  # check if we need to run in batch
   pending_doc_count = get_pending_doc_count()
+  print(f"Pending doc count: {pending_doc_count}")
   process_in_batch = pending_doc_count > int(os.getenv("DBT_BATCH_PROCESS_LIMIT") or 100000)
   if process_in_batch:
+    print("Processing in batches")
     run_dbt_in_batches()
   else:
+    print("Processing in full")
     while True:
       update_models()
       run_incremental_models()
