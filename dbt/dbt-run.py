@@ -119,8 +119,7 @@ def save_package_manifest(package_json, manifest_json):
       )
       conn.commit()
 
-
-def update_models():
+def update_dbt_deps():
   # install the cht pipeline package
   package_json = get_package()
   subprocess.run(["dbt", "deps", "--profiles-dir", ".dbt", "--upgrade"])
@@ -131,6 +130,8 @@ def update_models():
   # save the new manifest and package for the next run
   save_package_manifest(package_json, manifest_json)
 
+def update_models():
+  update_dbt_deps()
   # anything that changed, run a full refresh
   subprocess.run(["dbt", "run",
     "--profiles-dir",
@@ -194,6 +195,15 @@ def get_last_processed_timestamp():
       if result and result[0]:
         return result[0]
       return '1970-01-01 00:00:00'
+    
+def get_max_timestamp():
+  with connection() as conn:
+    with conn.cursor() as cur:
+      cur.execute(f"""
+          SELECT MAX(saved_timestamp)
+          FROM {os.getenv('POSTGRES_SCHEMA')}.document_metadata
+      """)
+      return cur.fetchone()[0]
    
 def run_dbt_in_batches():
   print("Running dbt in batches")
@@ -203,13 +213,14 @@ def run_dbt_in_batches():
 
   while True:
      print(f"Starting new batch with timestamp: {last_processed_timestamp}")
+     update_dbt_deps()
      result = subprocess.run([
         "dbt", "run",
         "--profiles-dir", ".dbt",
         "--vars", f'{{start_timestamp: "{last_processed_timestamp}", batch_size: {batch_size}}}'
       ])
 
-     if result != 0:
+     if result.returncode != 0:
        print("Error running dbt")
        update_batch_status(last_processed_timestamp, "error")
        time.sleep(int(os.getenv("DATAEMON_INTERVAL") or 5))
@@ -224,6 +235,15 @@ def run_dbt_in_batches():
      
      last_processed_timestamp = max_timestamp
 
+  run_dbt()
+
+def run_dbt():
+  print("Starting regular dbt run")
+  while True:
+      update_models()
+      run_incremental_models()
+      time.sleep(int(os.getenv("DATAEMON_INTERVAL") or 5))
+
 if __name__ == "__main__":
   print("Starting dbt run")
   setup()
@@ -235,8 +255,4 @@ if __name__ == "__main__":
     print("Processing in batches")
     run_dbt_in_batches()
   else:
-    print("Processing in full")
-    while True:
-      update_models()
-      run_incremental_models()
-      time.sleep(int(os.getenv("DATAEMON_INTERVAL") or 5))
+    run_dbt()
