@@ -189,6 +189,7 @@ def get_max_timestamp():
 def run_dbt_in_batches():
   last_processed_timestamp = get_last_processed_timestamp()
   batch_size = int(os.getenv("DBT_BATCH_SIZE") or 10000)
+  dataemon_interval = int(os.getenv("DATAEMON_INTERVAL") or 5)
 
   while True:
      update_dbt_deps()
@@ -202,14 +203,14 @@ def run_dbt_in_batches():
      if result.returncode != 0:
        print("Error running dbt")
        update_batch_status(last_processed_timestamp, "error")
-       time.sleep(int(os.getenv("DATAEMON_INTERVAL") or 5))
+       time.sleep(dataemon_interval)
        continue
      
      update_batch_status(last_processed_timestamp, "success")
      max_timestamp = get_max_timestamp()
 
      if max_timestamp == last_processed_timestamp:
-        time.sleep(int(os.getenv("DATAEMON_INTERVAL") or 5))
+        time.sleep(dataemon_interval)
         continue
      
      last_processed_timestamp = max_timestamp
