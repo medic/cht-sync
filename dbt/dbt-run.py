@@ -155,25 +155,6 @@ def get_pending_doc_count():
           """)
           return cur.fetchone()[0]
 
-def get_batch_ranges():
-  with connection() as conn:
-      with conn.cursor() as cur:
-          cur.execute(f"""
-              SELECT
-                  MIN(saved_timestamp) as start_timestamp,
-                  MAX(saved_timestamp) as end_timestamp
-              FROM {os.getenv('POSTGRES_SCHEMA')}.{os.getenv('POSTGRES_TABLE')}
-          """)
-          result = cur.fetchone()
-          if result is None or len(result) == 0:
-            return []
-          
-          start_timestamp, end_timestamp = result
-          start_timestamp = int(start_timestamp.timestamp())
-          end_timestamp = int(end_timestamp.timestamp())
-          batch_size = int(os.getenv("DBT_BATCH_SIZE") or 10000)
-          return [(start, min(start + batch_size, end_timestamp)) for start in range(start_timestamp, end_timestamp, batch_size)]
-
 def update_batch_status(timestamp, status):
   with connection() as conn:
     with conn.cursor() as cur:
@@ -209,7 +190,8 @@ def run_dbt_in_batches():
   print("Running dbt in batches")
   last_processed_timestamp = get_last_processed_timestamp()
   batch_size = int(os.getenv("DBT_BATCH_SIZE") or 10000)
-  print(f"Starting new batch with timestamp: {last_processed_timestamp}")
+  # Start the timer
+  start_time = time.time()
 
   while True:
      print(f"Starting new batch with timestamp: {last_processed_timestamp}")
@@ -217,7 +199,8 @@ def run_dbt_in_batches():
      result = subprocess.run([
         "dbt", "run",
         "--profiles-dir", ".dbt",
-        "--vars", f'{{start_timestamp: "{last_processed_timestamp}", batch_size: {batch_size}}}'
+        "--vars", f'{{start_timestamp: "{last_processed_timestamp}", batch_size: {batch_size}}}',
+        "--exclude", "config.materialized:view"
       ])
 
      if result.returncode != 0:
@@ -230,12 +213,17 @@ def run_dbt_in_batches():
      max_timestamp = get_max_timestamp()
 
      if max_timestamp == last_processed_timestamp:
-       print("Finished processing all batches")
-       break
+        print("No batches to process")
+        # End the timer
+        end_time = time.time()
+
+        # Calculate the duration
+        duration = end_time - start_time
+        print(f"Time taken to process batches: {duration:.2f} seconds")
+        time.sleep(int(os.getenv("DATAEMON_INTERVAL") or 5))
+        break
      
      last_processed_timestamp = max_timestamp
-
-  run_dbt()
 
 def run_dbt():
   print("Starting regular dbt run")
@@ -247,12 +235,4 @@ def run_dbt():
 if __name__ == "__main__":
   print("Starting dbt run")
   setup()
-  # check if we need to run in batch
-  pending_doc_count = get_pending_doc_count()
-  print(f"Pending doc count: {pending_doc_count}")
-  process_in_batch = pending_doc_count > int(os.getenv("DBT_BATCH_PROCESS_LIMIT") or 100000)
-  if process_in_batch:
-    print("Processing in batches")
-    run_dbt_in_batches()
-  else:
-    run_dbt()
+  run_dbt_in_batches()
