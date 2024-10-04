@@ -187,14 +187,10 @@ def get_max_timestamp():
       return cur.fetchone()[0]
    
 def run_dbt_in_batches():
-  print("Running dbt in batches")
   last_processed_timestamp = get_last_processed_timestamp()
   batch_size = int(os.getenv("DBT_BATCH_SIZE") or 10000)
-  # Start the timer
-  start_time = time.time()
 
   while True:
-     print(f"Starting new batch with timestamp: {last_processed_timestamp}")
      update_dbt_deps()
      result = subprocess.run([
         "dbt", "run",
@@ -213,20 +209,12 @@ def run_dbt_in_batches():
      max_timestamp = get_max_timestamp()
 
      if max_timestamp == last_processed_timestamp:
-        print("No batches to process")
-        # End the timer
-        end_time = time.time()
-
-        # Calculate the duration
-        duration = end_time - start_time
-        print(f"Time taken to process batches: {duration:.2f} seconds")
         time.sleep(int(os.getenv("DATAEMON_INTERVAL") or 5))
-        break
+        continue
      
      last_processed_timestamp = max_timestamp
 
 def run_dbt():
-  print("Starting regular dbt run")
   while True:
       update_models()
       run_incremental_models()
@@ -235,4 +223,7 @@ def run_dbt():
 if __name__ == "__main__":
   print("Starting dbt run")
   setup()
-  run_dbt_in_batches()
+  if os.getenv("RUN_DBT_IN_BATCHES"):
+    run_dbt_in_batches()
+  else:
+    run_dbt()
