@@ -185,6 +185,17 @@ def get_max_timestamp():
           FROM {os.getenv('POSTGRES_SCHEMA')}.document_metadata
       """)
       return cur.fetchone()[0]
+    
+def handle_batch_update_error(last_processed_timestamp, dataemon_interval):
+   print(f"Error running dbt for batch {last_processed_timestamp}")
+   update_batch_status(last_processed_timestamp, "error")
+   time.sleep(dataemon_interval)
+
+def handle_batch_update_success(last_processed_timestamp, dataemon_interval, max_timestamp):
+  update_batch_status(last_processed_timestamp, "success")
+
+  if max_timestamp == last_processed_timestamp:
+     time.sleep(dataemon_interval)
    
 def run_dbt_in_batches():
   last_processed_timestamp = get_last_processed_timestamp()
@@ -199,19 +210,13 @@ def run_dbt_in_batches():
         "--vars", f'{{start_timestamp: "{last_processed_timestamp}", batch_size: {batch_size}}}',
         "--exclude", "config.materialized:view"
       ])
-
-     if result.returncode != 0:
-       print("Error running dbt")
-       update_batch_status(last_processed_timestamp, "error")
-       time.sleep(dataemon_interval)
-       continue
      
-     update_batch_status(last_processed_timestamp, "success")
-     max_timestamp = get_max_timestamp()
-
-     if max_timestamp == last_processed_timestamp:
-        time.sleep(dataemon_interval)
+     if result.returncode != 0:
+        handle_batch_update_error(last_processed_timestamp, dataemon_interval)
         continue
+     
+     max_timestamp = get_max_timestamp()
+     handle_batch_update_success(last_processed_timestamp, dataemon_interval, max_timestamp)
      
      last_processed_timestamp = max_timestamp
 
