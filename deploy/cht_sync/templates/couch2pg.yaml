@@ -9,11 +9,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: cht-sync
+      app: cht-sync-couch2pg-{{ $service.host | replace "." "-" }}
   template:
     metadata:
       labels:
-        app: cht-sync
+        app: cht-sync-couch2pg-{{ $service.host | replace "." "-" }}
     spec:
       automountServiceAccountToken: false
       containers:
