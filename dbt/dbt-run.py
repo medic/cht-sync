@@ -7,6 +7,8 @@ import subprocess
 from urllib.parse import urlparse
 
 
+BATCH_STATUS_TABLE = f"{os.getenv('POSTGRES_SCHEMA')}.dbt_batch_status"
+
 def connection():
     for attempt in range(5):
         time.sleep(3)
@@ -46,7 +48,7 @@ def setup():
       with conn.cursor() as cur:
           cur.execute(f"""
               CREATE TABLE IF NOT EXISTS
-              {os.getenv('POSTGRES_SCHEMA')}.dbt_batch_status (
+              {BATCH_STATUS_TABLE} (
                   id SERIAL PRIMARY KEY,
                   timestamp TIMESTAMP,
                   status TEXT
@@ -146,21 +148,12 @@ def run_incremental_models():
   # update incremental models (and tables if there are any)
   subprocess.run(["dbt", "run",  "--profiles-dir", ".dbt", "--exclude", "config.materialized:view"])
 
-def get_pending_doc_count():
-  with connection() as conn:
-      with conn.cursor() as cur:
-          cur.execute(f"""
-              SELECT SUM(pending)
-              FROM {os.getenv('POSTGRES_SCHEMA')}.couchdb_progress
-          """)
-          return cur.fetchone()[0]
-
 def update_batch_status(timestamp, status):
   with connection() as conn:
     with conn.cursor() as cur:
       # insert new entry
       cur.execute(
-        f"INSERT INTO {os.getenv('POSTGRES_SCHEMA')}.dbt_batch_status (timestamp, status) VALUES (%s, %s);", [timestamp, status]
+        f"INSERT INTO {BATCH_STATUS_TABLE} (timestamp, status) VALUES (%s, %s);", [timestamp, status]
       )
       conn.commit()
 
@@ -169,7 +162,7 @@ def get_last_processed_timestamp():
     with conn.cursor() as cur:
       cur.execute(f"""
           SELECT MAX(timestamp)
-          FROM {os.getenv('POSTGRES_SCHEMA')}.dbt_batch_status
+          FROM {BATCH_STATUS_TABLE}
           WHERE status = 'success'
       """)
       result = cur.fetchone()
