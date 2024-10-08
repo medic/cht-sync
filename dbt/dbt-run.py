@@ -7,7 +7,9 @@ import subprocess
 from urllib.parse import urlparse
 
 
-BATCH_STATUS_TABLE = f"{os.getenv('POSTGRES_SCHEMA')}.dbt_batch_status"
+METADATA_TABLE_NAME = 'document_metadata'
+SCHEMA_NAME = os.getenv('POSTGRES_SCHEMA')
+BATCH_STATUS_TABLE = f"{SCHEMA_NAME}.dbt_batch_status"
 
 def connection():
     for attempt in range(5):
@@ -29,7 +31,7 @@ def setup():
   with connection() as conn:
       with conn.cursor() as cur:
           cur.execute(f"""
-              CREATE SCHEMA IF NOT EXISTS {os.getenv('POSTGRES_SCHEMA')};
+              CREATE SCHEMA IF NOT EXISTS {SCHEMA_NAME};
           """)
       conn.commit()
 
@@ -37,7 +39,7 @@ def setup():
       with conn.cursor() as cur:
           cur.execute(f"""
               CREATE TABLE IF NOT EXISTS
-              {os.getenv('POSTGRES_SCHEMA')}._dataemon (
+              {SCHEMA_NAME}._dataemon (
                   inserted_on TIMESTAMP DEFAULT NOW(),
                   packages jsonb, manifest jsonb
               )
@@ -87,7 +89,7 @@ def get_manifest():
       with conn.cursor() as cur:
           cur.execute(f"""
               SELECT manifest
-              FROM {os.getenv('POSTGRES_SCHEMA')}._dataemon
+              FROM {SCHEMA_NAME}._dataemon
               ORDER BY inserted_on DESC
           """)
           manifest = cur.fetchone()
@@ -112,10 +114,10 @@ def save_package_manifest(package_json, manifest_json):
       # because manifest is large, delete old entries
       # we only want the current/latest data
       cur.execute(
-        f"DELETE FROM {os.getenv('POSTGRES_SCHEMA')}._dataemon "
+        f"DELETE FROM {SCHEMA_NAME}._dataemon "
       )
       cur.execute(
-        f"INSERT INTO {os.getenv('POSTGRES_SCHEMA')}._dataemon "
+        f"INSERT INTO {SCHEMA_NAME}._dataemon "
         "(packages, manifest) VALUES (%s, %s);",
         [package_json, manifest_json]
       )
@@ -175,7 +177,7 @@ def get_max_timestamp():
     with conn.cursor() as cur:
       cur.execute(f"""
           SELECT MAX(saved_timestamp)
-          FROM {os.getenv('POSTGRES_SCHEMA')}.document_metadata
+          FROM {SCHEMA_NAME}.{METADATA_TABLE_NAME}
       """)
       return cur.fetchone()[0]
     
@@ -189,8 +191,22 @@ def handle_batch_update_success(last_processed_timestamp, dataemon_interval, max
 
   if max_timestamp == last_processed_timestamp:
      time.sleep(dataemon_interval)
+
+def check_table_exists(schema_name, table_name):
+    with connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(f"""
+                SELECT EXISTS (
+                    SELECT FROM information_schema.tables 
+                    WHERE table_schema = '{schema_name}' AND table_name = '{table_name}'
+                )
+            """)
+            return cur.fetchone()[0]
    
 def run_dbt_in_batches():
+  if not check_table_exists(SCHEMA_NAME, METADATA_TABLE_NAME):
+     raise psycopg2.errors.UndefinedTable(f"The table {METADATA_TABLE_NAME} does not exist in the database.")
+
   last_processed_timestamp = get_last_processed_timestamp()
   batch_size = int(os.getenv("DBT_BATCH_SIZE") or 10000)
   dataemon_interval = int(os.getenv("DATAEMON_INTERVAL") or 5)
