@@ -204,9 +204,6 @@ def check_table_exists(schema_name, table_name):
             return cur.fetchone()[0]
    
 def run_dbt_in_batches():
-  if not check_table_exists(SCHEMA_NAME, METADATA_TABLE_NAME):
-     raise psycopg2.errors.UndefinedTable(f"The table {METADATA_TABLE_NAME} does not exist in the database.")
-
   last_processed_timestamp = get_last_processed_timestamp()
   batch_size = int(os.getenv("DBT_BATCH_SIZE") or 10000)
   dataemon_interval = int(os.getenv("DATAEMON_INTERVAL") or 5)
@@ -239,6 +236,8 @@ if __name__ == "__main__":
   print("Starting dbt run")
   setup()
   if os.getenv("RUN_DBT_IN_BATCHES"):
+    if not check_table_exists(SCHEMA_NAME, METADATA_TABLE_NAME):
+       raise psycopg2.errors.UndefinedTable(f"The table {METADATA_TABLE_NAME} does not exist in the database.")
     run_dbt_in_batches()
   else:
     run_dbt()
