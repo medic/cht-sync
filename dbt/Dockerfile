@@ -2,7 +2,7 @@ FROM python:3 AS testing
 
 RUN pip install flake8
 
-RUN flake8 dbt-run.py
+RUN flake8 dbt_run.py
 
 FROM python:3 AS release
 
@@ -14,10 +14,10 @@ RUN adduser dbt
 USER dbt
 
 WORKDIR /dbt/
-COPY dbt-run.py dbt-run.py
+COPY dbt_run.py dbt_run.py
 COPY .dbt .dbt
 COPY dbt_project.yml dbt_project.yml
 
 RUN mkdir old_manifest
 
-CMD ["python3", "/dbt/dbt-run.py"]
+CMD ["python3", "/dbt/dbt_run.py"]

@@ -5,10 +5,13 @@
   "main": "",
   "scripts": {
     "postinstall": "cd couch2pg && npm ci",    
-    "test:e2e": "npm run test:e2e-data && npm run test:e2e-containers && mocha tests/**/*.spec.js --timeout 50000; npm run test:e2e-stop-containers ",
+    "test:e2e": "npm run test:e2e-regular && npm run test:e2e-batch",
+    "test:e2e-regular": "npm run test:e2e-data && npm run test:e2e-containers && mocha tests/e2e-test.spec.js --timeout 50000; npm run test:e2e-stop-containers",
+    "test:e2e-batch": "npm run test:e2e-data && npm run test:e2e-batch-containers && mocha tests/**/*.spec.js --timeout 50000; npm run test:e2e-stop-containers",
     "lint": "eslint --color --cache .",
     "test:e2e-stop-containers": "docker compose --env-file ./tests/.e2e-env -f docker-compose.yml -f docker-compose.couchdb.yml -f docker-compose.postgres.yml down -v",
     "test:e2e-containers": "docker compose --env-file ./tests/.e2e-env -f docker-compose.yml -f docker-compose.couchdb.yml -f docker-compose.postgres.yml -f tests/dbt/docker-compose.yml up -d --build --force-recreate",
+    "test:e2e-batch-containers": "docker compose --env-file ./tests/.e2e-batch-env -f docker-compose.yml -f docker-compose.couchdb.yml -f docker-compose.postgres.yml -f tests/dbt/docker-compose.yml up -d --build --force-recreate",
     "test:e2e-data": "cd tests/data && rm -rf ./json_docs && cht csv-to-docs",
     "test": "cd couch2pg && npm run test"
   },
