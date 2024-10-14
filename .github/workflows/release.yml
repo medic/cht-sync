@@ -18,7 +18,7 @@ jobs:
         with:
           node-version: 20.x
       - name: Install Semantic Release and plugins
-        run: npm install -g semantic-release @semantic-release/git @semantic-release/changelog @semantic-release/github @semantic-release/commit-analyzer @semantic-release/release-notes-generator
+        run: npm install -g semantic-release @semantic-release/git @semantic-release/changelog @semantic-release/github @semantic-release/commit-analyzer @semantic-release/release-notes-generator @semantic-release/npm
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}
