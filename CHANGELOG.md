@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/medic/cht-sync/compare/v1.1.1...v1.1.2) (2024-10-14)
+
+
+### Bug Fixes
+
+* **#155:** use semantic release npm module ([#162](https://github.com/medic/cht-sync/issues/162)) ([09ed265](https://github.com/medic/cht-sync/commit/09ed265bff670d5dfab116e5611ded9e8f7cd1f6)), closes [#155](https://github.com/medic/cht-sync/issues/155)
+
 ## [1.1.1](https://github.com/medic/cht-sync/compare/v1.1.0...v1.1.1) (2024-10-14)
 
 
