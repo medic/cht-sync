@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/medic/cht-sync/compare/v1.1.0...v1.1.1) (2024-10-14)
+
+
+### Bug Fixes
+
+* **#155:** bump version upon release ([#160](https://github.com/medic/cht-sync/issues/160)) ([85cacd0](https://github.com/medic/cht-sync/commit/85cacd0580f47e44134ffeb13a71bcdd0ccaf574)), closes [#155](https://github.com/medic/cht-sync/issues/155)
+
 # [1.1.0](https://github.com/medic/cht-sync/compare/v1.0.2...v1.1.0) (2024-09-23)
 
 
