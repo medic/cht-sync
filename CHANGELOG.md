@@ -1,3 +1,10 @@
+## [1.1.3](https://github.com/medic/cht-sync/compare/v1.1.2...v1.1.3) (2024-10-15)
+
+
+### Bug Fixes
+
+* pin python version to 3.12 ([f84e7ec](https://github.com/medic/cht-sync/commit/f84e7ec0ccef24713d92ddeb0f9c568da0ce4448))
+
 ## [1.1.2](https://github.com/medic/cht-sync/compare/v1.1.1...v1.1.2) (2024-10-14)
 
 
