@@ -5,7 +5,7 @@ postgres:
   password: ""
   db: ""
   schema: "v1"
-  table: "medic"  
+  table: "couchdb"  
   host: "postgres" # if postgres is outside the cluster
   port: 5432 # if postgres is outside the cluster
 
