@@ -8,7 +8,7 @@ FROM python:3.12 AS release
 
 RUN pip install --upgrade cffi \
     && pip install cryptography~=3.4 \
-    && pip install dbt-core dbt-postgres
+    && pip install dbt-core==1.9.0b1 dbt-postgres==1.9.0b1
 
 RUN adduser dbt
 USER dbt
