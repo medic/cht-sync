@@ -11,6 +11,7 @@ In order to run these end-to-end tests locally, follow the steps below:
 ```sh
 npm ci
 ```
+
 2. Run the `couch2pg` unit tests:
 
 ```sh
