@@ -1,8 +1,8 @@
 # Description
 
-[description]
+<!-- DESCRIPTION -->
 
-medic/sync#[number]
+<!-- ISSUE NUMBER -->
 
 # Code review checklist
 <!-- Remove or comment out any items that do not apply to this PR; in the remaining boxes, replace the [ ] with [x]. -->
