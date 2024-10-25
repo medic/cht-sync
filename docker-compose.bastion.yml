@@ -1,7 +1,12 @@
 services:
-
   bastion:
-    image: bastion
-#    environment:
+    build: ./bastion/
+    restart: unless-stopped
     ports:
-      - "${BASTOIN_PORT:-2222}:22"
+      - ${BASTION_PORT:-22222}:22/tcp
+    volumes:
+      - $PWD/authorized_keys:/var/lib/bastion/authorized_keys
+      - bastion:/usr/etc/ssh:rw
+
+volumes:
+  bastion:
