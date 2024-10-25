@@ -1,0 +1,7 @@
+services:
+
+  bastion:
+    image: bastion
+#    environment:
+    ports:
+      - "${BASTOIN_PORT:-2222}:22"
