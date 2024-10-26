@@ -19,12 +19,13 @@ ENV HOST_KEYS_PATH="${HOST_KEYS_PATH_PREFIX}/etc/ssh"
 COPY bastion /usr/sbin/bastion
 
 RUN addgroup -S -g ${GID} ${GROUP} \
-    && adduser -D -h ${HOME} -s /bin/ash -g "${USER} service" \
+    && adduser -D -h ${HOME} -s /bin/false -g "${USER} service" \
            -u ${UID} -G ${GROUP} ${USER} \
     && sed -i "s/${USER}:!/${USER}:*/g" /etc/shadow \
     && set -x \
     && apk add --no-cache openssh-server \
-    && echo "Welcome to Bastion!" > /etc/motd \
+    && echo -e "Interactive sessions not allowed. Use \"-N\" with ssh tunnel command instead: \n" > /etc/motd \
+    && echo -e "\tssh -N -L 5432:CONTAINER-NAME-HERE:5432 bastion@127.0.0.1 -p 22222\n\n" >> /etc/motd \
     && chmod +x /usr/sbin/bastion \
     && mkdir -p ${HOST_KEYS_PATH} \
     && mkdir /etc/ssh/auth_principals \
