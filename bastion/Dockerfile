@@ -1,3 +1,4 @@
+# NOSONAR - because sshd requires root https://superuser.com/a/1548482 :(
 FROM alpine:3.20
 
 ARG HOME=/var/lib/bastion

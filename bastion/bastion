@@ -24,6 +24,13 @@ else
     CONFIG_LISTEN_PORT="-o Port=22"
 fi
 
+# todo - original project has this as "assumes your authorized_keys file with 644 permissions
+# and mounted under /var/lib/bastion/authorized_keys." - but this simply doesn't work
+# without this hack
+cp /var/lib/bastion/authorized_keys-tmp /var/lib/bastion/authorized_keys
+chown bastion /var/lib/bastion/authorized_keys
+chmod 600 /var/lib/bastion/authorized_keys
+
 /usr/sbin/sshd -D -e -4 \
     -o "HostKey=$HOST_KEYS_PATH/ssh_host_rsa_key" \
     -o "HostKey=$HOST_KEYS_PATH/ssh_host_dsa_key" \
