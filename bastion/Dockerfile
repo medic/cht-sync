@@ -17,6 +17,7 @@ ENV HOST_KEYS_PATH_PREFIX="/usr"
 ENV HOST_KEYS_PATH="${HOST_KEYS_PATH_PREFIX}/etc/ssh"
 
 COPY bastion /usr/sbin/bastion
+COPY get_keys.sh /usr/sbin/get_keys.sh
 
 RUN addgroup -S -g ${GID} ${GROUP} \
     && adduser -D -h ${HOME} -s /bin/false -g "${USER} service" \
@@ -27,6 +28,7 @@ RUN addgroup -S -g ${GID} ${GROUP} \
     && echo -e "Interactive sessions not allowed. Use \"-N\" with ssh tunnel command instead: \n" > /etc/motd \
     && echo -e "\tssh -N -L 5432:CONTAINER-NAME-HERE:5432 bastion@127.0.0.1 -p 22222\n\n" >> /etc/motd \
     && chmod +x /usr/sbin/bastion \
+    && chmod +x /usr/sbin/get_keys.sh \
     && mkdir -p ${HOST_KEYS_PATH} \
     && mkdir /etc/ssh/auth_principals \
     && echo "bastion" > /etc/ssh/auth_principals/bastion

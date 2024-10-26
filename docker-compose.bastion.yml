@@ -5,7 +5,7 @@ services:
     ports:
       - ${BASTION_PORT:-22222}:22/tcp
     volumes:
-      - $PWD/authorized_keys:/var/lib/bastion/authorized_keys-tmp
+      - $PWD/bastion/authorized_keys:/var/lib/bastion/authorized_keys-tmp
       - bastion:/usr/etc/ssh:rw
 
 volumes:

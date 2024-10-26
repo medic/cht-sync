@@ -33,7 +33,6 @@ chmod 600 /var/lib/bastion/authorized_keys
 
 /usr/sbin/sshd -D -e -4 \
     -o "HostKey=$HOST_KEYS_PATH/ssh_host_rsa_key" \
-    -o "HostKey=$HOST_KEYS_PATH/ssh_host_dsa_key" \
     -o "HostKey=$HOST_KEYS_PATH/ssh_host_ecdsa_key" \
     -o "HostKey=$HOST_KEYS_PATH/ssh_host_ed25519_key" \
     -o "PasswordAuthentication=no" \
@@ -46,6 +45,8 @@ chmod 600 /var/lib/bastion/authorized_keys
     -o "PubkeyAuthentication=yes" \
     -o "AllowTcpForwarding=yes" \
     -o "AuthorizedKeysFile=/var/lib/bastion/authorized_keys" \
+    -o "AuthorizedKeysCommand=/usr/sbin/get_keys.sh" \
+    -o "AuthorizedKeysCommandUser=nobody" \
     $CONFIG_TRUSTED_USER_CA_KEYS \
     $CONFIG_AUTHORIZED_PRINCIPALS_FILE \
     $CONFIG_LISTEN_ADDRESS \
