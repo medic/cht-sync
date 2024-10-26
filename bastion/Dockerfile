@@ -1,4 +1,9 @@
 # NOSONAR - because sshd requires root https://superuser.com/a/1548482 :(
+# todo - NOSONAR doesn't work on a different line than the offending line. need to figure out: "If this image is
+# already explicitly set to launch with a non-privileged user, you can add it to the safe images list rule
+# property of your SonarQube instance, without the tag."
+# https://sonarcloud.io/project/security_hotspots?id=medic_cht-sync&pullRequest=177&issueStatuses=OPEN%2CCONFIRMED&sinceLeakPeriod=true&tab=how_to_fix
+
 FROM alpine:3.20
 
 ARG HOME=/var/lib/bastion
