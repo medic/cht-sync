@@ -1,5 +1,3 @@
-version: '3.7'
-
 services:
   couchdb:
     image: public.ecr.aws/medic/cht-couchdb:4.8.0
