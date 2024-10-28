@@ -24,9 +24,9 @@ RUN addgroup -S -g ${GID} ${GROUP} \
            -u ${UID} -G ${GROUP} ${USER} \
     && sed -i "s/${USER}:!/${USER}:*/g" /etc/shadow \
     && set -x \
-    && apk add --no-cache openssh-server \
-    && echo -e "Interactive sessions not allowed. Use \"-N\" with ssh tunnel command instead: \n" > /etc/motd \
-    && echo -e "\tssh -N -L 5432:CONTAINER-NAME-HERE:5432 bastion@127.0.0.1 -p 22222\n\n" >> /etc/motd \
+    && apk add --no-cache openssh-server curl \
+    && echo -e "\nLogin Successful! \n\nHowever, interactive sessions not allowed. Use \"-N\" with ssh tunnel command instead: \n" > /etc/motd \
+    && echo -e "\tssh -N -L 5432:CONTAINER-NAME-HERE:5432 bastion@127.0.0.1 -p 22222\n" >> /etc/motd \
     && chmod +x /usr/sbin/bastion \
     && chmod +x /usr/sbin/get_keys.sh \
     && mkdir -p ${HOST_KEYS_PATH} \
