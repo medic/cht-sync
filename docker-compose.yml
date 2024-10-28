@@ -1,3 +1,4 @@
+name: ${COMPOSE_PROJECT_NAME:-cht-sync}
 services:
   couch2pg:
     build: ./couch2pg/
