@@ -111,4 +111,14 @@ describe('db', () => {
       ]);
     });
   });
+
+  describe('handle multiple DBs', () => {
+    it('should split by space or comma', async () => {
+      process.env.COUCHDB_DBS = 'db1, db2  db3,db4';
+
+      db = await esmock('../../src/db', { pg, 'pouchdb-core': pouchDb });
+      const expectedDbs = ['db1', 'db2', 'db3', 'db4'];
+      expect(db.couchDbs).to.deep.equal(expectedDbs);
+    });
+  });
 });
