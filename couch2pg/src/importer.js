@@ -133,7 +133,7 @@ const storeDocs = async (allDocsResult) => {
 const importChangesBatch = async (couchDb, source) => {
   const dbName = couchDb.name.split('/').pop();
   const seq = await getSeq(source);
-  console.info(`Downloading CouchDB changes feed from ${seq} in ${dbName}`);
+  console.info(`Downloading ${dbName} changes feed from ${seq}`);
 
   let pending;
   try {
@@ -150,7 +150,7 @@ const importChangesBatch = async (couchDb, source) => {
   const docsToDownload = [];
   changes.results.forEach(change => change.deleted ? docsToDelete.push(change) : docsToDownload.push(change));
 
-  console.info(`There are ${docsToDelete.length} deletions and ${docsToDownload.length} new changed documents ` +
+  console.info(`There are ${docsToDelete.length} deletions and ${docsToDownload.length} new / changed documents ` +
     `in ${dbName}`);
 
   console.log(`There are approximately ${pending} changes left in ${dbName}`);
