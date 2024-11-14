@@ -131,8 +131,9 @@ const storeDocs = async (allDocsResult) => {
 };
 
 const importChangesBatch = async (couchDb, source) => {
+  const dbName = couchDb.name.split('/').pop();
   const seq = await getSeq(source);
-  console.info('Downloading CouchDB changes feed from ' + seq);
+  console.info(`Downloading CouchDB changes feed from ${seq} in ${dbName}`);
 
   let pending;
   try {
@@ -143,17 +144,16 @@ const importChangesBatch = async (couchDb, source) => {
   }
 
   const changes = await couchDb.changes({ limit: BATCH_SIZE, since: seq, seq_interval: BATCH_SIZE });
-  console.log('There are ' + changes.results.length + ' changes to process');
+  console.log(`There are ${changes.results.length} changes to process in ${dbName}`);
 
   const docsToDelete = [];
   const docsToDownload = [];
   changes.results.forEach(change => change.deleted ? docsToDelete.push(change) : docsToDownload.push(change));
 
-  console.info('There are ' +
-            docsToDelete.length + ' deletions and ' +
-            docsToDownload.length + ' new / changed documents');
+  console.info(`There are ${docsToDelete.length} deletions and ${docsToDownload.length} new changed documents ` +
+    `in ${dbName}`);
 
-  console.log('There are approximately ' + pending + ' changes left');
+  console.log(`There are approximately ${pending} changes left in ${dbName}`);
   await loadAndStoreDocs(couchDb, changes.results);
   await storeSeq(changes.last_seq, pending, source);
 
