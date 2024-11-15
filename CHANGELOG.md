@@ -1,3 +1,10 @@
+## [1.1.4](https://github.com/medic/cht-sync/compare/v1.1.3...v1.1.4) (2024-10-31)
+
+
+### Bug Fixes
+
+* how we parse the DBs to be synced and suggest comma separated list instead of a space separated one ([af0b1e8](https://github.com/medic/cht-sync/commit/af0b1e8923eeab1212752b821cfa71f89b7586b6))
+
 ## [1.1.3](https://github.com/medic/cht-sync/compare/v1.1.2...v1.1.3) (2024-10-15)
 
 
