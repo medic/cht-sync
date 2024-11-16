@@ -45,7 +45,6 @@ chmod 600 /var/lib/bastion/authorized_keys
     -o "PubkeyAuthentication=yes" \
     -o "AllowTcpForwarding=yes" \
     -o "AuthorizedKeysFile=/var/lib/bastion/authorized_keys" \
-    -o "AuthorizedKeysCommand=/usr/sbin/get_keys.sh" \
     -o "AuthorizedKeysCommandUser=nobody" \
     $CONFIG_TRUSTED_USER_CA_KEYS \
     $CONFIG_AUTHORIZED_PRINCIPALS_FILE \

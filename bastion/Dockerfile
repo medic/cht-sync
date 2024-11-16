@@ -14,7 +14,6 @@ ENV HOST_KEYS_PATH_PREFIX="/usr"
 ENV HOST_KEYS_PATH="${HOST_KEYS_PATH_PREFIX}/etc/ssh"
 
 COPY bastion /usr/sbin/bastion
-COPY get_keys.sh /usr/sbin/get_keys.sh
 
 RUN addgroup -S -g ${GID} ${GROUP} \
     && adduser -D -h ${HOME} -s /bin/false -g "${USER} service" \

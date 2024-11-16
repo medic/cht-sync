@@ -35,6 +35,7 @@
     "pouchdb-adapter-http": "^8.0.1",
     "pouchdb-core": "^8.0.1",
     "sinon": "^18.0.0",
+    "tunnel-ssh": "^5.1.2",
     "uuid": "^9.0.1"
   },
   "private": true

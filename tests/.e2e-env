@@ -16,3 +16,4 @@ COUCHDB_HOST="host.docker.internal"
 COUCHDB_PORT=5984
 COUCHDB_SECURE=false
 POSTGRES_HOST=postgres
+BASTION_AUTHORIZED_KEYS_FILE=./tests/utils/bastion-ssh-key.pub
