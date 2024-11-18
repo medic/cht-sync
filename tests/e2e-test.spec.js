@@ -169,7 +169,7 @@ describe('Main workflow Test Suite', () => {
       await delay(15); // Wait for Postgres
       const isRunning = isServiceRunning('postgres');
       expect(isRunning).to.be.true;
-      await delay(6); // Wait for DBT
+      await delay(15); // Wait for DBT
 
       client = await rootConnect();
       const modelNewDocResult = await client.query(
@@ -199,7 +199,7 @@ describe('Main workflow Test Suite', () => {
       const pgTableContact = await client.query(`SELECT * from ${PGTABLE} where _id = $1`, [contact._id]);
       expect(pgTableContact.rows[0].doc.edited).to.equal(1);
 
-      await delay(12); // wait for DBT
+      await delay(15); // wait for DBT
 
       const modelReportResult = await client.query(
         `SELECT * FROM ${POSTGRES_SCHEMA}.reports where uuid = $1`,
@@ -232,7 +232,7 @@ describe('Main workflow Test Suite', () => {
       await delay(6); // wait for CHT-Sync
       const pgTableContact = await client.query(`SELECT * from ${PGTABLE} where _id = $1`, [contact._id]);
       expect(pgTableContact.rows[0]._deleted).to.equal(true);
-      await delay(6); // wait for DBT
+      await delay(15); // wait for DBT
       const modelContactResult = await client.query(
         `SELECT * FROM ${POSTGRES_SCHEMA}.contacts where uuid= $1`,
         [contact._id]
@@ -248,7 +248,7 @@ describe('Main workflow Test Suite', () => {
 
       await deleteDoc(person);
       await delay(6); // wait for CHT-Sync
-      await delay(12); // wait for DBT
+      await delay(15); // wait for DBT
 
       const modelContactResult = await client.query(
         `SELECT * FROM ${POSTGRES_SCHEMA}.contacts where uuid = $1`,
@@ -264,7 +264,7 @@ describe('Main workflow Test Suite', () => {
       const report = reports()[0];
       await deleteDoc(report);
       await delay(6); // wait for CHT-Sync
-      await delay(6); // wait for DBT
+      await delay(15); // wait for DBT
       const pgTableReport = await client.query(`SELECT * from ${PGTABLE} where _id = $1`, [report._id]);
       expect(pgTableReport.rows[0]._deleted).to.equal(true);
       const modelReportResult = await client.query(
@@ -285,7 +285,7 @@ describe('Main workflow Test Suite', () => {
 
       await insertDocs([newDoc]);
       await delay(6); // wait for CHT-Sync
-      await delay(12); // wait for DBT
+      await delay(15); // wait for DBT
 
       const pgTableNewDoc = await client.query(`SELECT * from ${PGTABLE} where _id = $1`, [newDoc._id]);
       expect(pgTableNewDoc.rows.length).to.equal(1);
@@ -315,7 +315,7 @@ describe('Main workflow Test Suite', () => {
       const resolvedValue = pgTableContact.rows[0].doc.edited;
       expect(resolvedValue).to.equal('A');
 
-      await delay(12); // wait for DBT
+      await delay(15); // wait for DBT
 
       const modelContactResult = await client.query(
         `SELECT * FROM ${POSTGRES_SCHEMA}.contacts where uuid= $1`,
