@@ -24,7 +24,6 @@ RUN addgroup -S -g ${GID} ${GROUP} \
     && echo -e "\nLogin Successful! \n\nHowever, interactive sessions not allowed. Use \"-N\" with ssh tunnel command instead: \n" > /etc/motd \
     && echo -e "\tssh -N -L 5432:CONTAINER-NAME:5432 bastion@PUBLIC-IP-OR-DNS -p 22222\n" >> /etc/motd \
     && chmod +x /usr/sbin/bastion \
-    && chmod +x /usr/sbin/get_keys.sh \
     && mkdir -p ${HOST_KEYS_PATH} \
     && mkdir /etc/ssh/auth_principals \
     && echo "bastion" > /etc/ssh/auth_principals/bastion
