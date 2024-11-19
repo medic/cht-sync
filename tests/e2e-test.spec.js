@@ -4,6 +4,7 @@ import chaiExclude from 'chai-exclude';
 chai.use(chaiExclude);
 chai.use(chaiExclude);
 import { rootConnect, isPostgresConnectionAlive } from './utils/postgres-utils.js';
+import { setupTunnel } from './utils/bastion-utils.js';
 import {
   importAllDocs,
   docs,
@@ -53,6 +54,9 @@ describe('Main workflow Test Suite', () => {
   before(async () => {
     console.log('Importing docs');
     await importAllDocs();
+    console.log('Creating SSH tunnel');
+    const tunnel = await setupTunnel();
+    console.log('tunnel created maybe??', JSON.stringify(tunnel));
     client = await rootConnect();
     console.log('Waiting for DBT');
     await waitForDbt(client);
