@@ -56,7 +56,7 @@ describe('Main workflow Test Suite', () => {
     await importAllDocs();
     console.log('Creating SSH tunnel');
     const tunnel = await setupTunnel();
-    console.log('tunnel created maybe??', JSON.stringify(tunnel));
+    console.log('Connecting to Postgres');
     client = await rootConnect();
     console.log('Waiting for DBT');
     await waitForDbt(client);
