@@ -180,6 +180,7 @@ describe('Main workflow Test Suite', () => {
       await delay(15); // Wait for Postgres
       const isRunning = isServiceRunning('postgres');
       expect(isRunning).to.be.true;
+      await delay(15);
       client = await rootConnect();
       const conditionMet = await waitForCondition(async () => {
         const modelNewDocResult = await client.query(
