@@ -62,7 +62,11 @@ describe('Main workflow Test Suite', () => {
     await waitForDbt(client);
   });
 
-  after(async () => await client?.end());
+  after(async () => {
+    // todo - we need some cleanup on the bastion tunnel - how to do?!?!
+    // await tunnel.end(); // doesn't work :(
+    await client?.end();
+  });
 
   describe('Initial Sync', () => {
     it('should have data in postgres medic table', async () => {
