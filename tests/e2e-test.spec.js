@@ -46,6 +46,17 @@ const waitForDbt = async (pgClient, retry = 30) => {
   return waitForDbt(pgClient, --retry);
 };
 
+const waitForCondition = async (condition) => {
+  const startTime = Date.now();
+  while (Date.now() - startTime < 50000) {
+    if (await condition()) {
+      return true;
+    }
+    await delay(0.1);
+  }
+  return false;
+};
+
 describe('Main workflow Test Suite', () => {
   let client;
 
@@ -199,13 +210,14 @@ describe('Main workflow Test Suite', () => {
       const pgTableContact = await client.query(`SELECT * from ${PGTABLE} where _id = $1`, [contact._id]);
       expect(pgTableContact.rows[0].doc.edited).to.equal(1);
 
-      await delay(15); // wait for DBT
-
-      const modelReportResult = await client.query(
-        `SELECT * FROM ${POSTGRES_SCHEMA}.reports where uuid = $1`,
-        [report._id]
-      );
-      expect(modelReportResult.rows[0].doc.edited).to.equal(1);
+      const conditionMet = await waitForCondition(async () => {
+        const modelReportResult = await client.query(
+          `SELECT * FROM ${POSTGRES_SCHEMA}.reports where uuid = $1`,
+          [report._id]
+        );
+        return modelReportResult.rows[0]?.doc?.edited === 1;
+      });
+      expect(conditionMet).to.be.true;
 
       const modelContactResult = await client.query(
         `SELECT * FROM ${POSTGRES_SCHEMA}.contacts where uuid= $1`,
@@ -213,11 +225,14 @@ describe('Main workflow Test Suite', () => {
       );
       expect(modelContactResult.rows[0].edited).to.equal('1');
 
-      const modelPersonResult = await client.query(
-        `SELECT * FROM ${POSTGRES_SCHEMA}.persons where uuid = $1`,
-        [contact._id]
-      );
-      expect(modelPersonResult.rows[0].edited).to.equal('1');
+      const personConditionMet = await waitForCondition(async () => {
+        const modelPersonResult = await client.query(
+          `SELECT * FROM ${POSTGRES_SCHEMA}.persons WHERE uuid = $1`,
+          [contact._id]
+        );
+        return modelPersonResult.rows[0]?.edited === '1';
+      });
+      expect(personConditionMet).to.be.true;
 
       const contactsTableResult = await client.query(`SELECT * FROM ${POSTGRES_SCHEMA}.contacts`);
       expect(contactsTableResult.rows.length).to.equal(contacts().length);
@@ -232,12 +247,14 @@ describe('Main workflow Test Suite', () => {
       await delay(6); // wait for CHT-Sync
       const pgTableContact = await client.query(`SELECT * from ${PGTABLE} where _id = $1`, [contact._id]);
       expect(pgTableContact.rows[0]._deleted).to.equal(true);
-      await delay(15); // wait for DBT
-      const modelContactResult = await client.query(
-        `SELECT * FROM ${POSTGRES_SCHEMA}.contacts where uuid= $1`,
-        [contact._id]
-      );
-      expect(modelContactResult.rows.length).to.equal(0);
+      const conditionMet = await waitForCondition(async () => {
+        const modelContactResult = await client.query(
+          `SELECT * FROM ${POSTGRES_SCHEMA}.contacts where uuid= $1`,
+          [contact._id]
+        );
+        return modelContactResult.rows.length === 0;
+      });
+      expect(conditionMet).to.be.true;
     });
 
     it('should process person deletes', async () => {
@@ -248,13 +265,16 @@ describe('Main workflow Test Suite', () => {
 
       await deleteDoc(person);
       await delay(6); // wait for CHT-Sync
-      await delay(15); // wait for DBT
 
-      const modelContactResult = await client.query(
-        `SELECT * FROM ${POSTGRES_SCHEMA}.contacts where uuid = $1`,
-        [person._id]
-      );
-      expect(modelContactResult.rows.length).to.equal(0);
+      const conditionMet = await waitForCondition(async () => {
+        const modelContactResult = await client.query(
+          `SELECT * FROM ${POSTGRES_SCHEMA}.contacts where uuid = $1`,
+          [person._id]
+        );
+        return modelContactResult.rows.length === 0;
+      });
+
+      expect(conditionMet).to.be.true;
 
       const postDelete = await client.query(`SELECT * FROM ${POSTGRES_SCHEMA}.persons where uuid = $1`, [person._id]);
       expect(postDelete.rows.length).to.equal(0);
@@ -264,14 +284,17 @@ describe('Main workflow Test Suite', () => {
       const report = reports()[0];
       await deleteDoc(report);
       await delay(6); // wait for CHT-Sync
-      await delay(15); // wait for DBT
       const pgTableReport = await client.query(`SELECT * from ${PGTABLE} where _id = $1`, [report._id]);
       expect(pgTableReport.rows[0]._deleted).to.equal(true);
-      const modelReportResult = await client.query(
-        `SELECT * FROM ${POSTGRES_SCHEMA}.reports where uuid = $1`,
-        [report._id]
-      );
-      expect(modelReportResult.rows.length).to.equal(0);
+
+      const conditionMet = await waitForCondition(async () => {
+        const modelReportResult = await client.query(
+          `SELECT * FROM ${POSTGRES_SCHEMA}.reports where uuid = $1`,
+          [report._id]
+        );
+        return modelReportResult.rows.length === 0;
+      });
+      expect(conditionMet).to.be.true;
     });
 
     it('should process incremental inserts', async () => {
@@ -285,16 +308,18 @@ describe('Main workflow Test Suite', () => {
 
       await insertDocs([newDoc]);
       await delay(6); // wait for CHT-Sync
-      await delay(15); // wait for DBT
 
       const pgTableNewDoc = await client.query(`SELECT * from ${PGTABLE} where _id = $1`, [newDoc._id]);
       expect(pgTableNewDoc.rows.length).to.equal(1);
-      const modelNewDocResult = await client.query(
-        `SELECT * FROM ${POSTGRES_SCHEMA}.contacts where uuid = $1`,
-        [newDoc._id]
-      );
-      expect(modelNewDocResult.rows.length).to.equal(1);
-      expect(modelNewDocResult.rows[0].name).to.equal(newDoc.name);
+
+      const conditionMet = await waitForCondition(async () => {
+        const modelNewDocResult = await client.query(
+          `SELECT * FROM ${POSTGRES_SCHEMA}.contacts where uuid = $1`,
+          [newDoc._id]
+        );
+        return modelNewDocResult.rows.length === 1 && modelNewDocResult.rows[0].name === newDoc.name;
+      });
+      expect(conditionMet).to.be.true;
     });
   });
 
