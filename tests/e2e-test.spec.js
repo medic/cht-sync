@@ -48,7 +48,7 @@ const waitForDbt = async (pgClient, retry = 30) => {
 
 const waitForCondition = async (condition) => {
   const startTime = Date.now();
-  while (Date.now() - startTime < 50000) {
+  while (Date.now() - startTime < 20000) {
     if (await condition()) {
       return true;
     }
