@@ -180,16 +180,11 @@ describe('Main workflow Test Suite', () => {
       await delay(15); // Wait for Postgres
       const isRunning = isServiceRunning('postgres');
       expect(isRunning).to.be.true;
-      await delay(15);
+      await delay(50);
       client = await rootConnect();
-      const conditionMet = await waitForCondition(async () => {
-        const modelNewDocResult = await client.query(
-          `SELECT * FROM ${POSTGRES_SCHEMA}.contacts WHERE uuid = $1`,
-          [newDoc._id]
-        );
-        return modelNewDocResult.rows.length === 1 && modelNewDocResult.rows[0].name === newDoc.name;
-      });
-      expect(conditionMet).to.be.true;
+      const modelNewDocResult = await client.query(`SELECT * FROM ${pgSchema}.contacts where uuid = $1`, [newDoc._id]);
+      expect(modelNewDocResult.rows.length).to.equal(1);
+      expect(modelNewDocResult.rows[0].name).to.equal(newDoc.name);
     });
   });
 
