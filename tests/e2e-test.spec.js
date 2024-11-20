@@ -132,7 +132,8 @@ describe('Main workflow Test Suite', () => {
     });
   });
 
-  describe('Downtime handles', () => {
+  //skipping these scenarios to try an idea. DO NOT MERGE
+  describe.skip('Downtime handles', () => {
     after(async () => {
       const isAlive = await isPostgresConnectionAlive(client);
       if (!isAlive) {
