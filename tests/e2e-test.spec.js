@@ -182,7 +182,7 @@ describe('Main workflow Test Suite', () => {
       expect(isRunning).to.be.true;
       await delay(50);
       client = await rootConnect();
-      const modelNewDocResult = await client.query(`SELECT * FROM ${pgSchema}.contacts where uuid = $1`, [newDoc._id]);
+      const modelNewDocResult = await client.query(`SELECT * FROM ${POSTGRES_SCHEMA}.contacts where uuid = $1`, [newDoc._id]);
       expect(modelNewDocResult.rows.length).to.equal(1);
       expect(modelNewDocResult.rows[0].name).to.equal(newDoc.name);
     });
