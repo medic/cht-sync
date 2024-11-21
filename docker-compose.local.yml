@@ -28,7 +28,7 @@ services:
     build: ./dbt/
     working_dir: /dbt/
     volumes:
-      - "${DBT_LOCAL_PATH:-dbt}:/dbt/local/"
+      - "${DBT_LOCAL_PATH}:/dbt/package/"
     environment:
       - POSTGRES_HOST=${POSTGRES_HOST}
       - POSTGRES_USER=${POSTGRES_USER}
@@ -37,7 +37,5 @@ services:
       - POSTGRES_TABLE=${POSTGRES_TABLE}
       - POSTGRES_SCHEMA=${POSTGRES_SCHEMA}
       - ROOT_POSTGRES_SCHEMA=${POSTGRES_SCHEMA}
-      - CHT_PIPELINE_BRANCH_URL=${CHT_PIPELINE_BRANCH_URL}
       - DATAEMON_INTERVAL=${DATAEMON_INTERVAL}
-      - DBT_PACKAGE_TARBALL_URL=${DBT_PACKAGE_TARBALL_URL}
       - DBT_LOCAL_PATH=${DBT_LOCAL_PATH}

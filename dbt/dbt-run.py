@@ -63,7 +63,7 @@ def get_package():
 
   if os.getenv("DBT_LOCAL_PATH"):
       package_json = json.dumps({"packages": [{
-          "local": '/dbt/local/'
+          "local": '/dbt/package/'
       }]})
 
   with open("/dbt/packages.yml", "w") as f:
