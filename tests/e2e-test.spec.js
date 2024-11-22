@@ -65,16 +65,12 @@ describe('Main workflow Test Suite', () => {
     console.log('Importing docs');
     await importAllDocs();
     console.log('Creating SSH tunnel');
-    const tunnel = await setupTunnel();
+    await setupTunnel();
     console.log('Connecting to Postgres');
     client = await rootConnect();
     console.log('Waiting for DBT');
     await waitForDbt(client);
   });
-
-  /*afterEach(async () => {
-    await delay(10);
-  });*/
 
   after(async () => await client?.end());
 
