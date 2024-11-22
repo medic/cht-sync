@@ -376,7 +376,7 @@ describe('Main workflow Test Suite', () => {
           modelNewDocResult.rows.length === 1 &&
           modelNewDocResult.rows[0].name === newDoc.name
         );
-      }, 20000, 0.1);
+      });
       expect(conditionMet).to.be.true;
     });
   });
