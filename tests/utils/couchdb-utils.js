@@ -110,7 +110,7 @@ export const conflictDeleteDoc = async (doc) => {
   result.forEach((res) => {
     if (res.error) {
       console.log(`Failed to delete document with id ${doc._id}: ${res.reason}`);
-    }else {
+    } else {
       const index = docs.findIndex(d => d._id === doc._id);
       if (index !== -1) {
         docs.splice(index, 1);
