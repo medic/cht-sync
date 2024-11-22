@@ -1,9 +1,12 @@
 services:
   couchdb:
-    image: public.ecr.aws/medic/cht-couchdb:4.8.0
+    image: public.ecr.aws/medic/cht-couchdb:4.15.0
     restart: always
     ports:
       - "5984:5984"
     environment:
       - COUCHDB_USER=${COUCHDB_USER}
       - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
+      - COUCHDB_SECRET=9c0d6034-0f19-45df-8fcd-5fec9c473c73
+      - COUCHDB_UUID=4c6bffc8-a5ac-4f98-a34c-6fb0e63964e5
+      - SVC_NAME=couchdb
