@@ -46,13 +46,13 @@ const waitForDbt = async (pgClient, retry = 30) => {
   return waitForDbt(pgClient, --retry);
 };
 
-const waitForCondition = async (condition) => {
+const waitForCondition = async (condition, timeout = 20000, interval = 0.1) => {
   const startTime = Date.now();
-  while (Date.now() - startTime < 20000) {
+  while (Date.now() - startTime < timeout) {
     if (await condition()) {
       return true;
     }
-    await delay(0.1);
+    await delay(interval);
   }
   return false;
 };
@@ -67,6 +67,10 @@ describe('Main workflow Test Suite', () => {
     console.log('Waiting for DBT');
     await waitForDbt(client);
   });
+
+  /*afterEach(async () => {
+    await delay(10);
+  });*/
 
   after(async () => await client?.end());
 
@@ -129,66 +133,6 @@ describe('Main workflow Test Suite', () => {
       expect(reportTableResult.rows[0].patient_id).to.equal(report.patient_id);
       expect(reportTableResult.rows[0].contact_id).to.equal(report.contact._id);
       expect(reportTableResult.rows[0].fields).to.deep.equal(report.fields);
-    });
-  });
-
-  //skipping these scenarios to try an idea. DO NOT MERGE
-  describe.skip('Downtime handles', () => {
-    after(async () => {
-      const isAlive = await isPostgresConnectionAlive(client);
-      if (!isAlive) {
-        client = await rootConnect();
-      }
-    });
-
-    it('should handle CouchDB downtime gracefully', async () => {
-      stopService('couchdb');
-      await delay(5);
-      const isStopped = !isServiceRunning('couchdb');
-      expect(isStopped).to.be.true;
-      startService('couchdb');
-      await delay(15); // Wait for CouchDB
-      const isRunning = isServiceRunning('couchdb');
-      expect(isRunning).to.be.true;
-      await delay(15); // Wait for DBT
-      const couchdbTableResult = await client.query(`SELECT * FROM ${PGTABLE}`);
-      expect(couchdbTableResult.rows.length).to.equal(docs.length);
-      const contactsTableResult = await client.query(`SELECT * FROM ${POSTGRES_SCHEMA}.contacts`);
-      expect(contactsTableResult.rows.length).to.equal(contacts().length);
-      const reportsTableResult = await client.query(`SELECT * FROM ${POSTGRES_SCHEMA}.reports`);
-      expect(reportsTableResult.rows.length).to.equal(reports().length);
-      const personsTableResult = await client.query(`SELECT * FROM ${POSTGRES_SCHEMA}.persons`);
-      expect(personsTableResult.rows.length).to.equal(persons().length);
-    });
-
-    it('should handle PostgreSQL downtime gracefully', async () => {
-      await client?.end();
-      stopService('postgres');
-      await delay(5);
-      const isStopped = !isServiceRunning('postgres');
-      expect(isStopped).to.be.true;
-
-      const newDoc = {
-        _id: uuidv4(),
-        type: 'contact',
-        name: 'New Contact During PG Down',
-        phone: '1234567890',
-        parent: { _id: uuidv4() },
-      };
-
-      await insertDocs([newDoc]);
-      startService('postgres');
-      await delay(15); // Wait for Postgres
-      const isRunning = isServiceRunning('postgres');
-      expect(isRunning).to.be.true;
-      await delay(50);
-      client = await rootConnect();
-      const modelNewDocResult = await client.query(
-        `SELECT * FROM ${POSTGRES_SCHEMA}.contacts where uuid = $1`,
-        [newDoc._id]
-      );
-      expect(modelNewDocResult.rows.length).to.equal(1);
-      expect(modelNewDocResult.rows[0].name).to.equal(newDoc.name);
     });
   });
 
@@ -370,6 +314,70 @@ describe('Main workflow Test Suite', () => {
         [contact._id]
       );
       expect(modelContactResult.rows.length).to.equal(1);
+    });
+  });
+
+  describe('Downtime handles', () => {
+    after(async () => {
+      const isAlive = await isPostgresConnectionAlive(client);
+      if (!isAlive) {
+        client = await rootConnect();
+      }
+    });
+
+    it('should handle CouchDB downtime gracefully', async () => {
+      stopService('couchdb');
+      await delay(5);
+      const isStopped = !isServiceRunning('couchdb');
+      expect(isStopped).to.be.true;
+      startService('couchdb');
+      await delay(15); // Wait for CouchDB
+      const isRunning = isServiceRunning('couchdb');
+      expect(isRunning).to.be.true;
+      await delay(15); // Wait for DBT
+      const couchdbTableResult = await client.query(`SELECT * FROM ${PGTABLE} where _deleted != true`);
+
+      expect(couchdbTableResult.rows.length).to.equal(docs.length);
+      const contactsTableResult = await client.query(`SELECT * FROM ${POSTGRES_SCHEMA}.contacts`);
+      expect(contactsTableResult.rows.length).to.equal(contacts().length);
+      const reportsTableResult = await client.query(`SELECT * FROM ${POSTGRES_SCHEMA}.reports`);
+      expect(reportsTableResult.rows.length).to.equal(reports().length);
+      const personsTableResult = await client.query(`SELECT * FROM ${POSTGRES_SCHEMA}.persons`);
+      expect(personsTableResult.rows.length).to.equal(persons().length);
+    });
+
+    it('should handle PostgreSQL downtime gracefully', async () => {
+      await client?.end();
+      stopService('postgres');
+      await delay(5);
+      const isStopped = !isServiceRunning('postgres');
+      expect(isStopped).to.be.true;
+
+      const newDoc = {
+        _id: uuidv4(),
+        type: 'contact',
+        name: 'New Contact During PG Down',
+        phone: '1234567890',
+        parent: { _id: uuidv4() },
+      };
+
+      await insertDocs([newDoc]);
+      startService('postgres');
+      await delay(15); // Wait for Postgres
+      const isRunning = isServiceRunning('postgres');
+      expect(isRunning).to.be.true;
+      client = await rootConnect();
+      const conditionMet = await waitForCondition(async () => {
+        const modelNewDocResult = await client.query(
+          `SELECT * FROM ${POSTGRES_SCHEMA}.contacts WHERE uuid = $1`,
+          [newDoc._id]
+        );
+        return (
+          modelNewDocResult.rows.length === 1 &&
+          modelNewDocResult.rows[0].name === newDoc.name
+        );
+      }, 20000, 0.1);
+      expect(conditionMet).to.be.true;
     });
   });
 });
