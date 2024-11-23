@@ -70,6 +70,7 @@ describe('Main workflow Test Suite', () => {
     client = await rootConnect();
     console.log('Waiting for DBT');
     await waitForDbt(client);
+    console.log('Starting main tests');
   });
 
   after(async () => await client?.end());
