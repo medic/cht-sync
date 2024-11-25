@@ -28,9 +28,9 @@ const PGTABLE = `${POSTGRES_SCHEMA}.${POSTGRES_TABLE}`;
 
 const delay = (seconds) => new Promise(resolve => setTimeout(resolve, seconds * 1000));
 
-const waitForDbt = async (pgClient, retry = 30) => {
+const waitForDbt = async (pgClient, retry = 60) => {
   if (retry <= 0) {
-    throw new Error('DBT models missing records after 30s');
+    throw new Error('DBT models missing records after 60s');
   }
 
   try {
@@ -60,12 +60,15 @@ const waitForCondition = async (condition, timeout = 20000, interval = 0.1) => {
 
 describe('Main workflow Test Suite', () => {
   let client;
+  let sshServer;
+  let sshClient;
+  let tunnel;
 
   before(async () => {
     console.log('Importing docs');
     await importAllDocs();
     console.log('Creating SSH tunnel');
-    await setupTunnel();
+    tunnel = await setupTunnel();
     console.log('Connecting to Postgres');
     client = await rootConnect();
     console.log('Waiting for DBT');
@@ -77,7 +80,11 @@ describe('Main workflow Test Suite', () => {
     await delay(10);
   });*/
 
-  after(async () => await client?.end());
+  after(async () => {
+    await client?.end();
+    [ sshServer, sshClient ] = tunnel;
+    sshServer?.close();
+  });
 
   describe('Initial Sync', () => {
     it('should have data in postgres medic table', async () => {
