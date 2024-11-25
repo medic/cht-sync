@@ -61,7 +61,6 @@ const waitForCondition = async (condition, timeout = 20000, interval = 0.1) => {
 describe('Main workflow Test Suite', () => {
   let client;
   let sshServer;
-  let sshClient;
   let tunnel;
 
   before(async () => {
@@ -82,7 +81,7 @@ describe('Main workflow Test Suite', () => {
 
   after(async () => {
     await client?.end();
-    [ sshServer, sshClient ] = tunnel;
+    [ sshServer ] = tunnel;
     sshServer?.close();
   });
 
