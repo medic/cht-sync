@@ -73,6 +73,10 @@ describe('Main workflow Test Suite', () => {
     console.log('Starting main tests');
   });
 
+  /*afterEach(async () => {
+    await delay(10);
+  });*/
+
   after(async () => await client?.end());
 
   describe('Initial Sync', () => {
