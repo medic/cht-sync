@@ -27,9 +27,9 @@ const PGTABLE = `${POSTGRES_SCHEMA}.${POSTGRES_TABLE}`;
 
 const delay = (seconds) => new Promise(resolve => setTimeout(resolve, seconds * 1000));
 
-const waitForDbt = async (pgClient, retry = 30) => {
+const waitForDbt = async (pgClient, retry = 60) => {
   if (retry <= 0) {
-    throw new Error('DBT models missing records after 30s');
+    throw new Error('DBT models missing records after 60s');
   }
 
   try {
