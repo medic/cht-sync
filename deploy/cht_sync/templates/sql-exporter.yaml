@@ -17,13 +17,13 @@ spec:
     spec:
       automountServiceAccountToken: false
       containers:
-        - name: dbt
+        - name: sql-exporter
           image: burningalchemist/sql_exporter:latest
           command: ["sql_exporter", "--config.file=/etc/sql_exporter/sql_exporter.yml"]
           resources:
             limits:
-              cpu: {{ (.Values.dbt).cpu_limit | default "500m" }}
-              memory: {{ (.Values.dbt).memory_limit | default "1Gi" }}
+              cpu: {{ (.Values.metrics_exporter).cpu_limit | default "500m" }}
+              memory: {{ (.Values.metrics_exporter).memory_limit | default "1Gi" }}
           volumeMounts:
             - name: config-volume
               mountPath: /etc/sql_exporter/sql_exporter.yml
