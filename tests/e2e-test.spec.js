@@ -4,6 +4,7 @@ import chaiExclude from 'chai-exclude';
 chai.use(chaiExclude);
 chai.use(chaiExclude);
 import { rootConnect, isPostgresConnectionAlive } from './utils/postgres-utils.js';
+import { setupTunnel } from './utils/bastion-utils.js';
 import {
   importAllDocs,
   docs,
@@ -27,9 +28,9 @@ const PGTABLE = `${POSTGRES_SCHEMA}.${POSTGRES_TABLE}`;
 
 const delay = (seconds) => new Promise(resolve => setTimeout(resolve, seconds * 1000));
 
-const waitForDbt = async (pgClient, retry = 50) => {
+const waitForDbt = async (pgClient, retry = 60) => {
   if (retry <= 0) {
-    throw new Error('DBT models missing records after 50s');
+    throw new Error('DBT models missing records after 60s');
   }
 
   try {
@@ -59,20 +60,30 @@ const waitForCondition = async (condition, timeout = 20000, interval = 0.1) => {
 
 describe('Main workflow Test Suite', () => {
   let client;
+  let sshServer;
+  let tunnel;
 
   before(async () => {
     console.log('Importing docs');
     await importAllDocs();
+    console.log('Creating SSH tunnel');
+    tunnel = await setupTunnel();
+    console.log('Connecting to Postgres');
     client = await rootConnect();
     console.log('Waiting for DBT');
     await waitForDbt(client);
+    console.log('Starting main tests');
   });
 
   /*afterEach(async () => {
     await delay(10);
   });*/
 
-  after(async () => await client?.end());
+  after(async () => {
+    await client?.end();
+    [ sshServer ] = tunnel;
+    sshServer?.close();
+  });
 
   describe('Initial Sync', () => {
     it('should have data in postgres medic table', async () => {

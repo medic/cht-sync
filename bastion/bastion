@@ -1,0 +1,52 @@
+#!/usr/bin/env sh
+
+HOST_KEYS_PATH_PREFIX="${HOST_KEYS_PATH_PREFIX:='/'}"
+HOST_KEYS_PATH="${HOST_KEYS_PATH:='/etc/ssh'}"
+
+if [ -n "$TRUSTED_USER_CA_KEYS" ]; then
+    CONFIG_TRUSTED_USER_CA_KEYS="-o TrustedUserCAKeys=$TRUSTED_USER_CA_KEYS"
+    CONFIG_AUTHORIZED_PRINCIPALS_FILE="-o AuthorizedPrincipalsFile=/etc/ssh/auth_principals/%u"
+fi
+
+if [ ! -f "$HOST_KEYS_PATH/ssh_host_rsa_key" ]; then
+    /usr/bin/ssh-keygen -A -f "$HOST_KEYS_PATH_PREFIX"
+fi
+
+if [ -n "$LISTEN_ADDRESS" ]; then
+    CONFIG_LISTEN_ADDRESS="-o ListenAddress=$LISTEN_ADDRESS"
+else
+    CONFIG_LISTEN_ADDRESS="-o ListenAddress=0.0.0.0"
+fi
+
+if [ -n "$LISTEN_PORT" ]; then
+    CONFIG_LISTEN_PORT="-o Port=$LISTEN_PORT"
+else
+    CONFIG_LISTEN_PORT="-o Port=22"
+fi
+
+# todo - original project has this as "assumes your authorized_keys file with 644 permissions
+# and mounted under /var/lib/bastion/authorized_keys." - but this simply doesn't work
+# without this hack
+cp /var/lib/bastion/authorized_keys-tmp /var/lib/bastion/authorized_keys
+chown bastion /var/lib/bastion/authorized_keys
+chmod 600 /var/lib/bastion/authorized_keys
+
+/usr/sbin/sshd -D -e -4 \
+    -o "HostKey=$HOST_KEYS_PATH/ssh_host_rsa_key" \
+    -o "HostKey=$HOST_KEYS_PATH/ssh_host_ecdsa_key" \
+    -o "HostKey=$HOST_KEYS_PATH/ssh_host_ed25519_key" \
+    -o "PasswordAuthentication=no" \
+    -o "PermitEmptyPasswords=no" \
+    -o "PermitRootLogin=no" \
+    -o "X11Forwarding=no" \
+    -o "AllowAgentForwarding=yes" \
+    -o "GatewayPorts=yes" \
+    -o "PermitTunnel=yes" \
+    -o "PubkeyAuthentication=yes" \
+    -o "AllowTcpForwarding=yes" \
+    -o "AuthorizedKeysFile=/var/lib/bastion/authorized_keys" \
+    -o "AuthorizedKeysCommandUser=nobody" \
+    $CONFIG_TRUSTED_USER_CA_KEYS \
+    $CONFIG_AUTHORIZED_PRINCIPALS_FILE \
+    $CONFIG_LISTEN_ADDRESS \
+    $CONFIG_LISTEN_PORT
