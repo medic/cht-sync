@@ -2,7 +2,7 @@ default:
   target: default
   outputs:
     default:
-      threads: "{{ env_var('DBT_THREAD_COUNT') }}"
+      threads: "{{ env_var('DBT_THREAD_COUNT') | as_number }}"
       type: postgres
       host: "{{ env_var('POSTGRES_HOST') }}"
       user: "{{ env_var('POSTGRES_USER') }}"
