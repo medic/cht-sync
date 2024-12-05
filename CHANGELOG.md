@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/medic/cht-sync/compare/v1.1.4...v1.2.0) (2024-12-05)
+
+
+### Features
+
+* **#174:** bastion Dockerfile and compose file ([#177](https://github.com/medic/cht-sync/issues/177)) ([27d1739](https://github.com/medic/cht-sync/commit/27d1739041cf55b02a6257d4f1f65779d83b2737)), closes [#174](https://github.com/medic/cht-sync/issues/174) [#174](https://github.com/medic/cht-sync/issues/174)
+
 ## [1.1.4](https://github.com/medic/cht-sync/compare/v1.1.3...v1.1.4) (2024-10-31)
 
 
