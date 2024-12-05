@@ -1,0 +1,12 @@
+services:
+  bastion:
+    build: ./bastion/
+    restart: unless-stopped
+    ports:
+      - ${BASTION_PORT:-22222}:22/tcp
+    volumes:
+      - ${BASTION_AUTHORIZED_KEYS_FILE:-$PWD/bastion/authorized_keys}:/var/lib/bastion/authorized_keys-tmp
+      - bastion:/usr/etc/ssh:rw
+
+volumes:
+  bastion:
