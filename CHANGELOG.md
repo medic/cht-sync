@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/medic/cht-sync/compare/v1.2.0...v1.3.0) (2024-12-06)
+
+
+### Features
+
+* make dbt thread count configurable ([#190](https://github.com/medic/cht-sync/issues/190)) ([17318c1](https://github.com/medic/cht-sync/commit/17318c1fe6cf7529127c866dba8402914dd82fac))
+
 # [1.2.0](https://github.com/medic/cht-sync/compare/v1.1.4...v1.2.0) (2024-12-05)
 
 
