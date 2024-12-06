@@ -10,6 +10,7 @@ postgres:
   port: 5432 # if postgres is outside the cluster
 
 cht_pipeline_branch_url: "https://github.com/medic/cht-pipeline.git#main"
+DBT_THREAD_COUNT: 1
 
 # values shared by all couchdb instances
 # can be omitted if couchdb instances do not share any values
