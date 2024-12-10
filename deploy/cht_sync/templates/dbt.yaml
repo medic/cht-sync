@@ -40,5 +40,5 @@ spec:
             - name: CHT_PIPELINE_BRANCH_URL
               value: {{ .Values.cht_pipeline_branch_url }}
             - name: DBT_THREAD_COUNT
-              value: {{ .Values.dbt_thread_count | default "1" }}
+              value: {{ .Values.dbt_thread_count | default "1" | quote }}
 
