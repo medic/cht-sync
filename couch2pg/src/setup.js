@@ -18,11 +18,11 @@ CREATE TABLE IF NOT EXISTS ${db.postgresProgressTable} (
 );`;
 
 const createDeleteIndex = `
-CREATE INDEX IF NOT EXISTS _deleted ON ${db.postgresTable}(_deleted);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS _deleted ON ${db.postgresTable}(_deleted);
 `;
 
 const createTimestampIndex = `
-CREATE INDEX IF NOT EXISTS saved_timestamp ON ${db.postgresTable}(saved_timestamp);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS saved_timestamp ON ${db.postgresTable}(saved_timestamp);
 `;
 
 export const createDatabase = async () => {

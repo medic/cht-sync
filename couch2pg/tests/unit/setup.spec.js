@@ -43,10 +43,10 @@ CREATE TABLE IF NOT EXISTS v1.whatever (
   doc jsonb
 )`]);
       expect(pgClient.query.args[2]).to.deep.equal([`
-CREATE INDEX IF NOT EXISTS _deleted ON v1.whatever(_deleted);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS _deleted ON v1.whatever(_deleted);
 `]);
       expect(pgClient.query.args[3]).to.deep.equal([`
-CREATE INDEX IF NOT EXISTS saved_timestamp ON v1.whatever(saved_timestamp);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS saved_timestamp ON v1.whatever(saved_timestamp);
 `]);
       expect(pgClient.query.args[4]).to.deep.equal([`
 CREATE TABLE IF NOT EXISTS v1.couchdb_progress (
