@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/medic/cht-sync/compare/v1.3.0...v1.3.1) (2024-12-11)
+
+
+### Bug Fixes
+
+* **#193:** only create indexes if table does not exist ([#194](https://github.com/medic/cht-sync/issues/194)) ([0e6b671](https://github.com/medic/cht-sync/commit/0e6b6710aa85be45039c16351d451843bdcec527)), closes [#193](https://github.com/medic/cht-sync/issues/193) [#193](https://github.com/medic/cht-sync/issues/193)
+
 # [1.3.0](https://github.com/medic/cht-sync/compare/v1.2.0...v1.3.0) (2024-12-06)
 
 
