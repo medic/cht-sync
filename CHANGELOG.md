@@ -1,3 +1,10 @@
+## [1.3.2](https://github.com/medic/cht-sync/compare/v1.3.1...v1.3.2) (2024-12-12)
+
+
+### Bug Fixes
+
+* **#189:** add dbt thread count to helm ([#195](https://github.com/medic/cht-sync/issues/195)) ([e545b04](https://github.com/medic/cht-sync/commit/e545b0477441422ef82bc3a68ebcbeb1275d1ca1)), closes [#189](https://github.com/medic/cht-sync/issues/189) [#189](https://github.com/medic/cht-sync/issues/189) [#189](https://github.com/medic/cht-sync/issues/189)
+
 ## [1.3.1](https://github.com/medic/cht-sync/compare/v1.3.0...v1.3.1) (2024-12-11)
 
 
