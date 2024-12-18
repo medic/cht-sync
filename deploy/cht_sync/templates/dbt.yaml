@@ -20,9 +20,6 @@ spec:
             limits:
               cpu: {{ (.Values.dbt).cpu_limit | default "500m" }}
               memory: {{ (.Values.dbt).memory_limit | default "1Gi" }}
-          volumeMounts:
-            - mountPath: /dev/shm
-              name: sharedmemory
           env:
             - name: POSTGRES_HOST
               value: {{ .Values.postgres.host | default "postgres" }}
@@ -44,8 +41,4 @@ spec:
               value: {{ .Values.cht_pipeline_branch_url }}
             - name: DBT_THREAD_COUNT
               value: {{ .Values.dbt_thread_count | default "1" | quote }}
-      volumes:
-        - name: sharedmemory
-          emptyDir:
-            medium: Memory
 

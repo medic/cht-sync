@@ -26,6 +26,9 @@ spec:
             limits:
               cpu: {{ (.Values.postgres).cpu_limit | default "1000m" }}
               memory: {{ (.Values.postgres).memory_limit | default "2Gi" }}
+          volumeMounts:
+            - mountPath: /dev/shm
+              name: pg-sharedmemory
           env:
             - name: POSTGRES_USER
               value: {{ .Values.postgres.user }}
@@ -44,4 +47,7 @@ spec:
         - name: postgres-data
           persistentVolumeClaim:
             claimName: postgres-pvc
+        - name: pg-sharedmemory
+          emptyDir:
+            medium: Memory
 {{- end }}
