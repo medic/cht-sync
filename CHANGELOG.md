@@ -1,3 +1,10 @@
+## [1.3.3](https://github.com/medic/cht-sync/compare/v1.3.2...v1.3.3) (2025-01-06)
+
+
+### Bug Fixes
+
+* **#198:** add configurable POSTGRES_PORT to docker compose file ([#199](https://github.com/medic/cht-sync/issues/199)) ([c286014](https://github.com/medic/cht-sync/commit/c286014ea45210604e601d4a8b02b447b108b853)), closes [#198](https://github.com/medic/cht-sync/issues/198)
+
 ## [1.3.2](https://github.com/medic/cht-sync/compare/v1.3.1...v1.3.2) (2024-12-12)
 
 
