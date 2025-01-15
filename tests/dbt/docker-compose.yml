@@ -1,5 +1,0 @@
-services:
-  dbt-package:
-    build: ./tests/dbt/
-    ports:
-      - "10080:80"
