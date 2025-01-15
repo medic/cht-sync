@@ -131,7 +131,12 @@ def update_models():
 
 def run_incremental_models():
   # update incremental models (and tables if there are any)
-  subprocess.run(["dbt", "run",  "--profiles-dir", ".dbt", "--exclude", "config.materialized:view"])
+  args = ["dbt", "run",  "--profiles-dir", ".dbt", "--exclude", "config.materialized:view"]
+  selector = os.getenv("DBT_SELECTOR")
+  if selector:
+    args.append('--select')
+    args.append(selector)
+  subprocess.run(args)
 
 
 if __name__ == "__main__":
