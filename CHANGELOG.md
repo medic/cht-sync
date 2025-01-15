@@ -1,3 +1,38 @@
+## [1.3.3](https://github.com/medic/cht-sync/compare/v1.3.2...v1.3.3) (2025-01-06)
+
+
+### Bug Fixes
+
+* **#198:** add configurable POSTGRES_PORT to docker compose file ([#199](https://github.com/medic/cht-sync/issues/199)) ([c286014](https://github.com/medic/cht-sync/commit/c286014ea45210604e601d4a8b02b447b108b853)), closes [#198](https://github.com/medic/cht-sync/issues/198)
+
+## [1.3.2](https://github.com/medic/cht-sync/compare/v1.3.1...v1.3.2) (2024-12-12)
+
+
+### Bug Fixes
+
+* **#189:** add dbt thread count to helm ([#195](https://github.com/medic/cht-sync/issues/195)) ([e545b04](https://github.com/medic/cht-sync/commit/e545b0477441422ef82bc3a68ebcbeb1275d1ca1)), closes [#189](https://github.com/medic/cht-sync/issues/189) [#189](https://github.com/medic/cht-sync/issues/189) [#189](https://github.com/medic/cht-sync/issues/189)
+
+## [1.3.1](https://github.com/medic/cht-sync/compare/v1.3.0...v1.3.1) (2024-12-11)
+
+
+### Bug Fixes
+
+* **#193:** only create indexes if table does not exist ([#194](https://github.com/medic/cht-sync/issues/194)) ([0e6b671](https://github.com/medic/cht-sync/commit/0e6b6710aa85be45039c16351d451843bdcec527)), closes [#193](https://github.com/medic/cht-sync/issues/193) [#193](https://github.com/medic/cht-sync/issues/193)
+
+# [1.3.0](https://github.com/medic/cht-sync/compare/v1.2.0...v1.3.0) (2024-12-06)
+
+
+### Features
+
+* make dbt thread count configurable ([#190](https://github.com/medic/cht-sync/issues/190)) ([17318c1](https://github.com/medic/cht-sync/commit/17318c1fe6cf7529127c866dba8402914dd82fac))
+
+# [1.2.0](https://github.com/medic/cht-sync/compare/v1.1.4...v1.2.0) (2024-12-05)
+
+
+### Features
+
+* **#174:** bastion Dockerfile and compose file ([#177](https://github.com/medic/cht-sync/issues/177)) ([27d1739](https://github.com/medic/cht-sync/commit/27d1739041cf55b02a6257d4f1f65779d83b2737)), closes [#174](https://github.com/medic/cht-sync/issues/174) [#174](https://github.com/medic/cht-sync/issues/174)
+
 ## [1.1.4](https://github.com/medic/cht-sync/compare/v1.1.3...v1.1.4) (2024-10-31)
 
 
