@@ -158,7 +158,7 @@ describe('importer', () => {
 
     expect(pgClient.query.withArgs(sinon.match(insertDocsMatch())).args).to.deep.equal([[
       'INSERT INTO v1.whatever (saved_timestamp, _id, _deleted, source, doc) VALUES ' +
-      '($1, $2, $3, $4),($5, $6, $7, $8),($9, $10, $11, $12) ' + ON_CONFLICT_STMT,
+      '($1, $2, $3, $4, $5),($6, $7, $8, $9, $10),($11, $12, $13, $14, $15) ' + ON_CONFLICT_STMT,
       [
         now.toISOString(),
         'doc1',
@@ -239,7 +239,7 @@ describe('importer', () => {
     expect(pgClient.query.withArgs(sinon.match(insertDocsMatch())).callCount).to.equal(3);
     expect(pgClient.query.withArgs(sinon.match(insertDocsMatch())).args[0]).to.deep.equal([
       'INSERT INTO v1.whatever (saved_timestamp, _id, _deleted, source, doc) VALUES ' +
-      '($1, $2, $3, $4),($5, $6, $7, $8),($9, $10, $11, $12) ' + ON_CONFLICT_STMT,
+      '($1, $2, $3, $4, $5),($6, $7, $8, $9, $10),($11, $12, $13, $14, $15) ' + ON_CONFLICT_STMT,
       [
         now.toISOString(),
         iterationOne.docs[0].id,
@@ -263,7 +263,7 @@ describe('importer', () => {
 
     expect(pgClient.query.withArgs(sinon.match(insertDocsMatch())).args[1]).to.deep.equal([
       'INSERT INTO v1.whatever (saved_timestamp, _id, _deleted, source, doc) VALUES ' +
-      '($1, $2, $3, $4),($5, $6, $7, $8),($9, $10, $11, $12) ' + ON_CONFLICT_STMT,
+      '($1, $2, $3, $4, $5),($6, $7, $8, $9, $10),($11, $12, $13, $14, $15) ' + ON_CONFLICT_STMT,
       [
         now.toISOString(),
         iterationTwo.docs[0].id,
@@ -287,7 +287,7 @@ describe('importer', () => {
 
     expect(pgClient.query.withArgs(sinon.match(insertDocsMatch())).args[2]).to.deep.equal([
       'INSERT INTO v1.whatever (saved_timestamp, _id, _deleted, source, doc) VALUES ' +
-      '($1, $2, $3, $4),($5, $6, $7, $8),($9, $10, $11, $12) ' + ON_CONFLICT_STMT,
+      '($1, $2, $3, $4, $5),($6, $7, $8, $9, $10),($11, $12, $13, $14, $15) ' + ON_CONFLICT_STMT,
       [
         now.toISOString(),
         iterationThree.docs[0].id,
@@ -329,7 +329,7 @@ describe('importer', () => {
 
     expect(pgClient.query.withArgs(sinon.match(insertDocsMatch())).args).to.deep.equal([[
       'INSERT INTO v1.whatever (saved_timestamp, _id, _deleted, source, doc) VALUES ' +
-      '($1, $2, $3, $4) ' + ON_CONFLICT_STMT,
+      '($1, $2, $3, $4, $5) ' + ON_CONFLICT_STMT,
       [
         new Date().toISOString(),
         'change',
@@ -367,7 +367,7 @@ describe('importer', () => {
 
     expect(pgClient.query.withArgs(sinon.match(insertDocsMatch())).args).to.deep.equal([[
       'INSERT INTO v1.whatever (saved_timestamp, _id, _deleted, source, doc) VALUES ' +
-      '($1, $2, $3, $4) ' + ON_CONFLICT_STMT,
+      '($1, $2, $3, $4, $5) ' + ON_CONFLICT_STMT,
       [
         new Date().toISOString(),
         'change',
@@ -408,7 +408,7 @@ describe('importer', () => {
 
     expect(pgClient.query.withArgs(sinon.match(insertDocsMatch())).args).to.deep.equal([[
       'INSERT INTO v1.whatever (saved_timestamp, _id, _deleted, source, doc) VALUES ' +
-      '($1, $2, $3, $4),($5, $6, $7, $8),($9, $10, $11, $12) ' + ON_CONFLICT_STMT,
+      '($1, $2, $3, $4, $5),($6, $7, $8, $9, $10),($11, $12, $13, $14, $15) ' + ON_CONFLICT_STMT,
       [
         now.toISOString(),
         'doc2',
@@ -584,7 +584,7 @@ describe('importer', () => {
 
     const queryArgs = [
       'INSERT INTO v1.whatever (saved_timestamp, _id, _deleted, source, doc) VALUES ' +
-      '($1, $2, $3, $4),($5, $6, $7, $8),($9, $10, $11, $12) ' + ON_CONFLICT_STMT,
+      '($1, $2, $3, $4, $5),($6, $7, $8, $9, $10),($11, $12, $13, $14, $15) ' + ON_CONFLICT_STMT,
       [
         now.toISOString(),
         'doc1',
