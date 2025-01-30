@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS ${db.postgresTable} (
   saved_timestamp TIMESTAMP,
   _id VARCHAR PRIMARY KEY,
   _deleted BOOLEAN,
+  source varchar,
   doc jsonb
 )`;
 
@@ -25,12 +26,17 @@ const createTimestampIndex = `
 CREATE INDEX CONCURRENTLY IF NOT EXISTS saved_timestamp ON ${db.postgresTable}(saved_timestamp);
 `;
 
+const createSourceIndex = `
+CREATE INDEX CONCURRENTLY IF NOT EXISTS source ON ${db.postgresTable}(source);
+`;
+
 export const createDatabase = async () => {
   const client = await db.getPgClient();
   await client.query(createSchema);
   await client.query(createTable);
   await client.query(createDeleteIndex);
   await client.query(createTimestampIndex);
+  await client.query(createSourceIndex);
   await client.query(createProgressTable);
   await client.end();
 };
