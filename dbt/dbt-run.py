@@ -6,6 +6,7 @@ import subprocess
 
 from urllib.parse import urlparse
 
+dbt_selector = os.getenv("DBT_SELECTOR")
 
 def connection():
     for attempt in range(5):
@@ -37,7 +38,9 @@ def setup():
               CREATE TABLE IF NOT EXISTS
               {os.getenv('POSTGRES_SCHEMA')}._dataemon (
                   inserted_on TIMESTAMP DEFAULT NOW(),
-                  packages jsonb, manifest jsonb
+                  packages jsonb,
+                  manifest jsonb,
+                  dbt_selector text
               )
           """)
       conn.commit()
@@ -74,8 +77,9 @@ def get_manifest():
           cur.execute(f"""
               SELECT manifest
               FROM {os.getenv('POSTGRES_SCHEMA')}._dataemon
+              WHERE dbt_selector = %s OR (dbt_selector IS NULL AND %s IS NULL)
               ORDER BY inserted_on DESC
-          """)
+          """, (dbt_selector,dbt_selector))
           manifest = cur.fetchone()
 
           # save to file if found
@@ -97,14 +101,14 @@ def save_package_manifest(package_json, manifest_json):
     with conn.cursor() as cur:
       # because manifest is large, delete old entries
       # we only want the current/latest data
-      cur.execute(
-        f"DELETE FROM {os.getenv('POSTGRES_SCHEMA')}._dataemon "
-      )
-      cur.execute(
-        f"INSERT INTO {os.getenv('POSTGRES_SCHEMA')}._dataemon "
-        "(packages, manifest) VALUES (%s, %s);",
-        [package_json, manifest_json]
-      )
+      cur.execute(f"""
+          DELETE FROM {os.getenv('POSTGRES_SCHEMA')}._dataemon
+          WHERE dbt_selector = %s OR (dbt_selector IS NULL AND %s IS NULL)
+      """, (dbt_selector,dbt_selector))
+      cur.execute(f"""
+          INSERT INTO {os.getenv('POSTGRES_SCHEMA')}._dataemon
+          (packages, manifest, dbt_selector) VALUES (%s, %s, %s);
+      """, (package_json, manifest_json, dbt_selector))
       conn.commit()
 
 
@@ -132,10 +136,9 @@ def update_models():
 def run_incremental_models():
   # update incremental models (and tables if there are any)
   args = ["dbt", "run",  "--profiles-dir", ".dbt", "--exclude", "config.materialized:view"]
-  selector = os.getenv("DBT_SELECTOR")
-  if selector:
+  if dbt_selector:
     args.append('--select')
-    args.append(selector)
+    args.append(dbt_selector)
   subprocess.run(args)
 
 
