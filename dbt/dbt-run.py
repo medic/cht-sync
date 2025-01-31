@@ -88,7 +88,11 @@ def get_manifest():
                 f.write(json.dumps(manifest[0]));
 
           # run dbt ls to make sure current manifest is generated
-          subprocess.run(["dbt", "ls",  "--profiles-dir", ".dbt"])
+          args = ["dbt", "ls",  "--profiles-dir", ".dbt"]
+          if dbt_selector:
+            args.append('--select')
+            args.append(dbt_selector)
+          subprocess.run(args)
 
           new_manifest = '{}'
           with open("/dbt/target/manifest.json", "r") as f:
