@@ -328,6 +328,33 @@ describe('Main workflow Test Suite', () => {
     });
   });
 
+  describe('DBT Selector Tests', () => {
+    it('should maintain separate manifests for different selectors', async () => {
+      // Test contacts selector
+      await delay(6);
+
+      const contactsManifest = await client.query(
+        `SELECT manifest, dbt_selector FROM ${POSTGRES_SCHEMA}._dataemon WHERE dbt_selector = $1`,
+        ['tag:contacts']
+      );
+      expect(contactsManifest.rows.length).to.be.greaterThan(0);
+      expect(contactsManifest.rows[0].dbt_selector).to.equal('tag:contacts');
+
+      // Test reports selector
+      await delay(6);
+
+      const reportsManifest = await client.query(
+        `SELECT manifest, dbt_selector FROM ${POSTGRES_SCHEMA}._dataemon WHERE dbt_selector = $1`,
+        ['tag:reports']
+      );
+      expect(reportsManifest.rows.length).to.be.greaterThan(0);
+      expect(reportsManifest.rows[0].dbt_selector).to.equal('tag:reports');
+
+      // Verify manifests are different
+      expect(contactsManifest.rows[0].manifest).to.not.deep.equal(reportsManifest.rows[0].manifest);
+    });
+  });
+
   describe('Downtime handles', () => {
     after(async () => {
       const isAlive = await isPostgresConnectionAlive(client);
