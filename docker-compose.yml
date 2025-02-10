@@ -35,6 +35,7 @@ services:
       COUCHDB_DBS: ${COUCHDB_DBS}
       COUCHDB_PORT: ${COUCHDB_PORT}
       COUCHDB_SECURE: ${COUCHDB_SECURE:-true}
+    restart: always
 
   dbt:
     <<: *dbt-common
