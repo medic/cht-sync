@@ -157,7 +157,7 @@ describe('Main workflow Test Suite', () => {
       await editDoc({ ...report, edited: 1 });
       await editDoc({ ...contact, edited: 1 });
 
-      await delay(6); // wait for CHT-Sync
+      await delay(24); // wait for CHT-Sync
 
       const pgTableDataRecord = await client.query(`SELECT * from ${PGTABLE} where _id = $1`, [report._id]);
       expect(pgTableDataRecord.rows[0].doc.edited).to.equal(1);
