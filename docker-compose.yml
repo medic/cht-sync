@@ -13,9 +13,7 @@ x-dbt-base: &dbt-common
     POSTGRES_TABLE: ${POSTGRES_TABLE}
     POSTGRES_SCHEMA: ${POSTGRES_SCHEMA}
     ROOT_POSTGRES_SCHEMA: ${POSTGRES_SCHEMA}
-    CHT_PIPELINE_BRANCH_URL: ${CHT_PIPELINE_BRANCH_URL}
     DATAEMON_INTERVAL: ${DATAEMON_INTERVAL}
-    DBT_PACKAGE_TARBALL_URL: ${DBT_PACKAGE_TARBALL_URL}
     DBT_THREAD_COUNT: ${DBT_THREAD_COUNT}
 
 services:
@@ -44,6 +42,7 @@ services:
     environment:
       <<: *dbt-env
       DBT_SELECTOR: ''
+      CHT_PIPELINE_BRANCH_URL: ${CHT_PIPELINE_BRANCH_URL}
 
   dbt-base:
     <<: *dbt-common
@@ -52,6 +51,7 @@ services:
     environment:
       <<: *dbt-env
       DBT_SELECTOR: tag:base
+      CHT_PIPELINE_BRANCH_URL: ${CHT_PIPELINE_BRANCH_URL}
 
   dbt-models:
     <<: *dbt-common
@@ -62,17 +62,23 @@ services:
     environment:
       <<: *dbt-env
       DBT_SELECTOR: package:${DBT_PACKAGE_NAME}
+      CHT_PIPELINE_BRANCH_URL: ${CHT_PIPELINE_BRANCH_URL}
 
   dbt-contacts:
     <<: *dbt-common
+    volumes:
+      - "${DBT_LOCAL_PATH}:/dbt/package/"
     profiles:
       - test
     environment:
       <<: *dbt-env
       DBT_SELECTOR: tag:contacts
+      DBT_LOCAL_PATH: ${DBT_LOCAL_PATH}
 
   dbt-reports:
     <<: *dbt-common
+    volumes:
+      - "${DBT_LOCAL_PATH}:/dbt/package/"
     profiles:
      - test
     depends_on:
@@ -80,3 +86,4 @@ services:
     environment:
       <<: *dbt-env
       DBT_SELECTOR: tag:reports
+      DBT_LOCAL_PATH: ${DBT_LOCAL_PATH}
