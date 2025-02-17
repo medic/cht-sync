@@ -144,10 +144,20 @@ def update_models():
 
 def run_incremental_models():
   # update incremental models (and tables if there are any)
-  args = ["dbt", "run",  "--profiles-dir", ".dbt", "--exclude", "config.materialized:view"]
+  args = ["dbt", "run", 
+    "--profiles-dir",
+    ".dbt",
+    "--exclude", "config.materialized:view"]
+
   if dbt_selector:
     args.append('--select')
     args.append(dbt_selector)
+
+  batch_size = int(os.getenv("DBT_BATCH_SIZE") or 0)
+  if batch_size:
+      args.append("--vars")
+      args.append(f'{{batch_size: {batch_size}}}')
+
   subprocess.run(args)
 
 

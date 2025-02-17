@@ -46,4 +46,7 @@ spec:
               value: {{ $.Values.dbt_thread_count | default "1" | quote }}
             - name: DBT_SELECTOR
               value: {{ $dbt_selector }}
+              value: {{ .Values.dbt_thread_count | default "1" | quote }}
+            - name: DBT_BATCH_SIZE
+              value: {{ .Values.dbt_batch_size | default "" | quote }}
 {{- end }}
