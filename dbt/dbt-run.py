@@ -64,6 +64,11 @@ def get_package():
               "revision": init_package.fragment
           }]})
 
+  if os.getenv("DBT_LOCAL_PATH"):
+      package_json = json.dumps({"packages": [{
+          "local": '/dbt/package/'
+      }]})
+
   with open("/dbt/packages.yml", "w") as f:
     f.write(package_json)
 
