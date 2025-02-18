@@ -38,8 +38,14 @@ spec:
           volumeMounts:
             - name: postgres-data
               mountPath: /var/lib/postgresql/data
+            - name: postgres-shm
+              mountPath: /dev/shm
       volumes:
         - name: postgres-data
           persistentVolumeClaim:
             claimName: postgres-pvc
+        - name: postgres-shm
+          emptyDir:
+            medium: Memory
+            sizeLimit: {{ (.Values.postgres).memory_limit | default "2Gi" }}
 {{- end }}

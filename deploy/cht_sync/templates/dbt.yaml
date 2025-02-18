@@ -4,16 +4,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cht-sync-dbt
+  name: cht-sync-dbt-{{ $index }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: cht-sync-dbt
+      app: cht-sync-dbt-{{ $index }}
   template:
     metadata:
       labels:
-        app: cht-sync-dbt
+        app: cht-sync-dbt-{{ $index }}
     spec:
       automountServiceAccountToken: false
       containers:
@@ -46,7 +46,6 @@ spec:
               value: {{ $.Values.dbt_thread_count | default "1" | quote }}
             - name: DBT_SELECTOR
               value: {{ $dbt_selector }}
-              value: {{ .Values.dbt_thread_count | default "1" | quote }}
             - name: DBT_BATCH_SIZE
-              value: {{ .Values.dbt_batch_size | default "" | quote }}
+              value: {{ $.Values.dbt_batch_size | default "" | quote }}
 {{- end }}
