@@ -1,4 +1,4 @@
-{{- $dbt_selectors := .Values.dbt_selectors -}}
+{{- $dbt_selectors := .Values.dbt_selectors | default (list "") -}}
 {{- range $index, $dbt_selector := $dbt_selectors }}
 ---
 apiVersion: apps/v1

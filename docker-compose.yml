@@ -36,36 +36,9 @@ services:
       COUCHDB_SECURE: ${COUCHDB_SECURE:-true}
     restart: always
 
-  dbt:
-    <<: *dbt-common
-    profiles:
-      - default
-    environment:
-      <<: *dbt-env
-      DBT_SELECTOR: ''
-      CHT_PIPELINE_BRANCH_URL: ${CHT_PIPELINE_BRANCH_URL}
+#### Test ##############################################################################################
 
-  dbt-base:
-    <<: *dbt-common
-    profiles:
-      - base-and-package
-    environment:
-      <<: *dbt-env
-      DBT_SELECTOR: tag:base
-      CHT_PIPELINE_BRANCH_URL: ${CHT_PIPELINE_BRANCH_URL}
-
-  dbt-models:
-    <<: *dbt-common
-    profiles:
-      - base-and-package
-    depends_on:
-      - dbt-base
-    environment:
-      <<: *dbt-env
-      DBT_SELECTOR: package:${DBT_PACKAGE_NAME}
-      CHT_PIPELINE_BRANCH_URL: ${CHT_PIPELINE_BRANCH_URL}
-
-  dbt-contacts:
+  dbt-test-contacts:
     <<: *dbt-common
     volumes:
       - "${DBT_LOCAL_PATH}:/dbt/package/"
@@ -76,7 +49,7 @@ services:
       DBT_SELECTOR: tag:contacts
       DBT_LOCAL_PATH: ${DBT_LOCAL_PATH}
 
-  dbt-reports:
+  dbt-test-reports:
     <<: *dbt-common
     volumes:
       - "${DBT_LOCAL_PATH}:/dbt/package/"
@@ -88,3 +61,78 @@ services:
       <<: *dbt-env
       DBT_SELECTOR: tag:reports
       DBT_LOCAL_PATH: ${DBT_LOCAL_PATH}
+
+  couchdb:
+    image: public.ecr.aws/medic/cht-couchdb:4.15.0
+    restart: always
+    profiles:
+      - test
+    ports:
+      - "5984:5984"
+    environment:
+      - COUCHDB_USER=${COUCHDB_USER}
+      - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
+      - COUCHDB_SECRET=9c0d6034-0f19-45df-8fcd-5fec9c473c73
+      - COUCHDB_UUID=4c6bffc8-a5ac-4f98-a34c-6fb0e63964e5
+      - SVC_NAME=couchdb
+
+  postgres:
+    image: postgres:16
+    restart: always
+    profiles:
+     - test
+     - local
+    volumes:
+      - ./postgres/init-dbt-resources.sh:/docker-entrypoint-initdb.d/init-dbt-resources.sh:z
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_TABLES=${COUCHDB_DBS}
+      - POSTGRES_SCHEMA=${POSTGRES_SCHEMA}
+
+#### Local ##############################################################################################
+
+  dbt-local:
+    <<: *dbt-common
+    volumes:
+      - "${DBT_LOCAL_PATH}:/dbt/package/"
+    profiles:
+      - local
+    environment:
+      <<: *dbt-env
+      DBT_SELECTOR: ''
+      DBT_LOCAL_PATH: ${DBT_LOCAL_PATH}
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+
+
+#### Production ##########################################################################################
+
+  dbt-production:
+    <<: *dbt-common
+    profiles:
+      - production
+    environment:
+      <<: *dbt-env
+      DBT_SELECTOR: ''
+      CHT_PIPELINE_BRANCH_URL: ${CHT_PIPELINE_BRANCH_URL}
+
+  bastion:
+    build: ./bastion/
+    restart: unless-stopped
+    profiles:
+      - production
+    ports:
+      - ${BASTION_PORT:-22222}:22/tcp
+    volumes:
+      - ${BASTION_AUTHORIZED_KEYS_FILE:-$PWD/bastion/authorized_keys}:/var/lib/bastion/authorized_keys-tmp
+      - bastion:/usr/etc/ssh:rw
+
