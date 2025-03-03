@@ -14,8 +14,8 @@ x-dbt-base: &dbt-common
     POSTGRES_SCHEMA: ${POSTGRES_SCHEMA}
     ROOT_POSTGRES_SCHEMA: ${POSTGRES_SCHEMA}
     DATAEMON_INTERVAL: ${DATAEMON_INTERVAL}
-    DBT_THREAD_COUNT: ${DBT_THREAD_COUNT}
-    DBT_BATCH_SIZE: ${DBT_BATCH_SIZE}
+    DBT_THREAD_COUNT: ${DBT_THREAD_COUNT:-1}
+    DBT_BATCH_SIZE: ${DBT_BATCH_SIZE:-0}
 
 services:
   couch2pg:
@@ -56,7 +56,7 @@ services:
     profiles:
      - test
     depends_on:
-      - dbt-contacts
+      - dbt-test-contacts
     environment:
       <<: *dbt-env
       DBT_SELECTOR: tag:reports
@@ -130,9 +130,12 @@ services:
     restart: unless-stopped
     profiles:
       - production
+      - test
     ports:
       - ${BASTION_PORT:-22222}:22/tcp
     volumes:
       - ${BASTION_AUTHORIZED_KEYS_FILE:-$PWD/bastion/authorized_keys}:/var/lib/bastion/authorized_keys-tmp
       - bastion:/usr/etc/ssh:rw
 
+volumes:
+  bastion:
