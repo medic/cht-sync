@@ -1,5 +1,4 @@
 name: ${COMPOSE_PROJECT_NAME:-cht-sync}
-version: '3.8'
 
 x-dbt-base: &dbt-common
   build: ./dbt/
@@ -103,6 +102,7 @@ services:
       <<: *dbt-env
       DBT_SELECTOR: ''
       DBT_LOCAL_PATH: ${DBT_LOCAL_PATH}
+      CHT_PIPELINE_BRANCH_URL: ${CHT_PIPELINE_BRANCH_URL}
 
   pgadmin:
     image: dpage/pgadmin4
