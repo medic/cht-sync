@@ -7,6 +7,7 @@ source "$SCRIPT_DIR/lib/migration.sh"
 # SQL statements to execute
 SQL_STATEMENTS=(
     "ALTER TABLE _dataemon ADD COLUMN IF NOT EXISTS manifest jsonb;"
+    "ALTER TABLE _dataemon ADD COLUMN IF NOT EXISTS dbt_selector text;"
     "ALTER TABLE couchdb ADD COLUMN IF NOT EXISTS source varchar;"
     "CREATE INDEX IF NOT EXISTS source ON couchdb(source);"
 )
