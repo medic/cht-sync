@@ -73,7 +73,8 @@ services:
       - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
       - COUCHDB_SECRET=9c0d6034-0f19-45df-8fcd-5fec9c473c73
       - COUCHDB_UUID=4c6bffc8-a5ac-4f98-a34c-6fb0e63964e5
-      - SVC_NAME=couchdb
+
+#### Local ##############################################################################################
 
   postgres:
     image: postgres:16
@@ -90,8 +91,6 @@ services:
       - POSTGRES_TABLES=${COUCHDB_DBS}
       - POSTGRES_SCHEMA=${POSTGRES_SCHEMA}
 
-#### Local ##############################################################################################
-
   dbt-local:
     <<: *dbt-common
     volumes:
@@ -102,10 +101,11 @@ services:
       <<: *dbt-env
       DBT_SELECTOR: ''
       DBT_LOCAL_PATH: ${DBT_LOCAL_PATH}
-      CHT_PIPELINE_BRANCH_URL: ${CHT_PIPELINE_BRANCH_URL}
 
   pgadmin:
     image: dpage/pgadmin4
+    profiles:
+      - local
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
