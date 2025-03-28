@@ -1,3 +1,15 @@
+# [2.0.0](https://github.com/medic/cht-sync/compare/v1.3.3...v2.0.0) (2025-03-28)
+
+
+### Features
+
+* version 2: add dbt selectors, batching and local path ([#202](https://github.com/medic/cht-sync/issues/202)) ([7efa2f1](https://github.com/medic/cht-sync/commit/7efa2f1632a97515d68532d1bca52ba0b54e1673)), closes [#182](https://github.com/medic/cht-sync/issues/182) [#172](https://github.com/medic/cht-sync/issues/172) [#156](https://github.com/medic/cht-sync/issues/156) [#127](https://github.com/medic/cht-sync/issues/127)
+
+
+### BREAKING CHANGES
+
+* adding source to couchdb table
+
 ## [1.3.3](https://github.com/medic/cht-sync/compare/v1.3.2...v1.3.3) (2025-01-06)
 
 
