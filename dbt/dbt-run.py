@@ -132,15 +132,21 @@ def update_models():
   # save the new manifest and package for the next run
   save_package_manifest(package_json, manifest_json)
 
-  # anything that changed, run a full refresh
-  subprocess.run(["dbt", "run",
+  args = ["dbt", "run",
     "--profiles-dir",
      ".dbt",
-     "--select",
-     "state:modified",
       "--full-refresh",
       "--state",
-      "./old_manifest"])
+      "./old_manifest",
+      "--select"]
+
+  if dbt_selector:
+    args.append(f"{dbt_selector},state:modified")
+  else:
+    args.append("state:modified")
+
+  # anything that changed, run a full refresh
+  subprocess.run(args)
 
 def run_incremental_models():
   # update incremental models (and tables if there are any)
