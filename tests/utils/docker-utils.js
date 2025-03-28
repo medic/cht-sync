@@ -2,8 +2,6 @@ import { execSync } from 'child_process';
 
 const composeFiles = [
   'docker-compose.yml',
-  'docker-compose.couchdb.yml',
-  'docker-compose.postgres.yml'
 ].map(file => `-f ${file}`).join(' ');
 
 const execDockerCommand = (command) => {

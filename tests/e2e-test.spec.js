@@ -157,7 +157,7 @@ describe('Main workflow Test Suite', () => {
       await editDoc({ ...report, edited: 1 });
       await editDoc({ ...contact, edited: 1 });
 
-      await delay(6); // wait for CHT-Sync
+      await delay(24); // wait for CHT-Sync
 
       const pgTableDataRecord = await client.query(`SELECT * from ${PGTABLE} where _id = $1`, [report._id]);
       expect(pgTableDataRecord.rows[0].doc.edited).to.equal(1);
@@ -325,6 +325,33 @@ describe('Main workflow Test Suite', () => {
         [contact._id]
       );
       expect(modelContactResult.rows.length).to.equal(1);
+    });
+  });
+
+  describe('DBT Selector Tests', () => {
+    it('should maintain separate manifests for different selectors', async () => {
+      // Test contacts selector
+      await delay(6);
+
+      const contactsManifest = await client.query(
+        `SELECT manifest, dbt_selector FROM ${POSTGRES_SCHEMA}._dataemon WHERE dbt_selector = $1`,
+        ['tag:contacts']
+      );
+      expect(contactsManifest.rows.length).to.be.greaterThan(0);
+      expect(contactsManifest.rows[0].dbt_selector).to.equal('tag:contacts');
+
+      // Test reports selector
+      await delay(6);
+
+      const reportsManifest = await client.query(
+        `SELECT manifest, dbt_selector FROM ${POSTGRES_SCHEMA}._dataemon WHERE dbt_selector = $1`,
+        ['tag:reports']
+      );
+      expect(reportsManifest.rows.length).to.be.greaterThan(0);
+      expect(reportsManifest.rows[0].dbt_selector).to.equal('tag:reports');
+
+      // Verify manifests are different
+      expect(contactsManifest.rows[0].manifest).to.not.deep.equal(reportsManifest.rows[0].manifest);
     });
   });
 

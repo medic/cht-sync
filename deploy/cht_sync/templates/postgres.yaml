@@ -10,13 +10,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: cht-sync
-      inner.service: postgres
+      app: cht-sync-postgres
   template:
     metadata:
       labels:
-        app: cht-sync
-        inner.service: postgres
+        app: cht-sync-postgres
     spec:
       automountServiceAccountToken: false
       containers:
@@ -40,8 +38,14 @@ spec:
           volumeMounts:
             - name: postgres-data
               mountPath: /var/lib/postgresql/data
+            - name: postgres-shm
+              mountPath: /dev/shm
       volumes:
         - name: postgres-data
           persistentVolumeClaim:
             claimName: postgres-pvc
+        - name: postgres-shm
+          emptyDir:
+            medium: Memory
+            sizeLimit: {{ (.Values.postgres).memory_limit | default "2Gi" }}
 {{- end }}
