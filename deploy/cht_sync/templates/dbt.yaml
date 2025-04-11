@@ -1,44 +1,51 @@
+{{- $dbt_selectors := .Values.dbt_selectors | default (list "") -}}
+{{- range $index, $dbt_selector := $dbt_selectors }}
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cht-sync-dbt
+  name: cht-sync-dbt-{{ $index }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: cht-sync
+      app: cht-sync-dbt-{{ $index }}
   template:
     metadata:
       labels:
-        app: cht-sync
+        app: cht-sync-dbt-{{ $index }}
     spec:
       automountServiceAccountToken: false
       containers:
         - name: dbt
-          image: medicmobile/dataemon:{{ .Values.image_tag | default "latest" }}
+          image: medicmobile/dataemon:{{ $.Values.image_tag | default "latest" }}
           resources:
             limits:
-              cpu: {{ (.Values.dbt).cpu_limit | default "500m" }}
-              memory: {{ (.Values.dbt).memory_limit | default "1Gi" }}
+              cpu: {{ ($.Values.dbt).cpu_limit | default "500m" }}
+              memory: {{ ($.Values.dbt).memory_limit | default "1Gi" }}
           env:
             - name: POSTGRES_HOST
-              value: {{ .Values.postgres.host | default "postgres" }}
+              value: {{ $.Values.postgres.host | default "postgres" }}
             - name: POSTGRES_USER
-              value: {{ .Values.postgres.user }}
+              value: {{ $.Values.postgres.user }}
             - name: POSTGRES_PORT
-              value: {{ .Values.postgres.port | default "5432" | quote }}
+              value: {{ $.Values.postgres.port | default "5432" | quote }}
             - name: POSTGRES_PASSWORD
-              value: {{ .Values.postgres.password }}
+              value: {{ $.Values.postgres.password }}
             - name: POSTGRES_DB
-              value: {{ .Values.postgres.db }}
+              value: {{ $.Values.postgres.db }}
             - name: POSTGRES_TABLE
-              value: {{ .Values.postgres.table }}
+              value: {{ $.Values.postgres.table }}
             - name: POSTGRES_SCHEMA
-              value: {{ .Values.postgres.schema }}
+              value: {{ $.Values.postgres.schema }}
             - name: ROOT_POSTGRES_SCHEMA
-              value: {{ .Values.postgres.schema }}
+              value: {{ $.Values.postgres.schema }}
             - name: CHT_PIPELINE_BRANCH_URL
-              value: {{ .Values.cht_pipeline_branch_url }}
+              value: {{ $.Values.cht_pipeline_branch_url }}
             - name: DBT_THREAD_COUNT
-              value: {{ .Values.dbt_thread_count | default "1" | quote }}
-
+              value: {{ $.Values.dbt_thread_count | default "1" | quote }}
+            - name: DBT_SELECTOR
+              value: {{ $dbt_selector }}
+            - name: DBT_BATCH_SIZE
+              value: {{ $.Values.dbt_batch_size | default "" | quote }}
+{{- end }}

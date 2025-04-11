@@ -32,7 +32,7 @@ describe('setup', () => {
       await setup.createDatabase();
 
       expect(db.getPgClient.calledOnce).to.equal(true);
-      expect(pgClient.query.callCount).to.equal(5);
+      expect(pgClient.query.callCount).to.equal(6);
       expect(pgClient.end.calledOnce).to.equal(true);
       expect(pgClient.query.args[0]).to.deep.equal(['CREATE SCHEMA IF NOT EXISTS v1']);
       expect(pgClient.query.args[1]).to.deep.equal([ `
@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS v1.whatever (
   saved_timestamp TIMESTAMP,
   _id VARCHAR PRIMARY KEY,
   _deleted BOOLEAN,
+  source varchar,
   doc jsonb
 )`]);
       expect(pgClient.query.args[2]).to.deep.equal([`
@@ -49,6 +50,9 @@ CREATE INDEX CONCURRENTLY IF NOT EXISTS _deleted ON v1.whatever(_deleted);
 CREATE INDEX CONCURRENTLY IF NOT EXISTS saved_timestamp ON v1.whatever(saved_timestamp);
 `]);
       expect(pgClient.query.args[4]).to.deep.equal([`
+CREATE INDEX CONCURRENTLY IF NOT EXISTS source ON v1.whatever(source);
+`]);
+      expect(pgClient.query.args[5]).to.deep.equal([`
 CREATE TABLE IF NOT EXISTS v1.couchdb_progress (
   seq varchar,
   pending integer,

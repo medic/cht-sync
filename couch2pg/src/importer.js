@@ -15,11 +15,12 @@ const UPDATE_SEQ_STMT = `
     SET seq = $1, pending = $2, updated_at = CURRENT_TIMESTAMP
   WHERE source = $3
 `;
-const INSERT_DOCS_STMT = `INSERT INTO ${db.postgresTable} (saved_timestamp, _id, _deleted, doc) VALUES`;
+const INSERT_DOCS_STMT = `INSERT INTO ${db.postgresTable} (saved_timestamp, _id, _deleted, source, doc) VALUES`;
 const ON_CONFLICT_STMT = `
 ON CONFLICT (_id) DO UPDATE SET
   saved_timestamp = EXCLUDED.saved_timestamp,
   _deleted = EXCLUDED._deleted,
+  source = EXCLUDED.source,
   doc = EXCLUDED.doc
 `;
 
@@ -63,7 +64,7 @@ const storeSeq = async (seq, pending, source) => {
   await client.end();
 };
 
-const buildBulkInsertQuery = (allDocs) => {
+const buildBulkInsertQuery = (allDocs, source) => {
   const now = new Date().toISOString();
 
   let idx = 1;
@@ -72,8 +73,8 @@ const buildBulkInsertQuery = (allDocs) => {
 
   allDocs.rows.forEach((row) => {
     removeSecurityDetails(row.doc);
-    insertStmts.push(`($${idx++}, $${idx++}, $${idx++}, $${idx++})`);
-    docsToInsert.push(now, row.id, !!row.deleted, sanitise(JSON.stringify(row.doc)));
+    insertStmts.push(`($${idx++}, $${idx++}, $${idx++}, $${idx++}, $${idx++})`);
+    docsToInsert.push(now, row.id, !!row.deleted, source, sanitise(JSON.stringify(row.doc)));
   });
 
   return {
@@ -97,7 +98,7 @@ const addDeletesToResult = (deletedDocs, allDocs) => {
  Downloads all given documents from couchdb and stores them in Postgres, in batches.
  We presume if a document is on this list it has changed, and thus needs updating.
  */
-const loadAndStoreDocs = async (couchdb, docsToDownload) => {
+const loadAndStoreDocs = async (couchdb, docsToDownload, source) => {
   if (!docsToDownload.length) {
     return;
   }
@@ -109,13 +110,13 @@ const loadAndStoreDocs = async (couchdb, docsToDownload) => {
 
   const docsToStore = addDeletesToResult(deletedDocs, allDocsResult);
 
-  await storeDocs(docsToStore);
+  await storeDocs(docsToStore, source);
 };
 
-const storeDocs = async (allDocsResult) => {
+const storeDocs = async (allDocsResult, source) => {
   let client;
   try {
-    const { query, values } = buildBulkInsertQuery(allDocsResult);
+    const { query, values } = buildBulkInsertQuery(allDocsResult, source);
 
     client = await db.getPgClient();
     await client.query(query, values);
@@ -124,7 +125,7 @@ const storeDocs = async (allDocsResult) => {
     if (err.code === '40P01') {
       // deadlock detected
       await client.end();
-      return storeDocs(allDocsResult);
+      return storeDocs(allDocsResult, source);
     }
     throw err;
   }
@@ -154,7 +155,7 @@ const importChangesBatch = async (couchDb, source) => {
     `in ${dbName}`);
 
   console.log(`There are approximately ${pending} changes left in ${dbName}`);
-  await loadAndStoreDocs(couchDb, changes.results);
+  await loadAndStoreDocs(couchDb, changes.results, source);
   await storeSeq(changes.last_seq, pending, source);
 
   return changes.results.length;

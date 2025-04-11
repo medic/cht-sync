@@ -6,6 +6,7 @@ import subprocess
 
 from urllib.parse import urlparse
 
+dbt_selector = os.getenv("DBT_SELECTOR")
 
 def connection():
     for attempt in range(5):
@@ -37,7 +38,9 @@ def setup():
               CREATE TABLE IF NOT EXISTS
               {os.getenv('POSTGRES_SCHEMA')}._dataemon (
                   inserted_on TIMESTAMP DEFAULT NOW(),
-                  packages jsonb, manifest jsonb
+                  packages jsonb,
+                  manifest jsonb,
+                  dbt_selector text
               )
           """)
       conn.commit()
@@ -61,6 +64,11 @@ def get_package():
               "revision": init_package.fragment
           }]})
 
+  if os.getenv("DBT_LOCAL_PATH"):
+      package_json = json.dumps({"packages": [{
+          "local": '/dbt/package/'
+      }]})
+
   with open("/dbt/packages.yml", "w") as f:
     f.write(package_json)
 
@@ -74,8 +82,9 @@ def get_manifest():
           cur.execute(f"""
               SELECT manifest
               FROM {os.getenv('POSTGRES_SCHEMA')}._dataemon
+              WHERE dbt_selector = %s OR (dbt_selector IS NULL AND %s IS NULL)
               ORDER BY inserted_on DESC
-          """)
+          """, (dbt_selector,dbt_selector))
           manifest = cur.fetchone()
 
           # save to file if found
@@ -84,7 +93,11 @@ def get_manifest():
                 f.write(json.dumps(manifest[0]));
 
           # run dbt ls to make sure current manifest is generated
-          subprocess.run(["dbt", "ls",  "--profiles-dir", ".dbt"])
+          args = ["dbt", "ls",  "--profiles-dir", ".dbt"]
+          if dbt_selector:
+            args.append('--select')
+            args.append(dbt_selector)
+          subprocess.run(args)
 
           new_manifest = '{}'
           with open("/dbt/target/manifest.json", "r") as f:
@@ -97,14 +110,14 @@ def save_package_manifest(package_json, manifest_json):
     with conn.cursor() as cur:
       # because manifest is large, delete old entries
       # we only want the current/latest data
-      cur.execute(
-        f"DELETE FROM {os.getenv('POSTGRES_SCHEMA')}._dataemon "
-      )
-      cur.execute(
-        f"INSERT INTO {os.getenv('POSTGRES_SCHEMA')}._dataemon "
-        "(packages, manifest) VALUES (%s, %s);",
-        [package_json, manifest_json]
-      )
+      cur.execute(f"""
+          DELETE FROM {os.getenv('POSTGRES_SCHEMA')}._dataemon
+          WHERE dbt_selector = %s OR (dbt_selector IS NULL AND %s IS NULL)
+      """, (dbt_selector,dbt_selector))
+      cur.execute(f"""
+          INSERT INTO {os.getenv('POSTGRES_SCHEMA')}._dataemon
+          (packages, manifest, dbt_selector) VALUES (%s, %s, %s);
+      """, (package_json, manifest_json, dbt_selector))
       conn.commit()
 
 
@@ -119,19 +132,39 @@ def update_models():
   # save the new manifest and package for the next run
   save_package_manifest(package_json, manifest_json)
 
-  # anything that changed, run a full refresh
-  subprocess.run(["dbt", "run",
+  args = ["dbt", "run",
     "--profiles-dir",
      ".dbt",
-     "--select",
-     "state:modified",
       "--full-refresh",
       "--state",
-      "./old_manifest"])
+      "./old_manifest",
+      "--select"]
+
+  if dbt_selector:
+    args.append(f"{dbt_selector},state:modified")
+  else:
+    args.append("state:modified")
+
+  # anything that changed, run a full refresh
+  subprocess.run(args)
 
 def run_incremental_models():
   # update incremental models (and tables if there are any)
-  subprocess.run(["dbt", "run",  "--profiles-dir", ".dbt", "--exclude", "config.materialized:view"])
+  args = ["dbt", "run", 
+    "--profiles-dir",
+    ".dbt",
+    "--exclude", "config.materialized:view"]
+
+  if dbt_selector:
+    args.append('--select')
+    args.append(dbt_selector)
+
+  batch_size = int(os.getenv("DBT_BATCH_SIZE") or 0)
+  if batch_size:
+      args.append("--vars")
+      args.append(f'{{batch_size: {batch_size}}}')
+
+  subprocess.run(args)
 
 
 if __name__ == "__main__":
