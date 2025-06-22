@@ -104,7 +104,7 @@ describe('importer', () => {
 
     await importer(couchDb);
 
-    expect(couchDb.changes.args).to.deep.equal([[{ limit: 1000, seq_interval: 1000, since: 0 }]]);
+    expect(couchDb.changes.args).to.deep.equal([[{ limit: 1000, seq_interval: 1000, since: 0, batch_size: 1000 }]]);
     expect(pgClient.query.calledThrice).to.equal(true);
     expect(pgClient.query.args[0]).to.deep.equal([getSeqMatch(), ['host/db']]);
     expect(pgClient.query.args[1]).to.deep.equal([insertSeqMatch(), [0, null, 'host/db']]);
@@ -119,7 +119,7 @@ describe('importer', () => {
 
     await importer(couchDb);
 
-    expect(couchDb.changes.args).to.deep.equal([[{ limit: 1000, seq_interval: 1000, since: '22-123' }]]);
+    expect(couchDb.changes.args).to.deep.equal([[{ limit: 1000, seq_interval: 1000, since: '22-123', batch_size: 1000 }]]);
   }); 
 
   it('should import one batch of documents', async () => {
@@ -144,8 +144,8 @@ describe('importer', () => {
     await importer(couchDb);
 
     expect(couchDb.changes.calledTwice).to.equal(true);
-    expect(couchDb.changes.args[0]).to.deep.equal([{ limit: 1000, seq_interval: 1000, since: '1-22' }]);
-    expect(couchDb.changes.args[1]).to.deep.equal([{ limit: 1000, seq_interval: 1000, since: '23-ppp' }]);
+    expect(couchDb.changes.args[0]).to.deep.equal([{ limit: 1000, seq_interval: 1000, since: '1-22', batch_size: 1000 }]);
+    expect(couchDb.changes.args[1]).to.deep.equal([{ limit: 1000, seq_interval: 1000, since: '23-ppp', batch_size: 1000 }]);
 
     expect(seqQueries.update.calledTwice).to.equal(true);
     expect(seqQueries.update.args).to.deep.equal([
@@ -216,10 +216,10 @@ describe('importer', () => {
     await importer(couchDb);
 
     expect(couchDb.changes.callCount).to.equal(4);
-    expect(couchDb.changes.args[0]).to.deep.equal([{ limit: 1000, seq_interval: 1000, since: '1-seq' }]);
-    expect(couchDb.changes.args[1]).to.deep.equal([{ limit: 1000, seq_interval: 1000, since: '3-seq' }]);
-    expect(couchDb.changes.args[2]).to.deep.equal([{ limit: 1000, seq_interval: 1000, since: '6-seq' }]);
-    expect(couchDb.changes.args[3]).to.deep.equal([{ limit: 1000, seq_interval: 1000, since: '9-seq' }]);
+    expect(couchDb.changes.args[0]).to.deep.equal([{ limit: 1000, seq_interval: 1000, since: '1-seq', batch_size: 1000 }]);
+    expect(couchDb.changes.args[1]).to.deep.equal([{ limit: 1000, seq_interval: 1000, since: '3-seq', batch_size: 1000 }]);
+    expect(couchDb.changes.args[2]).to.deep.equal([{ limit: 1000, seq_interval: 1000, since: '6-seq', batch_size: 1000 }]);
+    expect(couchDb.changes.args[3]).to.deep.equal([{ limit: 1000, seq_interval: 1000, since: '9-seq', batch_size: 1000 }]);
 
     expect(seqQueries.update.callCount).to.equal(4);
     expect(seqQueries.update.args).to.deep.equal([
@@ -570,8 +570,8 @@ describe('importer', () => {
     await importer(couchDb);
 
     expect(couchDb.changes.calledTwice).to.equal(true);
-    expect(couchDb.changes.args[0]).to.deep.equal([{ limit: 1000, seq_interval: 1000, since: '1-22' }]);
-    expect(couchDb.changes.args[1]).to.deep.equal([{ limit: 1000, seq_interval: 1000, since: '23-ppp' }]);
+    expect(couchDb.changes.args[0]).to.deep.equal([{ limit: 1000, seq_interval: 1000, since: '1-22', batch_size: 1000 }]);
+    expect(couchDb.changes.args[1]).to.deep.equal([{ limit: 1000, seq_interval: 1000, since: '23-ppp', batch_size: 1000 }]);
 
     expect(seqQueries.update.calledTwice).to.equal(true);
     expect(seqQueries.update.args).to.deep.equal([

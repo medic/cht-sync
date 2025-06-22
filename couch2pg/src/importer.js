@@ -144,7 +144,12 @@ const importChangesBatch = async (couchDb, source) => {
     pending = null;
   }
 
-  const changes = await couchDb.changes({ limit: BATCH_SIZE, since: seq, seq_interval: BATCH_SIZE });
+  const changes = await couchDb.changes({ 
+    limit: BATCH_SIZE,
+    since: seq,
+    seq_interval: BATCH_SIZE,
+    batch_size: BATCH_SIZE
+  });
   console.log(`There are ${changes.results.length} changes to process in ${dbName}`);
 
   const docsToDelete = [];
