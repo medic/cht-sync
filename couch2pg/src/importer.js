@@ -74,7 +74,7 @@ const buildBulkInsertQuery = (allDocs, source) => {
   allDocs.rows.forEach((row) => {
     removeSecurityDetails(row.doc);
     insertStmts.push(`($${idx++}, $${idx++}, $${idx++}, $${idx++}, $${idx++})`);
-    docsToInsert.push(now, row.id, !!row.deleted, source, sanitise(JSON.stringify(row.doc)));
+    docsToInsert.push(now, row.doc._id, !!row.deleted, source, sanitise(JSON.stringify(row.doc)));
   });
 
   return {
@@ -95,18 +95,26 @@ const addDeletesToResult = (deletedDocs, allDocs) => {
 };
 
 /*
- Downloads all given documents from couchdb and stores them in Postgres, in batches.
- We presume if a document is on this list it has changed, and thus needs updating.
+ Processes documents from changes feed and stores them in Postgres.
+ Documents are already included in the changes feed with include_docs=true.
  */
-const loadAndStoreDocs = async (couchdb, docsToDownload, source) => {
-  if (!docsToDownload.length) {
+const loadAndStoreDocs = async (couchdb, changes, source) => {
+  if (!changes.length) {
     return;
   }
 
-  const deletedDocs = docsToDownload.filter(change => change.deleted);
-  const docIds = docsToDownload.filter(change => !change.deleted).map(change => change.id);
-  const allDocsResult = await couchdb.allDocs({ keys: docIds, include_docs: true });
-  console.info('Pulled ' + allDocsResult.rows.length + ' results from couchdb');
+  const deletedDocs = changes.filter(change => change.deleted);
+  const nonDeletedDocs = changes.filter(change => !change.deleted && change.doc);
+
+  const allDocsResult = {
+    rows: nonDeletedDocs.map(change => ({
+      id: change.id,
+      key: change.id,
+      doc: change.doc
+    }))
+  };
+
+  console.info('Processing ' + allDocsResult.rows.length + ' documents from changes feed');
 
   const docsToStore = addDeletesToResult(deletedDocs, allDocsResult);
 
@@ -148,15 +156,15 @@ const importChangesBatch = async (couchDb, source) => {
     limit: BATCH_SIZE,
     since: seq,
     seq_interval: BATCH_SIZE,
-    batch_size: BATCH_SIZE
+    batch_size: BATCH_SIZE,
+    include_docs: true
   });
   console.log(`There are ${changes.results.length} changes to process in ${dbName}`);
 
-  const docsToDelete = [];
-  const docsToDownload = [];
-  changes.results.forEach(change => change.deleted ? docsToDelete.push(change) : docsToDownload.push(change));
+  const deletedChanges = changes.results.filter(change => change.deleted);
+  const nonDeletedChanges = changes.results.filter(change => !change.deleted);
 
-  console.info(`There are ${docsToDelete.length} deletions and ${docsToDownload.length} new / changed documents ` +
+  console.info(`There are ${deletedChanges.length} deletions and ${nonDeletedChanges.length} new / changed documents ` +
     `in ${dbName}`);
 
   console.log(`There are approximately ${pending} changes left in ${dbName}`);
@@ -188,4 +196,3 @@ export default async (couchdb) => {
 
   return totalDocs;
 };
-
