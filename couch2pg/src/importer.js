@@ -1,4 +1,5 @@
 const BATCH_SIZE = process.env.BATCH_SIZE || 1000;
+const CHANGES_TIMEOUT = parseInt(process.env.CHANGES_TIMEOUT) || 300000; // 5 minutes default
 
 import * as db from './db.js';
 import axios from 'axios';
@@ -152,13 +153,17 @@ const importChangesBatch = async (couchDb, source) => {
     pending = null;
   }
 
-  const changes = await couchDb.changes({ 
-    limit: BATCH_SIZE,
-    since: seq,
-    seq_interval: BATCH_SIZE,
-    batch_size: BATCH_SIZE,
-    include_docs: true
-  });
+  const changes = await withTimeout(
+    couchDb.changes({ 
+      limit: BATCH_SIZE,
+      since: seq,
+      seq_interval: BATCH_SIZE,
+      batch_size: BATCH_SIZE,
+      include_docs: true
+    }),
+    CHANGES_TIMEOUT,
+    'CouchDB changes feed'
+  );
   console.log(`There are ${changes.results.length} changes to process in ${dbName}`);
 
   const deletedChanges = changes.results.filter(change => change.deleted);
@@ -172,6 +177,17 @@ const importChangesBatch = async (couchDb, source) => {
   await storeSeq(changes.last_seq, pending, source);
 
   return changes.results.length;
+};
+
+const withTimeout = (promise, timeoutMs, operation) => {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => {
+      setTimeout(() => {
+        reject(new Error(`${operation} timed out after ${timeoutMs}ms`));
+      }, timeoutMs);
+    })
+  ]);
 };
 
 const getPending = async (couchDb, seq) => {
