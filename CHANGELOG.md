@@ -1,3 +1,10 @@
+## [2.0.1](https://github.com/medic/cht-sync/compare/v2.0.0...v2.0.1) (2025-08-05)
+
+
+### Bug Fixes
+
+* **#206:** batch size and include docs ([#207](https://github.com/medic/cht-sync/issues/207)) ([8bf6819](https://github.com/medic/cht-sync/commit/8bf6819cabf851c69816d66522500e0da7a733d6)), closes [#206](https://github.com/medic/cht-sync/issues/206)
+
 # [2.0.0](https://github.com/medic/cht-sync/compare/v1.3.3...v2.0.0) (2025-03-28)
 
 
