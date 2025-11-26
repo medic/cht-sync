@@ -1,3 +1,10 @@
+## [2.0.2](https://github.com/medic/cht-sync/compare/v2.0.1...v2.0.2) (2025-11-26)
+
+
+### Bug Fixes
+
+* fix CI ([#209](https://github.com/medic/cht-sync/issues/209)) ([67ae9ec](https://github.com/medic/cht-sync/commit/67ae9ecf8e182cb606b9c1d3b58b46810ef9ef1c))
+
 ## [2.0.1](https://github.com/medic/cht-sync/compare/v2.0.0...v2.0.1) (2025-08-05)
 
 
