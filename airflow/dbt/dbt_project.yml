@@ -1,0 +1,11 @@
+name: 'dataemon'
+version: '0.0.1'
+config-version: 2
+profile: 'default'
+
+require-dbt-version: [">=1.0.0"]
+
+target-path: "target"
+clean-targets: ["target", "dbt_modules"]
+macro-paths: ["macros"]
+log-path: "logs"
